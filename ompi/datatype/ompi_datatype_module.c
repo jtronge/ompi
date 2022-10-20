@@ -18,7 +18,7 @@
  * Copyright (c) 2015-2018 Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * Copyright (c) 2016-2018 FUJITSU LIMITED.  All rights reserved.
- * Copyright (c) 2018-2021 Triad National Security, LLC. All rights
+ * Copyright (c) 2018-2022 Triad National Security, LLC. All rights
  *                         reserved.
  * $COPYRIGHT$
  *
@@ -387,6 +387,10 @@ const ompi_datatype_t* ompi_datatype_basicDatatypes[OMPI_DATATYPE_MPI_MAX_PREDEF
     [OMPI_DATATYPE_MPI_UNAVAILABLE] = &ompi_mpi_unavailable.dt,
 };
 
+#if DATATYPE_MATCHING
+uint64_t ompi_datatype_predefined_hashes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
+#endif
+
 opal_pointer_array_t ompi_datatype_f_to_c_table = {{0}};
 
 #define COPY_DATA_DESC( PDST, PSRC )                                                 \
@@ -677,6 +681,13 @@ int32_t ompi_datatype_init( void )
             datatype->flags &= ~OPAL_DATATYPE_FLAG_NO_GAPS;
         }
     }
+
+#if DATATYPE_MATCHING
+    /* Hash all predefined types */
+    for (i = 0; i < ompi_datatype_number_of_predefined_data; ++i) {
+        ompi_datatype_predefined_hashes[i] = ompi_datatype_hash_predefined(i);
+    }
+#endif
 
     /* get a reference to the attributes subsys */
     ret = ompi_attr_get_ref();

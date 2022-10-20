@@ -19,6 +19,9 @@ if PROJECT_OMPI
     MPI_CHECKS = to_self reduce_local
 endif
 TESTS = opal_datatype_test unpack_hetero $(MPI_TESTS)
+if DATATYPE_MATCHING
+TESTS += matching
+endif
 
 check_PROGRAMS = $(TESTS) $(MPI_CHECKS)
 
@@ -107,6 +110,14 @@ partial_LDFLAGS = $(OMPI_PKG_CONFIG_LDFLAGS)
 partial_LDADD = \
         $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la \
         $(top_builddir)/opal/lib@OPAL_LIB_NAME@.la
+
+if DATATYPE_MATCHING
+matching_SOURCES = matching.c ddt_lib.c ddt_lib.h
+matching_LDFLAGS = $(OMPI_PKG_CONFIG_LDFLAGS)
+matching_LDADD = \
+        $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la \
+        $(top_builddir)/opal/lib@OPAL_LIB_NAME@.la
+endif
 
 distclean-local:
 	rm -rf *.dSYM .deps .libs *.log *.o *.trs $(check_PROGRAMS) Makefile

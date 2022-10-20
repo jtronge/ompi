@@ -11,6 +11,8 @@
  *                         and Technology (RIST).  All rights reserved.
  * Copyright (c) 2018      FUJITSU LIMITED.  All rights reserved.
  * Copyright (c) 2021      IBM Corporation. All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -84,6 +86,11 @@ struct ompi_datatype_t {
     /* --- cacheline 7 boundary (448 bytes) --- */
 
     /* size: 448, cachelines: 7, members: 7 */
+#if DATATYPE_MATCHING
+    void               *sig;                     /**< Type signature */
+    uint64_t           full_hash;                /**< Datatype hash of whole type signature */
+    uint64_t           unit_hash;                /**< Datatype hash of unit element (if vector-like) */
+#endif
 };
 
 typedef struct ompi_datatype_t ompi_datatype_t;
@@ -387,6 +394,21 @@ OMPI_DECLSPEC int ompi_datatype_unpack_external( const char datarep[], const voi
 
 OMPI_DECLSPEC int ompi_datatype_pack_external_size( const char datarep[], int incount,
                                                     ompi_datatype_t *datatype, MPI_Aint *size);
+
+#if DATATYPE_MATCHING
+
+void ompi_datatype_build_typesig_vector_like(ompi_datatype_t *type, const ompi_datatype_t *inner, int count);
+void ompi_datatype_build_typesig_struct(ompi_datatype_t *type, int count, const int *blocklens,
+                                        ompi_datatype_t *const *inner_types);
+void ompi_datatype_build_typesig_multi_dim_array(ompi_datatype_t *newtype,
+                                                 const ompi_datatype_t *oldtype,
+                                                 int ndims,
+                                                 int const *size_array);
+uint64_t ompi_datatype_hash_predefined(int id);
+void ompi_datatype_typesig_free(void *sig);
+int ompi_datatype_typesig_duplicate(const ompi_datatype_t *old, ompi_datatype_t *type);
+
+#endif /* DATATYPE_MATCHING */
 
 #define OMPI_DATATYPE_RETAIN(ddt)                                       \
     {                                                                   \

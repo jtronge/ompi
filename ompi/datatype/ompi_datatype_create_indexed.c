@@ -16,6 +16,8 @@
  * Copyright (c) 2015-2017 Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * Copyright (c) 2019      IBM Corporation. All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -66,6 +68,9 @@ int32_t ompi_datatype_create_indexed( int count, const int* pBlockLength, const 
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp * extent, extent );
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
+#endif
 
     *newType = pdt;
     return OMPI_SUCCESS;
@@ -107,6 +112,9 @@ int32_t ompi_datatype_create_hindexed( int count, const int* pBlockLength, const
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp, extent );
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
+#endif
 
     *newType = pdt;
     return OMPI_SUCCESS;
@@ -142,6 +150,9 @@ int32_t ompi_datatype_create_indexed_block( int count, int bLength, const int* p
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp * extent, extent );
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
+#endif
 
     *newType = pdt;
     return OMPI_SUCCESS;
@@ -176,6 +187,9 @@ int32_t ompi_datatype_create_hindexed_block( int count, int bLength, const ptrdi
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp, extent );
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
+#endif
 
     *newType = pdt;
     return OMPI_SUCCESS;

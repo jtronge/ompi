@@ -244,5 +244,26 @@ else
 fi
 AM_CONDITIONAL(OMPI_OMPIO_SUPPORT, test "$ompi_want_ompio" = "1")
 
+
+#
+# Hash-based type matching
+#
+AC_MSG_CHECKING([if want hash-based datatype matching])
+AC_ARG_ENABLE([datatype-matching],
+    [AS_HELP_STRING([--enable-datatype-matching],
+                    [Enable hash-based datatype matching (default: disabled)])])
+if test "$enable_datatype_matching" = "yes" ; then
+    AC_MSG_RESULT([yes])
+    OMPI_WANT_DATATYPE_MATCHING=1
+else
+    AC_MSG_RESULT([no])
+    OMPI_WANT_DATATYPE_MATCHING=0
+fi
+AC_DEFINE_UNQUOTED([DATATYPE_MATCHING],
+                   [$OMPI_WANT_DATATYPE_MATCHING],
+                   [Enable hash-based datatype matching])
+AM_CONDITIONAL([DATATYPE_MATCHING], [test "$OMPI_WANT_DATATYPE_MATCHING" = "1"])
+
+
 ])dnl
 

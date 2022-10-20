@@ -15,6 +15,8 @@
  * Copyright (c) 2010      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2014-2015 Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -48,8 +50,8 @@ int32_t ompi_datatype_create_subarray(int ndims,
      */
     ompi_datatype_type_extent( oldtype, &extent );
 
-    /* If the ndims is zero then return the NULL datatype */
     if( ndims < 2 ) {
+        /* If the ndims is zero then return the NULL datatype */
         if( 0 == ndims ) {
             ompi_datatype_duplicate(&ompi_mpi_datatype_null.dt, newtype);
             return MPI_SUCCESS;
@@ -103,6 +105,9 @@ int32_t ompi_datatype_create_subarray(int ndims,
     ompi_datatype_add( *newtype, last_type, 1, displ * extent, size * extent);
     ompi_datatype_destroy( &last_type );
     opal_datatype_resize( &(*newtype)->super, 0, size * extent );
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_multi_dim_array(*newtype, oldtype, ndims, subsize_array);
+#endif
 
     return OMPI_SUCCESS;
 }

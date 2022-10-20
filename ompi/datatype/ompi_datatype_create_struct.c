@@ -15,6 +15,8 @@
  * Copyright (c) 2010      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2017      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -91,6 +93,10 @@ int32_t ompi_datatype_create_struct( int count, const int* pBlockLength, const p
         }
     }
     ompi_datatype_add( pdt, lastType, lastBlock, lastDisp, lastExtent );
+
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_struct(pdt, count, pBlockLength, pTypes);
+#endif
 
      *newType = pdt;
     return OMPI_SUCCESS;

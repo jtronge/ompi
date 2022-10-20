@@ -15,6 +15,8 @@
 # Copyright (c) 2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright (c) 2016      Research Organization for Information Science
 #                         and Technology (RIST). All rights reserved.
+# Copyright (c) 2022      Triad National Security, LLC. All rights
+#                         reserved
 # $COPYRIGHT$
 #
 # Additional copyrights may follow
@@ -45,6 +47,11 @@ libdatatype_la_SOURCES = \
         ompi_datatype_module.c \
         ompi_datatype_sndrcv.c \
         ompi_datatype_get_elements.c
+
+if DATATYPE_MATCHING
+libdatatype_la_SOURCES += \
+		ompi_datatype_typesig.c
+endif
 
 libdatatype_la_LIBADD =
 

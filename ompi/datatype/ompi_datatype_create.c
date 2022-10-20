@@ -11,6 +11,8 @@
  * Copyright (c) 2009      Oak Ridge National Labs.  All rights reserved.
  * Copyright (c) 2010-2018 Cisco Systems, Inc.  All rights reserved
  * Copyright (c) 2018      Amazon.com, Inc. or its affiliates.  All Rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -41,10 +43,19 @@ static void __ompi_datatype_allocate( ompi_datatype_t* datatype )
     datatype->name[0]            = '\0';
     datatype->packed_description = 0;
     datatype->pml_data           = 0;
+#if DATATYPE_MATCHING
+    datatype->full_hash          = 0;
+    datatype->unit_hash          = 0;
+    datatype->sig                = NULL;
+#endif
 }
 
 static void __ompi_datatype_release(ompi_datatype_t * datatype)
 {
+#if DATATYPE_MATCHING
+    /* Must be first */
+    ompi_datatype_typesig_free(datatype->sig);
+#endif
     if( NULL != datatype->args ) {
         ompi_datatype_release_args( datatype );
         datatype->args = NULL;
@@ -111,6 +122,12 @@ ompi_datatype_duplicate( const ompi_datatype_t* oldType, ompi_datatype_t** newTy
        the top level (specifically, MPI_TYPE_DUP). */
     new_ompi_datatype->d_keyhash = NULL;
     new_ompi_datatype->args = NULL;
+
+#if DATATYPE_MATCHING
+    if (0 != ompi_datatype_typesig_duplicate(oldType, new_ompi_datatype)) {
+        return OMPI_ERR_OUT_OF_RESOURCE;
+    }
+#endif
 
     char *new_name;
     opal_asprintf(&new_name, "Dup %s", oldType->name);

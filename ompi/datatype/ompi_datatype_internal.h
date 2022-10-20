@@ -10,6 +10,8 @@
  * Copyright (c) 2015-2018 Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * Copyright (c) 2016-2018 FUJITSU LIMITED.  All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -402,6 +404,10 @@
 #define OMPI_DATATYPE_MPI_CXX_LONG_DOUBLE_COMPLEX OMPI_DATATYPE_MPI_C_LONG_DOUBLE_COMPLEX
 
 extern const ompi_datatype_t* ompi_datatype_basicDatatypes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
+
+#if DATATYPE_MATCHING
+extern uint64_t ompi_datatype_predefined_hashes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
+#endif
 
 /* There 3 types of predefined data types.
  * - the basic one composed by just one basic datatype which are

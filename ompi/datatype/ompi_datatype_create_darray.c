@@ -16,6 +16,8 @@
  * Copyright (c) 2016      Los Alamos National Security, LLC. All rights
  *                         reserved.
  * Copyright (c) 2017      IBM Corporation. All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -287,9 +289,14 @@ int32_t ompi_datatype_create_darray(int size,
        don't check return code from above until after cleanup. */
     if (MPI_SUCCESS != rc) {
         ompi_datatype_destroy (newtype);
+        goto cleanup;
     } else {
         (void) opal_datatype_resize( &(*newtype)->super, 0, displs[1]);
     }
+
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_multi_dim_array(*newtype, oldtype, ndims, gsize_array);
+#endif
 
  cleanup:
     free(st_offsets);

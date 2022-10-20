@@ -15,6 +15,8 @@
  * Copyright (c) 2010      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2017      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2022      Triad National Security, LLC. All rights
+ *                         reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -52,6 +54,9 @@ int32_t ompi_datatype_create_vector( int count, int bLength, int stride,
             OBJ_RELEASE( pTempData );
         }
     }
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pData, oldType, count);
+#endif
     *newType = pData;
     return OMPI_SUCCESS;
 }
@@ -82,6 +87,9 @@ int32_t ompi_datatype_create_hvector( int count, int bLength, ptrdiff_t stride,
             OBJ_RELEASE( pTempData );
         }
     }
+#if DATATYPE_MATCHING
+    ompi_datatype_build_typesig_vector_like(pData, oldType, count);
+#endif
      *newType = pData;
     return OMPI_SUCCESS;
 }
