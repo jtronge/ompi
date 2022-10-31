@@ -995,6 +995,15 @@ static mca_pml_ob1_recv_request_t *match_one (mca_btl_base_module_t *btl,
             PERUSE_TRACE_COMM_EVENT(PERUSE_COMM_MSG_MATCH_POSTED_REQ,
                                     &(match->req_recv.req_base), PERUSE_RECV);
             SPC_TIMER_STOP(OMPI_SPC_MATCH_TIME, &timer);
+
+#if DATATYPE_MATCHING
+            /* Check for a bad type signature hash (ignoring MPI_PACKED unfortunately) */
+            if (ompi_datatype_get_typesig_hash(match->req_recv.req_base.req_datatype) != hdr->hdr_hash
+                && !ompi_datatype_is_packed(hdr->hdr_hash)) {
+                match->req_recv.req_base.req_ompi.req_status.MPI_ERROR =
+                    MPI_ERR_TYPE;
+            }
+#endif
             return match;
         }
 

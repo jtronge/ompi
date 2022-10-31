@@ -544,6 +544,9 @@ int mca_pml_ob1_send_request_start_buffered(
                                         sendreq->req_send.req_base.req_comm->c_my_rank,
                                         sendreq->req_send.req_base.req_tag,
                                         (uint16_t)sendreq->req_send.req_base.req_sequence,
+#if DATATYPE_MATCHING
+                                        ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
+#endif
                                         sendreq->req_send.req_bytes_packed, sendreq);
 
     ob1_hdr_hton(hdr, hdr->hdr_common.hdr_type, sendreq->req_send.req_base.req_proc);
@@ -627,7 +630,11 @@ int mca_pml_ob1_send_request_start_copy( mca_pml_ob1_send_request_t* sendreq,
                                        sendreq->ob1_proc->comm_index,
                                        sendreq->req_send.req_base.req_comm->c_my_rank,
                                        sendreq->req_send.req_base.req_tag,
-                                       (uint16_t)sendreq->req_send.req_base.req_sequence);
+                                       (uint16_t)sendreq->req_send.req_base.req_sequence
+#if DATATYPE_MATCHING
+                                       , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
+#endif
+                                       );
 
         ob1_hdr_hton (&match, MCA_PML_OB1_HDR_TYPE_MATCH, sendreq->req_send.req_base.req_proc);
 
@@ -702,11 +709,15 @@ int mca_pml_ob1_send_request_start_copy( mca_pml_ob1_send_request_t* sendreq,
         hdr_match = &hdr->hdr_match;
     }
 
-    mca_pml_ob1_match_hdr_prepare (hdr_match, MCA_PML_OB1_HDR_TYPE_MATCH, 0,
-                                   sendreq->ob1_proc->comm_index,
-                                   sendreq->req_send.req_base.req_comm->c_my_rank,
-                                   sendreq->req_send.req_base.req_tag,
-                                   (uint16_t)sendreq->req_send.req_base.req_sequence);
+    mca_pml_ob1_match_hdr_prepare (
+        hdr_match, MCA_PML_OB1_HDR_TYPE_MATCH, 0,
+        sendreq->ob1_proc->comm_index, sendreq->req_send.req_base.req_comm->c_my_rank,
+        sendreq->req_send.req_base.req_tag,
+        (uint16_t)sendreq->req_send.req_base.req_sequence
+#if DATATYPE_MATCHING
+        , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
+#endif
+    );
 
     ob1_hdr_hton(hdr, hdr->hdr_common.hdr_type, sendreq->req_send.req_base.req_proc);
 
@@ -778,11 +789,15 @@ int mca_pml_ob1_send_request_start_prepare( mca_pml_ob1_send_request_t* sendreq,
         hdr_match = &hdr->hdr_match;
     }
 
-    mca_pml_ob1_match_hdr_prepare (hdr_match, MCA_PML_OB1_HDR_TYPE_MATCH, 0,
-                                   sendreq->ob1_proc->comm_index,
-                                   sendreq->req_send.req_base.req_comm->c_my_rank,
-                                   sendreq->req_send.req_base.req_tag,
-                                   (uint16_t)sendreq->req_send.req_base.req_sequence);
+    mca_pml_ob1_match_hdr_prepare (
+        hdr_match, MCA_PML_OB1_HDR_TYPE_MATCH, 0, sendreq->ob1_proc->comm_index,
+        sendreq->req_send.req_base.req_comm->c_my_rank,
+        sendreq->req_send.req_base.req_tag,
+        (uint16_t)sendreq->req_send.req_base.req_sequence
+#if DATATYPE_MATCHING
+        , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
+#endif
+    );
 
     ob1_hdr_hton(hdr, hdr->hdr_common.hdr_type, sendreq->req_send.req_base.req_proc);
 
@@ -893,6 +908,9 @@ int mca_pml_ob1_send_request_start_rdma( mca_pml_ob1_send_request_t* sendreq,
                                   sendreq->req_send.req_base.req_comm->c_my_rank,
                                   sendreq->req_send.req_base.req_tag,
                                   (uint16_t)sendreq->req_send.req_base.req_sequence,
+#if DATATYPE_MATCHING
+                                  ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
+#endif
                                   sendreq->req_send.req_bytes_packed, sendreq,
                                   frag, data_ptr, local_handle, reg_size);
 
@@ -990,6 +1008,9 @@ int mca_pml_ob1_send_request_start_rndv( mca_pml_ob1_send_request_t* sendreq,
                                         sendreq->req_send.req_base.req_comm->c_my_rank,
                                         sendreq->req_send.req_base.req_tag,
                                         (uint16_t)sendreq->req_send.req_base.req_sequence,
+#if DATATYPE_MATCHING
+                                        ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
+#endif
                                         sendreq->req_send.req_bytes_packed, sendreq);
 
     ob1_hdr_hton(hdr, hdr->hdr_common.hdr_type, sendreq->req_send.req_base.req_proc);

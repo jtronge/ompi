@@ -397,6 +397,7 @@ OMPI_DECLSPEC int ompi_datatype_pack_external_size( const char datarep[], int in
 
 #if DATATYPE_MATCHING
 
+uint64_t ompi_datatype_get_typesig_hash(const ompi_datatype_t *type);
 void ompi_datatype_build_typesig_vector_like(ompi_datatype_t *type, const ompi_datatype_t *inner, int count);
 void ompi_datatype_build_typesig_struct(ompi_datatype_t *type, int count, const int *blocklens,
                                         ompi_datatype_t *const *inner_types);
@@ -407,6 +408,11 @@ void ompi_datatype_build_typesig_multi_dim_array(ompi_datatype_t *newtype,
 uint64_t ompi_datatype_hash_predefined(int id);
 void ompi_datatype_typesig_free(void *sig);
 int ompi_datatype_typesig_duplicate(const ompi_datatype_t *old, ompi_datatype_t *type);
+static inline bool
+ompi_datatype_is_packed(uint64_t hash)
+{
+    return ompi_datatype_get_typesig_hash(&ompi_mpi_packed.dt) == hash;
+}
 
 #endif /* DATATYPE_MATCHING */
 

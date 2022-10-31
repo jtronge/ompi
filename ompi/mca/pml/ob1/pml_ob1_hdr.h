@@ -107,11 +107,16 @@ struct mca_pml_ob1_match_hdr_t {
     int32_t  hdr_src;                      /**< source rank */
     int32_t  hdr_tag;                      /**< user tag */
     uint16_t hdr_seq;                      /**< message sequence number */
+#if DATATYPE_MATCHING
+    uint64_t hdr_hash;                     /**< data type hash */
+#endif
 #if OPAL_ENABLE_HETEROGENEOUS_SUPPORT || OPAL_ENABLE_DEBUG
     uint8_t  hdr_padding[2];               /**< explicitly pad to 16 bytes.  Compilers seem to already prefer to do this, but make it explicit just in case */
 #endif
 };
-#if OPAL_ENABLE_HETEROGENEOUS_SUPPORT || OPAL_ENABLE_DEBUG
+#if DATATYPE_MATCHING
+#define OMPI_PML_OB1_MATCH_HDR_LEN  sizeof(struct mca_pml_ob1_match_hdr_t)
+#elif OPAL_ENABLE_HETEROGENEOUS_SUPPORT || OPAL_ENABLE_DEBUG
 #define OMPI_PML_OB1_MATCH_HDR_LEN  16
 #else
 #define OMPI_PML_OB1_MATCH_HDR_LEN  14
@@ -119,19 +124,37 @@ struct mca_pml_ob1_match_hdr_t {
 
 typedef struct mca_pml_ob1_match_hdr_t mca_pml_ob1_match_hdr_t;
 
-static inline void mca_pml_ob1_match_hdr_prepare (mca_pml_ob1_match_hdr_t *hdr, uint8_t hdr_type, uint8_t hdr_flags,
-                                                  uint16_t hdr_ctx, int32_t hdr_src, int32_t hdr_tag, uint16_t hdr_seq)
+static inline void mca_pml_ob1_match_hdr_prepare (
+    mca_pml_ob1_match_hdr_t *hdr, uint8_t hdr_type, uint8_t hdr_flags,
+    uint16_t hdr_ctx, int32_t hdr_src, int32_t hdr_tag, uint16_t hdr_seq
+#if DATATYPE_MATCHING
+    , uint64_t hdr_hash
+#endif
+)
 {
     mca_pml_ob1_common_hdr_prepare (&hdr->hdr_common, hdr_type, hdr_flags);
     hdr->hdr_ctx = hdr_ctx;
     hdr->hdr_src = hdr_src;
     hdr->hdr_tag = hdr_tag;
     hdr->hdr_seq = hdr_seq;
+#if DATATYPE_MATCHING
+    hdr->hdr_hash = hdr_hash;
+#endif
 #if OPAL_ENABLE_DEBUG
     hdr->hdr_padding[0] = 0;
     hdr->hdr_padding[1] = 0;
 #endif
 }
+
+/* Is ntohll and htonll standardized? */
+#if DATATYPE_MATCHING
+#define MCA_PML_OB1_MATCH_HDR_NTOH_HASH(h) \
+do { \
+    (h).hdr_hash = ntohll((h).hdr_hash); \
+} while (0)
+#else
+#define MCA_PML_OB1_MATCH_HDR_NTOH_HASH(h) do {} while (0)
+#endif
 
 #define MCA_PML_OB1_MATCH_HDR_NTOH(h) \
 do { \
@@ -140,7 +163,17 @@ do { \
     (h).hdr_src = ntohl((h).hdr_src); \
     (h).hdr_tag = ntohl((h).hdr_tag); \
     (h).hdr_seq = ntohs((h).hdr_seq); \
+    MCA_PML_OB1_MATCH_HDR_NTOH_HASH(h); \
 } while (0)
+
+#if DATATYPE_MATCHING
+#define MCA_PML_OB1_MATCH_HDR_HTON_HASH(h) \
+do { \
+    (h).hdr_hash = htonll((h).hdr_hash); \
+} while (0)
+#else
+#define MCA_PML_OB1_MATCH_HDR_HTON_HASH(h) do {} while (0)
+#endif
 
 #define MCA_PML_OB1_MATCH_HDR_HTON(h) \
 do { \
@@ -149,6 +182,7 @@ do { \
     (h).hdr_src = htonl((h).hdr_src); \
     (h).hdr_tag = htonl((h).hdr_tag); \
     (h).hdr_seq = htons((h).hdr_seq); \
+    MCA_PML_OB1_MATCH_HDR_HTON_HASH(h); \
 } while (0)
 
 #define MCA_PML_OB1_EXT_MATCH_HDR_NTOH(h) \
@@ -201,9 +235,17 @@ typedef struct mca_pml_ob1_ext_rendezvous_hdr_t mca_pml_ob1_ext_rendezvous_hdr_t
 
 static inline void mca_pml_ob1_rendezvous_hdr_prepare (mca_pml_ob1_rendezvous_hdr_t *hdr, uint8_t hdr_type, uint8_t hdr_flags,
                                                        uint16_t hdr_ctx, int32_t hdr_src, int32_t hdr_tag, uint16_t hdr_seq,
+#if DATATYPE_MATCHING
+                                                       uint64_t hdr_hash,
+#endif
                                                        uint64_t hdr_msg_length, void *hdr_src_req)
 {
-    mca_pml_ob1_match_hdr_prepare (&hdr->hdr_match, hdr_type, hdr_flags, hdr_ctx, hdr_src, hdr_tag, hdr_seq);
+    mca_pml_ob1_match_hdr_prepare (
+        &hdr->hdr_match, hdr_type, hdr_flags, hdr_ctx, hdr_src, hdr_tag, hdr_seq
+#if DATATYPE_MATCHING
+        , hdr_hash
+#endif
+    );
     hdr->hdr_msg_length = hdr_msg_length;
     hdr->hdr_src_req.pval = hdr_src_req;
 }
@@ -248,11 +290,18 @@ typedef struct mca_pml_ob1_ext_rget_hdr_t mca_pml_ob1_ext_rget_hdr_t;
 
 static inline void mca_pml_ob1_rget_hdr_prepare (mca_pml_ob1_rget_hdr_t *hdr, uint8_t hdr_flags,
                                                  uint16_t hdr_ctx, int32_t hdr_src, int32_t hdr_tag, uint16_t hdr_seq,
+#if DATATYPE_MATCHING
+                                                 uint64_t hdr_hash,
+#endif
                                                  uint64_t hdr_msg_length, void *hdr_src_req, void *hdr_frag,
                                                  void *hdr_src_ptr, void *local_handle, size_t local_handle_size)
 {
     mca_pml_ob1_rendezvous_hdr_prepare (&hdr->hdr_rndv, MCA_PML_OB1_HDR_TYPE_RGET, hdr_flags,
-                                        hdr_ctx, hdr_src, hdr_tag, hdr_seq, hdr_msg_length, hdr_src_req);
+                                        hdr_ctx, hdr_src, hdr_tag, hdr_seq,
+#if DATATYPE_MATCHING
+                                        hdr_hash,
+#endif
+                                        hdr_msg_length, hdr_src_req);
 #if OPAL_ENABLE_DEBUG
     hdr->hdr_padding[0] = 0;
     hdr->hdr_padding[1] = 0;

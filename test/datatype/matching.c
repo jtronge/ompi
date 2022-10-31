@@ -21,6 +21,7 @@ int main(void)
     int size_array[] = {3, 3, 3, 3};
     int subsize_array[] = {3, 3, 3, 3};
     int start_array[] = {0, 0, 0, 0};
+    uint64_t tmp_hash;
 
     opal_init(NULL, NULL);
     ompi_datatype_init();
@@ -94,7 +95,17 @@ int main(void)
     ASSERT(subarray->unit_hash == vec4->unit_hash);
     ompi_datatype_destroy(&subarray);
     ompi_datatype_destroy(&vec4);
-    /* TODO */
+
+    printf("---> Trying ompi_datatype_get_typesig_hash() on predefined types\n");
+    tmp_hash = ompi_datatype_get_typesig_hash(&ompi_mpi_double.dt);
+    printf("-------> hash(MPI_DOUBLE) = %lx\n", tmp_hash);
+    assert(tmp_hash != 0);
+    tmp_hash = ompi_datatype_get_typesig_hash(&ompi_mpi_float.dt);
+    printf("-------> hash(MPI_FLOAT) = %lx\n", tmp_hash);
+    assert(tmp_hash != 0);
+    tmp_hash = ompi_datatype_get_typesig_hash(&ompi_mpi_int.dt);
+    printf("-------> hash(MPI_INT) = %lx\n", tmp_hash);
+    assert(tmp_hash != 0);
 
 cleanup:
     opal_finalize_util();

@@ -55,6 +55,25 @@ static void fnv1_hash_init(uint64_t *hash);
 static void fnv1_hash_update(uint64_t *hash, unsigned char *data, int n);
 
 /*
+ * Return the type signature hash to be used for matching.
+ */
+uint64_t ompi_datatype_get_typesig_hash(const ompi_datatype_t *type)
+{
+    struct typesig *sig;
+
+    /* If it's predefined, then hashes are stored in a table */
+    if (ompi_datatype_is_predefined(type)) {
+        return ompi_datatype_predefined_hashes[type->id];
+    }
+    sig = type->sig;
+    if (sig->type == TYPESIG_TYPE_VECTOR) {
+        return type->unit_hash;
+    } else {
+        return type->full_hash;
+    }
+}
+
+/*
  * Compute the type signature and hash for a "vector"-like datatype (where all
  * elements are of the same type).
  */

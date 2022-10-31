@@ -167,7 +167,6 @@ OMPI_DECLSPEC OBJ_CLASS_DECLARATION( mca_pml_base_send_request_t );
         opal_convertor_cleanup( &((request)->req_base.req_convertor) );   \
     } while (0)
 
-
 #if MPI_VERSION >= 4
 enum {
       OMPI_PML_BASE_WARN_DEP_CANCEL_SEND_ALWAYS = 1,

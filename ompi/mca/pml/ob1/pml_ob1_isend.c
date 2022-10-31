@@ -115,9 +115,13 @@ static inline int mca_pml_ob1_send_inline (const void *buf, size_t count,
         size = 0;
     }
 
-    mca_pml_ob1_match_hdr_prepare (&match, MCA_PML_OB1_HDR_TYPE_MATCH, 0,
-                                   ob1_proc->comm_index, comm->c_my_rank,
-                                   tag, seqn);
+    mca_pml_ob1_match_hdr_prepare (
+        &match, MCA_PML_OB1_HDR_TYPE_MATCH, 0, ob1_proc->comm_index,
+        comm->c_my_rank, tag, seqn
+#if DATATYPE_MATCHING
+        , ompi_datatype_get_typesig_hash(datatype)
+#endif
+    );
 
     ob1_hdr_hton(&match, MCA_PML_OB1_HDR_TYPE_MATCH, dst_proc);
 
