@@ -294,7 +294,7 @@ int32_t ompi_datatype_create_darray(int size,
         (void) opal_datatype_resize( &(*newtype)->super, 0, displs[1]);
     }
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_multi_dim_array(*newtype, oldtype, ndims, gsize_array);
 #endif
 

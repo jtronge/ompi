@@ -48,7 +48,7 @@ libdatatype_la_SOURCES = \
         ompi_datatype_sndrcv.c \
         ompi_datatype_get_elements.c
 
-if DATATYPE_MATCHING
+if OMPI_DATATYPE_MATCHING
 libdatatype_la_SOURCES += \
 		ompi_datatype_typesig.c
 endif

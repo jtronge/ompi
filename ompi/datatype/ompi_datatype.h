@@ -86,7 +86,7 @@ struct ompi_datatype_t {
     /* --- cacheline 7 boundary (448 bytes) --- */
 
     /* size: 448, cachelines: 7, members: 7 */
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     void               *sig;                     /**< Type signature */
     uint64_t           full_hash;                /**< Datatype hash of whole type signature */
     uint64_t           unit_hash;                /**< Datatype hash of unit element (if vector-like) */
@@ -395,7 +395,7 @@ OMPI_DECLSPEC int ompi_datatype_unpack_external( const char datarep[], const voi
 OMPI_DECLSPEC int ompi_datatype_pack_external_size( const char datarep[], int incount,
                                                     ompi_datatype_t *datatype, MPI_Aint *size);
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
 
 uint64_t ompi_datatype_get_typesig_hash(const ompi_datatype_t *type);
 void ompi_datatype_build_typesig_vector_like(ompi_datatype_t *type, const ompi_datatype_t *inner, int count);
@@ -414,7 +414,7 @@ ompi_datatype_is_packed(uint64_t hash)
     return ompi_datatype_get_typesig_hash(&ompi_mpi_packed.dt) == hash;
 }
 
-#endif /* DATATYPE_MATCHING */
+#endif /* OMPI_DATATYPE_MATCHING */
 
 #define OMPI_DATATYPE_RETAIN(ddt)                                       \
     {                                                                   \

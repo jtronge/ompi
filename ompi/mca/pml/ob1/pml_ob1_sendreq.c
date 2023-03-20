@@ -544,7 +544,7 @@ int mca_pml_ob1_send_request_start_buffered(
                                         sendreq->req_send.req_base.req_comm->c_my_rank,
                                         sendreq->req_send.req_base.req_tag,
                                         (uint16_t)sendreq->req_send.req_base.req_sequence,
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
                                         ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
 #endif
                                         sendreq->req_send.req_bytes_packed, sendreq);
@@ -631,7 +631,7 @@ int mca_pml_ob1_send_request_start_copy( mca_pml_ob1_send_request_t* sendreq,
                                        sendreq->req_send.req_base.req_comm->c_my_rank,
                                        sendreq->req_send.req_base.req_tag,
                                        (uint16_t)sendreq->req_send.req_base.req_sequence
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
                                        , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
 #endif
                                        );
@@ -714,7 +714,7 @@ int mca_pml_ob1_send_request_start_copy( mca_pml_ob1_send_request_t* sendreq,
         sendreq->ob1_proc->comm_index, sendreq->req_send.req_base.req_comm->c_my_rank,
         sendreq->req_send.req_base.req_tag,
         (uint16_t)sendreq->req_send.req_base.req_sequence
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
         , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
 #endif
     );
@@ -794,7 +794,7 @@ int mca_pml_ob1_send_request_start_prepare( mca_pml_ob1_send_request_t* sendreq,
         sendreq->req_send.req_base.req_comm->c_my_rank,
         sendreq->req_send.req_base.req_tag,
         (uint16_t)sendreq->req_send.req_base.req_sequence
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
         , ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype)
 #endif
     );
@@ -908,7 +908,7 @@ int mca_pml_ob1_send_request_start_rdma( mca_pml_ob1_send_request_t* sendreq,
                                   sendreq->req_send.req_base.req_comm->c_my_rank,
                                   sendreq->req_send.req_base.req_tag,
                                   (uint16_t)sendreq->req_send.req_base.req_sequence,
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
                                   ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
 #endif
                                   sendreq->req_send.req_bytes_packed, sendreq,
@@ -1008,7 +1008,7 @@ int mca_pml_ob1_send_request_start_rndv( mca_pml_ob1_send_request_t* sendreq,
                                         sendreq->req_send.req_base.req_comm->c_my_rank,
                                         sendreq->req_send.req_base.req_tag,
                                         (uint16_t)sendreq->req_send.req_base.req_sequence,
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
                                         ompi_datatype_get_typesig_hash(sendreq->req_send.req_base.req_datatype),
 #endif
                                         sendreq->req_send.req_bytes_packed, sendreq);

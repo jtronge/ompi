@@ -94,7 +94,7 @@ int32_t ompi_datatype_create_struct( int count, const int* pBlockLength, const p
     }
     ompi_datatype_add( pdt, lastType, lastBlock, lastDisp, lastExtent );
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_struct(pdt, count, pBlockLength, pTypes);
 #endif
 

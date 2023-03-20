@@ -68,7 +68,7 @@ int32_t ompi_datatype_create_indexed( int count, const int* pBlockLength, const 
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp * extent, extent );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
 #endif
 
@@ -112,7 +112,7 @@ int32_t ompi_datatype_create_hindexed( int count, const int* pBlockLength, const
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp, extent );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
 #endif
 
@@ -150,7 +150,7 @@ int32_t ompi_datatype_create_indexed_block( int count, int bLength, const int* p
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp * extent, extent );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
 #endif
 
@@ -187,7 +187,7 @@ int32_t ompi_datatype_create_hindexed_block( int count, int bLength, const ptrdi
         }
     }
     ompi_datatype_add( pdt, oldType, dLength, disp, extent );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
 #endif
 

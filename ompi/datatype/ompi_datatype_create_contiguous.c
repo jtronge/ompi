@@ -37,7 +37,7 @@ int32_t ompi_datatype_create_contiguous( int count, const ompi_datatype_t* oldTy
 
     pdt = ompi_datatype_create( oldType->super.desc.used + 2 );
     opal_datatype_add( &(pdt->super), &(oldType->super), count, 0, (oldType->super.ub - oldType->super.lb) );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pdt, oldType, count);
 #endif
     *newType = pdt;

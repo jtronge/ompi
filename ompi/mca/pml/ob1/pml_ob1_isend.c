@@ -118,7 +118,7 @@ static inline int mca_pml_ob1_send_inline (const void *buf, size_t count,
     mca_pml_ob1_match_hdr_prepare (
         &match, MCA_PML_OB1_HDR_TYPE_MATCH, 0, ob1_proc->comm_index,
         comm->c_my_rank, tag, seqn
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
         , ompi_datatype_get_typesig_hash(datatype)
 #endif
     );

@@ -996,7 +996,7 @@ static mca_pml_ob1_recv_request_t *match_one (mca_btl_base_module_t *btl,
                                     &(match->req_recv.req_base), PERUSE_RECV);
             SPC_TIMER_STOP(OMPI_SPC_MATCH_TIME, &timer);
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
             /* Check for a bad type signature hash (ignoring MPI_PACKED unfortunately) */
             if (ompi_datatype_get_typesig_hash(match->req_recv.req_base.req_datatype) != hdr->hdr_hash
                 && !ompi_datatype_is_packed(hdr->hdr_hash)) {

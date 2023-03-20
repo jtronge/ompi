@@ -105,7 +105,7 @@ int32_t ompi_datatype_create_subarray(int ndims,
     ompi_datatype_add( *newtype, last_type, 1, displ * extent, size * extent);
     ompi_datatype_destroy( &last_type );
     opal_datatype_resize( &(*newtype)->super, 0, size * extent );
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_multi_dim_array(*newtype, oldtype, ndims, subsize_array);
 #endif
 

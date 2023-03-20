@@ -43,7 +43,7 @@ static void __ompi_datatype_allocate( ompi_datatype_t* datatype )
     datatype->name[0]            = '\0';
     datatype->packed_description = 0;
     datatype->pml_data           = 0;
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     datatype->full_hash          = 0;
     datatype->unit_hash          = 0;
     datatype->sig                = NULL;
@@ -52,7 +52,7 @@ static void __ompi_datatype_allocate( ompi_datatype_t* datatype )
 
 static void __ompi_datatype_release(ompi_datatype_t * datatype)
 {
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     /* Must be first */
     ompi_datatype_typesig_free(datatype->sig);
 #endif
@@ -123,7 +123,7 @@ ompi_datatype_duplicate( const ompi_datatype_t* oldType, ompi_datatype_t** newTy
     new_ompi_datatype->d_keyhash = NULL;
     new_ompi_datatype->args = NULL;
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     if (0 != ompi_datatype_typesig_duplicate(oldType, new_ompi_datatype)) {
         return OMPI_ERR_OUT_OF_RESOURCE;
     }

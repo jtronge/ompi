@@ -405,7 +405,7 @@
 
 extern const ompi_datatype_t* ompi_datatype_basicDatatypes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
 extern uint64_t ompi_datatype_predefined_hashes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
 #endif
 

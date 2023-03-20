@@ -54,7 +54,7 @@ int32_t ompi_datatype_create_vector( int count, int bLength, int stride,
             OBJ_RELEASE( pTempData );
         }
     }
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pData, oldType, count);
 #endif
     *newType = pData;
@@ -87,7 +87,7 @@ int32_t ompi_datatype_create_hvector( int count, int bLength, ptrdiff_t stride,
             OBJ_RELEASE( pTempData );
         }
     }
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     ompi_datatype_build_typesig_vector_like(pData, oldType, count);
 #endif
      *newType = pData;

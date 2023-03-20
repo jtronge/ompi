@@ -387,7 +387,7 @@ const ompi_datatype_t* ompi_datatype_basicDatatypes[OMPI_DATATYPE_MPI_MAX_PREDEF
     [OMPI_DATATYPE_MPI_UNAVAILABLE] = &ompi_mpi_unavailable.dt,
 };
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
 uint64_t ompi_datatype_predefined_hashes[OMPI_DATATYPE_MPI_MAX_PREDEFINED];
 #endif
 
@@ -682,7 +682,7 @@ int32_t ompi_datatype_init( void )
         }
     }
 
-#if DATATYPE_MATCHING
+#if OMPI_DATATYPE_MATCHING
     /* Hash all predefined types */
     for (i = 0; i < ompi_datatype_number_of_predefined_data; ++i) {
         ompi_datatype_predefined_hashes[i] = ompi_datatype_hash_predefined(i);
