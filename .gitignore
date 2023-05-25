@@ -528,6 +528,11 @@ docs/_static
 docs/_static/css/custom.css
 docs/_templates
 
+# Rust code
+opal/mca/btl/rsm/Cargo.lock
+opal/mca/btl/rsm/opal.rs
+opal/mca/btl/rsm/target
+
 # Common Python virtual environment directory names
 venv
 py??
