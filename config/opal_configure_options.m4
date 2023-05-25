@@ -544,6 +544,28 @@ fi
 AC_DEFINE_UNQUOTED([OPAL_ENABLE_GETPWUID], [$opal_want_getpwuid],
                    [Disable getpwuid support (default: enabled)])
 
+#
+# Rust module support
+#
+
+AC_MSG_CHECKING([if want rust modules])
+AC_ARG_ENABLE([rust-modules],
+              [AS_HELP_STRING([--enable-rust-modules],
+                              [Enable building Rust modules (default: disabled)])])
+AS_IF([test "$enable_rust_modules" = "yes"],
+      [AC_PATH_PROG(BINDGEN,bindgen,notfound)
+       AC_PATH_PROG(CARGO,cargo,notfound)
+       AS_IF([test "$BINDGEN" = "notfound" -o "$CARGO" = "notfound"],
+             [AC_MSG_ERROR(["cargo or bindgen were not found; both are required to build the Rust modules"])])
+       OPAL_WANT_RUST_MODULES=1
+       AC_MSG_RESULT([yes])],
+      [OPAL_WANT_RUST_MODULES=0
+       AC_MSG_RESULT([no])])
+AC_DEFINE_UNQUOTED([OPAL_ENABLE_RUST_MODULES],
+                   [$OPAL_WANT_RUST_MODULES],
+                   [Enable building the Rust modules])
+AM_CONDITIONAL([OPAL_ENABLE_RUST_MODULES],[test $OPAL_WANT_RUST_MODULES -eq 1])
+
 dnl We no longer support the old OPAL_ENABLE_PROGRESS_THREADS.  At
 dnl some point, this should die.
 AC_DEFINE([OPAL_ENABLE_PROGRESS_THREADS],
