@@ -6,3 +6,7 @@ edition = "2021"
 [lib]
 path = "lib.rs"
 crate-type = ["staticlib"]
+
+[dependencies]
+shared_memory = "0.12.4"
+raw_sync = "0.1.5"

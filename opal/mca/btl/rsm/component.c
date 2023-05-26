@@ -69,3 +69,20 @@ mca_btl_base_module_t mca_btl_rsm = {
     .btl_dump = mca_btl_base_dump,
     .btl_register_error = mca_btl_rsm_register_error,
 };
+
+/**
+ * *_rs wrapping functions for macros and other C-idioms.
+ */
+int opal_modex_recv_value_rs(const char *key,
+                             const opal_process_name_t *proc_name,
+                             void *data, uint32_t data_type)
+{
+    int rc;
+    OPAL_MODEX_RECV_VALUE(rc, key, proc_name, data, data_type);
+    return rc;
+}
+
+int opal_proc_on_local_node_rs(opal_hwloc_locality_t proc_flags)
+{
+    return OPAL_PROC_ON_LOCAL_NODE(proc_flags);
+}
