@@ -9,3 +9,4 @@ int opal_modex_recv_value_rs(const char *key,
                              const opal_process_name_t *proc_name,
                              void *data, uint32_t data_type);
 int opal_proc_on_local_node_rs(opal_hwloc_locality_t proc_flags);
+void opal_convertor_get_current_pointer_rs(const opal_convertor_t *pConv, void **position);

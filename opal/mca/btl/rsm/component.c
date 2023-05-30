@@ -86,3 +86,9 @@ int opal_proc_on_local_node_rs(opal_hwloc_locality_t proc_flags)
 {
     return OPAL_PROC_ON_LOCAL_NODE(proc_flags);
 }
+
+void opal_convertor_get_current_pointer_rs(const opal_convertor_t *pConv,
+                                           void **position)
+{
+    opal_convertor_get_current_pointer(pConv, position);
+}
