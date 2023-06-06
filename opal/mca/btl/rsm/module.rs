@@ -1,4 +1,5 @@
 use std::os::raw::{c_int, c_void};
+use std::sync::Mutex;
 use crate::opal::{
     mca_btl_base_descriptor_t,
     mca_btl_base_endpoint_t,
@@ -9,6 +10,10 @@ use crate::opal::{
     opal_bitmap_t,
     opal_convertor_get_current_pointer_rs,
     opal_convertor_pack,
+    // TODO: Figure out where these are
+    // opal_convertor_need_bufers,
+    // opal_convertor_on_discrete_device,
+    // opal_convertor_on_unified_device,
     opal_convertor_t,
     opal_proc_local_get,
     opal_proc_t,
@@ -17,10 +22,18 @@ use crate::opal::{
     OPAL_ERR_OUT_OF_RESOURCE,
     iovec,
 };
+use crate::globals::{SHMEM, PENDING};
 use crate::modex::{self, Key};
+use crate::shared_mem::Block;
 
 struct Endpoint {
     local_rank: u16,
+}
+
+pub(crate) struct PendingBlock {
+    local_rank: u16,
+    tag: mca_btl_base_tag_t,
+    block: Box<Block>,
 }
 
 #[no_mangle]
@@ -100,27 +113,30 @@ extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
 #[no_mangle]
 extern "C" fn mca_btl_rsm_alloc(
     btl: *mut mca_btl_base_module_t,
-    endpoc_int: *mut mca_btl_base_endpoint_t,
+    endpoint: *mut mca_btl_base_endpoint_t,
     order: u8,
     size: usize,
     flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
-    std::ptr::null_mut()
+    let shmem = unsafe { SHMEM.as_mut().unwrap() };
+    let mut block = shmem.alloc(size).unwrap();
+    Box::into_raw(Box::new(block)) as *mut _
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_free(
+unsafe extern "C" fn mca_btl_rsm_free(
     btl: *mut mca_btl_base_module_t,
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    0
+    let _ = Box::from_raw(des as *mut Block);
+    OPAL_SUCCESS
 }
 
 /// Packed data into shared memory.
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_prepare_src(
     btl: *mut mca_btl_base_module_t,
-    endpoc_int: *mut mca_btl_base_endpoint_t,
+    endpoint: *mut mca_btl_base_endpoint_t,
     convertor: *mut opal_convertor_t,
     order: u8,
     reserve: usize,
@@ -130,10 +146,15 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
     let mut data_ptr: *mut c_void = std::ptr::null_mut();
     opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
     assert!(!data_ptr.is_null());
+    let shmem = SHMEM.as_mut().unwrap();
+    let mut block = shmem.alloc(*size).unwrap();
+
+    // TODO: For now it's always calling opal_convertor_pack(), but we should
+    // check for the easy case with opal_convertor_need_buffers()
     let mut iov_count = 1;
     let mut iov = iovec {
         iov_len: *size,
-        iov_base: std::ptr::null_mut(),
+        iov_base: block.as_mut() as *mut _,
     };
     let rc = opal_convertor_pack(convertor, &mut iov, &mut iov_count, size);
     // if (rc < 0) {
@@ -141,23 +162,37 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
     //  return NULL;
     // }
     // }
-    std::ptr::null_mut()
+
+    // The descriptor/fragment being returned should be allocated here and
+    // then freed on destruction of the btl
+    Box::into_raw(Box::new(block)) as *mut _
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_send(
+unsafe extern "C" fn mca_btl_rsm_send(
     btl: *mut mca_btl_base_module_t,
-    endpoc_int: *mut mca_btl_base_endpoint_t,
+    endpoint: *mut mca_btl_base_endpoint_t,
     descriptor: *mut mca_btl_base_descriptor_t,
     tag: mca_btl_base_tag_t,
 ) -> c_int {
-    0
+    let endpoint = endpoint as *mut Endpoint;
+    let block = descriptor as *mut Block;
+    let pblock = PendingBlock {
+        local_rank: (*endpoint).local_rank,
+        tag,
+        block: Box::from_raw(block),
+    };
+    if PENDING.is_none() {
+        PENDING.insert(Mutex::new(vec![]));
+    }
+    (*PENDING.as_mut().unwrap().lock().unwrap()).push(pblock);
+    OPAL_SUCCESS
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_sendi(
+unsafe extern "C" fn mca_btl_rsm_sendi(
     btl: *mut mca_btl_base_module_t,
-    endpoc_int: *mut mca_btl_base_endpoint_t,
+    endpoint: *mut mca_btl_base_endpoint_t,
     convertor: *mut opal_convertor_t,
     header: *mut c_void,
     header_size: usize,
@@ -167,7 +202,34 @@ extern "C" fn mca_btl_rsm_sendi(
     tag: mca_btl_base_tag_t,
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    0
+    // NOTE: Ignoring data pointer here
+    let shmem = SHMEM.as_mut().unwrap();
+
+    let len = header_size + payload_size;
+    let mut block = shmem.alloc(len).unwrap();
+
+    std::ptr::copy_nonoverlapping(header as *const u8, block.as_mut(), header_size);
+    if payload_size > 0 {
+        let iov_len = 1;
+
+        let mut iov = iovec {
+            iov_base: block.as_mut().offset(header_size.try_into().unwrap()) as *mut _,
+            iov_len,
+        };
+        let mut iov_len: u32 = iov_len.try_into().unwrap();
+        let mut length = 0;
+        opal_convertor_pack(convertor, &mut iov, &mut iov_len, &mut length);
+        assert_eq!(length, payload_size);
+    }
+
+    // TODO: now write to the fifo immediately (progress will return the fragment)
+    // TODO: Get the endpoint ID from the endpoint parameter
+    let endpoint = endpoint as *mut Endpoint;
+    shmem.lock_fifo((*endpoint).local_rank.try_into().unwrap(), |fifo| {
+        fifo.push(block);
+    });
+
+    OPAL_SUCCESS
 }
 
 #[no_mangle]
@@ -175,5 +237,6 @@ extern "C" fn mca_btl_rsm_register_error(
     btl: *mut mca_btl_base_module_t,
     cbfunc: mca_btl_base_module_error_cb_fn_t,
 ) -> c_int {
+    // TODO
     0
 }
