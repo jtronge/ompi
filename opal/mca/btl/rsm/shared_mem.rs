@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicU8, Ordering};
 use shared_memory::{ShmemConf, Shmem};
 use crate::{Result, Error};
+use crate::opal::mca_btl_base_tag_t;
 
 #[derive(Clone, Debug)]
 pub struct SharedMemoryOptions {
@@ -39,9 +40,9 @@ struct FIFOArray {
 
 impl FIFOArray {
     /// Lock the FIFO and pass a mutable reference into the callback.
-    pub fn lock_fifo<F>(&self, fifo_id: isize, f: F)
+    pub fn lock_fifo<F, R>(&self, fifo_id: isize, f: F) -> R
     where
-        F: FnOnce(&mut inner::FIFO),
+        F: FnOnce(&mut inner::FIFO) -> R,
     {
         unsafe {
             let max_peers: isize = inner::MAX_PEERS.try_into().unwrap();
@@ -49,8 +50,9 @@ impl FIFOArray {
             let fifo = self.fifos.offset(fifo_id).as_mut().unwrap();
             while fifo.lock.compare_exchange(0, 1, Ordering::SeqCst,
                                              Ordering::Relaxed).is_err() {}
-            f(fifo);
+            let res = f(fifo);
             fifo.lock.store(0, Ordering::SeqCst);
+            res
         }
     }
 }
@@ -178,9 +180,9 @@ impl SharedMemory {
     }
 
     /// Lock the FIFO with ID fifo_id and pass it into the callback.
-    pub fn lock_fifo<F>(&self, fifo_id: isize, f: F)
+    pub fn lock_fifo<F, R>(&self, fifo_id: isize, f: F) -> R
     where
-        F: FnOnce(&mut FIFO),
+        F: FnOnce(&mut FIFO) -> R,
     {
         let shmem = Arc::clone(&self.shmem);
         let blocks = self.blocks;
@@ -193,8 +195,8 @@ impl SharedMemory {
                     free_list,
                     blocks,
                 };
-                f(&mut fifo);
-            });
+                f(&mut fifo)
+            })
     }
 }
 
@@ -266,26 +268,70 @@ pub struct Block {
 }
 
 impl Block {
+    /// Return a mutable pointer to the block body.
     pub fn as_mut(&mut self) -> *mut u8 {
-        std::ptr::null_mut()
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            // It doesn't make much sense that offset() is marked unsafe, it
+            // should only be the dereferencing of a pointer that's unsafe
+            hdr.offset(1) as *mut _
+        }
     }
 
+    /// Return an immutable pointer to the block body.
     pub fn as_ptr(&self) -> *const u8 {
-        std::ptr::null()
+        unsafe {
+            let hdr = self.block as *const inner::BlockHeader;
+            hdr.offset(1) as *const _
+        }
+    }
+
+    /// Return the length of the block body.
+    pub fn len(&self) -> usize {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).len
+        }
+    }
+
+    /// Return the tag.
+    pub fn tag(&self) -> mca_btl_base_tag_t {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).tag
+        }
+    }
+
+    /// Set the tag for a block.
+    pub fn set_tag(&mut self, tag: mca_btl_base_tag_t) {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).tag = tag;
+        }
     }
 }
 
 impl Drop for Block {
     fn drop(&mut self) {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).next = -1;
+            (*hdr).tag = 0;
+            (*hdr).len = 0;
+            // TODO: Lock the free list and get rid o
+        }
     }
 }
 
 mod inner {
     use std::sync::atomic::AtomicU8;
     use std::mem::size_of;
+    use crate::opal::mca_btl_base_tag_t;
 
     #[repr(C)]
     pub struct BlockHeader {
+        // TODO: Need tag
+        pub tag: mca_btl_base_tag_t,
         pub next: isize,
         pub len: usize,
     }

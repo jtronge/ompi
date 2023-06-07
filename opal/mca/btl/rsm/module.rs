@@ -22,18 +22,19 @@ use crate::opal::{
     OPAL_ERR_OUT_OF_RESOURCE,
     iovec,
 };
-use crate::globals::{SHMEM, PENDING};
+use crate::globals::{SHMEM, PENDING, ERROR_CB, ENDPOINTS};
 use crate::modex::{self, Key};
 use crate::shared_mem::Block;
 
-struct Endpoint {
+/// Info about a given endpoint
+pub(crate) struct Endpoint {
     local_rank: u16,
 }
 
+/// Pending block for an endpoint
 pub(crate) struct PendingBlock {
-    local_rank: u16,
-    tag: mca_btl_base_tag_t,
-    block: Box<Block>,
+    pub(crate) local_rank: u16,
+    pub(crate) block: Box<Option<Block>>,
 }
 
 #[no_mangle]
@@ -78,10 +79,17 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             return rc;
         }
         let mut endpoint = Box::new(Endpoint { local_rank });
-        *peers.offset(proc) = Box::into_raw(endpoint) as *mut _;
-            // TODO: Get the message size
-            // Now we just need to attach to the shared memory segment
-            // TODO: set up endpoint
+        let endpoint_ptr = Box::into_raw(endpoint);
+        *peers.offset(proc) = endpoint_ptr as *mut _;
+        ENDPOINTS
+            .as_mut()
+            .unwrap()
+            .lock()
+            .expect("Failed to lock endpoint vector")
+            .push(endpoint_ptr);
+        // TODO: Get the message size
+        // Now we just need to attach to the shared memory segment
+        // TODO: set up endpoint
     }
     rc
 }
@@ -107,9 +115,11 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
 
 #[no_mangle]
 extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
-    0
+    // TODO: Clean up any resources
+    OPAL_SUCCESS
 }
 
+/// Allocate a new descriptor and return it.
 #[no_mangle]
 extern "C" fn mca_btl_rsm_alloc(
     btl: *mut mca_btl_base_module_t,
@@ -120,15 +130,16 @@ extern "C" fn mca_btl_rsm_alloc(
 ) -> *mut mca_btl_base_descriptor_t {
     let shmem = unsafe { SHMEM.as_mut().unwrap() };
     let mut block = shmem.alloc(size).unwrap();
-    Box::into_raw(Box::new(block)) as *mut _
+    Box::into_raw(Box::new(Some(block))) as *mut _
 }
 
+/// Free a descriptor.
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_free(
     btl: *mut mca_btl_base_module_t,
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    let _ = Box::from_raw(des as *mut Block);
+    let _ = Box::from_raw(des as *mut Option<Block>);
     OPAL_SUCCESS
 }
 
@@ -157,17 +168,22 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
         iov_base: block.as_mut() as *mut _,
     };
     let rc = opal_convertor_pack(convertor, &mut iov, &mut iov_count, size);
-    // if (rc < 0) {
-    //  MCA_BTL_SM_FRAG_RETURN(frag)
-    //  return NULL;
-    // }
-    // }
+    if rc < 0 {
+        std::ptr::null_mut()
+    } else {
+        // if (rc < 0) {
+        //  MCA_BTL_SM_FRAG_RETURN(frag)
+        //  return NULL;
+        // }
+        // }
 
-    // The descriptor/fragment being returned should be allocated here and
-    // then freed on destruction of the btl
-    Box::into_raw(Box::new(block)) as *mut _
+        // The descriptor/fragment being returned should be allocated here and
+        // then freed on destruction of the btl
+        Box::into_raw(Box::new(Some(block))) as *mut _
+    }
 }
 
+/// Send a descriptor to the particular endpoint.
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_send(
     btl: *mut mca_btl_base_module_t,
@@ -176,19 +192,18 @@ unsafe extern "C" fn mca_btl_rsm_send(
     tag: mca_btl_base_tag_t,
 ) -> c_int {
     let endpoint = endpoint as *mut Endpoint;
-    let block = descriptor as *mut Block;
+    let block = descriptor as *mut Option<Block>;
+    let mut block = Box::from_raw(block);
+    (*block).as_mut().unwrap().set_tag(tag);
     let pblock = PendingBlock {
         local_rank: (*endpoint).local_rank,
-        tag,
-        block: Box::from_raw(block),
+        block,
     };
-    if PENDING.is_none() {
-        PENDING.insert(Mutex::new(vec![]));
-    }
     (*PENDING.as_mut().unwrap().lock().unwrap()).push(pblock);
     OPAL_SUCCESS
 }
 
+/// Do an immediate send to the endpoint.
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_sendi(
     btl: *mut mca_btl_base_module_t,
@@ -207,6 +222,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
 
     let len = header_size + payload_size;
     let mut block = shmem.alloc(len).unwrap();
+    block.set_tag(tag);
 
     std::ptr::copy_nonoverlapping(header as *const u8, block.as_mut(), header_size);
     if payload_size > 0 {
@@ -222,8 +238,6 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         assert_eq!(length, payload_size);
     }
 
-    // TODO: now write to the fifo immediately (progress will return the fragment)
-    // TODO: Get the endpoint ID from the endpoint parameter
     let endpoint = endpoint as *mut Endpoint;
     shmem.lock_fifo((*endpoint).local_rank.try_into().unwrap(), |fifo| {
         fifo.push(block);
@@ -232,11 +246,13 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     OPAL_SUCCESS
 }
 
+/// Register an error handler.
 #[no_mangle]
-extern "C" fn mca_btl_rsm_register_error(
+unsafe extern "C" fn mca_btl_rsm_register_error(
     btl: *mut mca_btl_base_module_t,
     cbfunc: mca_btl_base_module_error_cb_fn_t,
 ) -> c_int {
-    // TODO
-    0
+    // NOTE: This is set globally instead of on the btl parameter as in the original sm btl
+    ERROR_CB = cbfunc;
+    OPAL_SUCCESS
 }

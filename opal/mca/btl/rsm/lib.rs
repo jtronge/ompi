@@ -1,5 +1,6 @@
 /// The component type is defined in C
 use std::os::raw::c_int;
+use std::sync::Mutex;
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -7,23 +8,28 @@ use std::os::raw::c_int;
 #[allow(unused_variables)]
 #[allow(improper_ctypes)]
 mod opal;
-use opal::{
-    mca_btl_base_module_t,
-    mca_base_component_var_register,
-    mca_btl_base_param_register,
-    mca_btl_base_component_3_0_0_t,
-    MCA_BTL_FLAGS_SEND_INPLACE,
-    MCA_BTL_FLAGS_SEND,
-    OPAL_SUCCESS,
-    calloc,
-};
 mod module;
 mod modex;
 mod proc_info;
 mod shared_mem;
 mod globals;
+use opal::{
+    mca_btl_base_module_t,
+    mca_base_component_var_register,
+    mca_btl_active_message_callback_t,
+    mca_btl_base_active_message_trigger,
+    mca_btl_base_param_register,
+    mca_btl_base_receive_descriptor_t,
+    mca_btl_base_component_3_0_0_t,
+    mca_btl_base_segment_t,
+    opal_ptr_t,
+    MCA_BTL_FLAGS_SEND_INPLACE,
+    MCA_BTL_FLAGS_SEND,
+    OPAL_SUCCESS,
+    calloc,
+};
 use shared_mem::{SharedMemory, SharedMemoryOptions};
-use globals::SHMEM;
+use globals::{SHMEM, PENDING, ENDPOINTS};
 
 extern "C" {
     pub static mut mca_btl_rsm: mca_btl_base_module_t;
@@ -67,25 +73,69 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
         euid: 0,
         jobid: 0,
     }).unwrap();
-    SHMEM.insert(smem);
+    let _ = SHMEM.insert(smem);
 
     *btls = &mut mca_btl_rsm;
     btls
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_component_progress() -> c_int {
-    0
+unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
+    // Progress endpoints
+    let shmem = SHMEM.as_ref().unwrap();
+    while let Some(mut pblock) = PENDING.as_mut().unwrap().lock().unwrap().pop() {
+        shmem.lock_fifo(pblock.local_rank.try_into().unwrap(), |fifo| {
+            fifo.push(pblock.block.take().unwrap());
+        });
+    }
+
+    // Poll my local fifo
+    shmem.lock_fifo(proc_info::local_rank().try_into().unwrap(), |fifo| {
+        while let Some(mut block) = fifo.pop() {
+            let idx: usize = block.tag().into();
+            let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
+            let segments = [
+                mca_btl_base_segment_t {
+                    seg_addr: opal_ptr_t {
+                        pval: block.as_mut() as *mut _,
+                    },
+                    seg_len: block.len().try_into().unwrap(),
+                },
+            ];
+            let mut recv_de = mca_btl_base_receive_descriptor_t {
+                // TODO: Set the endpoint
+                endpoint: std::ptr::null_mut(),
+                des_segments: segments.as_ptr(),
+                des_segment_count: segments.len(),
+                tag: block.tag(),
+                cbdata: reg.cbdata,
+            };
+
+            reg.cbfunc.unwrap()(&mut mca_btl_rsm, &mut recv_de);
+            // See mca_btl_sm_poll_handle_frag in btl/sm
+            // Handle fragment, call the receive callback
+        }
+        // Return number of blocks received
+        0
+    })
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_component_open() -> c_int {
-    0
+unsafe extern "C" fn mca_btl_rsm_component_open() -> c_int {
+    // Initialize globals
+    let _ = PENDING.insert(Mutex::new(vec![]));
+    let _ = ENDPOINTS.insert(Mutex::new(vec![]));
+
+    OPAL_SUCCESS
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_component_close() -> c_int {
-    0
+unsafe extern "C" fn mca_btl_rsm_component_close() -> c_int {
+    // Clean up globals
+    let _ = PENDING.take();
+    let _ = ENDPOINTS.take();
+
+    OPAL_SUCCESS
 }
 
 const MAX_EAGER_LIMIT: usize = 4 * 1024;
