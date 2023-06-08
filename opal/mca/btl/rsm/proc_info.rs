@@ -7,6 +7,10 @@ extern {
     static mut opal_process_info: opal_process_info_t;
 }
 
+// TODO: Is there a way to ensure that these accesses to opal_process_info are
+// safe? Perhaps this is done by assumption that opal doesn't change these
+// during the execution of btl modules.
+
 /// Get the number of local procs on this same node
 pub(crate) fn num_local_peers() -> u32 {
     unsafe {

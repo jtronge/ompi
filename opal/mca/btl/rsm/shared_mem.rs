@@ -309,6 +309,22 @@ impl Block {
             (*hdr).tag = tag;
         }
     }
+
+    /// Local rank of the source.
+    pub fn src(&self) -> u16 {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).src
+        }
+    }
+
+    /// Set the local rank of the source.
+    pub fn set_src(&mut self, src: u16) {
+        unsafe {
+            let hdr = self.block as *mut inner::BlockHeader;
+            (*hdr).src = src;
+        }
+    }
 }
 
 impl Drop for Block {
@@ -331,6 +347,7 @@ mod inner {
     #[repr(C)]
     pub struct BlockHeader {
         // TODO: Need tag
+        pub src: u16,
         pub tag: mca_btl_base_tag_t,
         pub next: isize,
         pub len: usize,
