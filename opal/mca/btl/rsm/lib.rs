@@ -152,7 +152,7 @@ unsafe extern "C" fn mca_btl_rsm_component_register_params() -> c_int {
 
     mca_btl_rsm.parent.btl_flags = MCA_BTL_FLAGS_SEND_INPLACE | MCA_BTL_FLAGS_SEND;
     mca_btl_rsm.parent.btl_bandwidth = 20000; // Mbs
-    mca_btl_rsm.parent.btl_latency = 1;       // Microsecs
+    mca_btl_rsm.parent.btl_latency = 1; // Microsecs
 
     mca_btl_base_param_register(
         &mut mca_btl_rsm_component.btl_version,
