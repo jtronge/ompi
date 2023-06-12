@@ -18,16 +18,18 @@ component_install =
 endif
 
 mcacomponentdir = $(opallibdir)
-mcacomponent_LTLIBRARIES = $(component_install)
+mcacomponent_LTLIBRARIES = $(component_install) target/release/librsm.a
 
 mca_btl_rsm_la_SOURCES = component.c
 mca_btl_rsm_la_LDFLAGS = -module -avoid-version
-mca_btl_rsm_la_LIBADD = $(top_builddir)/opal/lib@OPAL_LIB_NAME@.la
+mca_btl_rsm_la_LIBADD = $(top_builddir)/opal/lib@OPAL_LIB_NAME@.la -L$(shell pwd)/target/release -lrsm
+mca_btl_rsm_la_DEPENDENCIES = target/release/librsm.a
 
 noinst_LTLIBRARIES = $(component_noinst)
 libmca_btl_rsm_la_SOURCES = component.c
-libmca_btl_rsm_la_LIBADD = target/release/librsm.a
+libmca_btl_rsm_la_LIBADD = -L$(shell pwd)/target/release -lrsm
 libmca_btl_rsm_la_LDFLAGS = -module -avoid-version
+libmca_btl_rsm_la_DEPENDENCIES = target/release/librsm.a
 
 clean-local:
 	-rm -rf target
