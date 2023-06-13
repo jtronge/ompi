@@ -76,6 +76,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     module_data::init(ptr, shmem);
+    *num_btls = 1;
     *btls = ptr;
     btls
 }
