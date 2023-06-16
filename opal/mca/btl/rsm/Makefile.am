@@ -5,7 +5,7 @@ BINDGEN_FLAGS = --blocklist-item IPPORT_RESERVED
 
 opal.rs: opal.h
 	$(BINDGEN) $(BINDGEN_FLAGS) $< -- $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) > $@
-target/debug/librsm.a: Cargo.toml lib.rs opal.rs fifo.rs block.rs endpoint.rs module.rs modex.rs proc_info.rs local_data.rs
+target/debug/librsm.a: Cargo.toml lib.rs opal.rs shared.rs endpoint.rs module.rs modex.rs proc_info.rs local_data.rs
 	$(CARGO) build
 
 # Configure for DSO or static builds

@@ -11,8 +11,7 @@ use shared_memory::ShmemConf;
 #[allow(unused_variables)]
 #[allow(improper_ctypes)]
 mod opal;
-mod fifo;
-mod block;
+mod shared;
 mod endpoint;
 mod module;
 mod modex;
@@ -36,7 +35,8 @@ use opal::{
     calloc,
 };
 // use shared_mem::{SharedMemory, SharedMemoryOptions};
-use crate::endpoint::Endpoint;
+use endpoint::Endpoint;
+use shared::{SHARED_MEM_SIZE, FIFO};
 
 extern "C" {
     pub static mut mca_btl_rsm: mca_btl_rsm_t;
@@ -71,12 +71,13 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     path.push("/dev/shm");
     path.push(fname);
     let shmem = ShmemConf::new()
-        .size(8192)
+        .size(SHARED_MEM_SIZE)
         .flink(path)
         .create()
         .unwrap();
     let ptr = shmem.as_ptr();
-    std::ptr::write_bytes(ptr, 0, 8192);
+    std::ptr::write_bytes(ptr, 0, SHARED_MEM_SIZE);
+    FIFO::init(ptr as *mut _);
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::init(ptr, shmem);

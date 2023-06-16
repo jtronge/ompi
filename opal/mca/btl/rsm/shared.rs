@@ -1,4 +1,5 @@
 use std::os::raw::{c_int, c_void};
+use std::sync::atomic::AtomicU64;
 use crate::opal::{
     iovec,
     opal_convertor_get_current_pointer_rs,
@@ -9,6 +10,8 @@ use crate::opal::{
 };
 
 pub const BLOCK_SIZE: usize = 8192;
+pub const MAX_BLOCKS: usize = 128;
+pub const SHARED_MEM_SIZE: usize = std::mem::size_of::<FIFO>() + MAX_BLOCKS * std::mem::size_of::<Block>();
 
 pub(crate) struct Block {
     pub(crate) next: isize,
@@ -74,5 +77,18 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
         let mut data_ptr = std::ptr::null_mut();
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
         std::ptr::copy_nonoverlapping(iov.iov_base, data_ptr, payload_size);
+    }
+}
+
+#[repr(C)]
+pub(crate) struct FIFO {
+    head: u64,
+    tail: AtomicU64,
+}
+
+impl FIFO {
+    /// Initialize a FIFO at a memory location.
+    pub(crate) unsafe fn init(fifo: *mut FIFO) {
+        // TODO
     }
 }

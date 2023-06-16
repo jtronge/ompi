@@ -12,11 +12,7 @@ use crate::opal::{
     mca_btl_rsm_t,
     opal_convertor_t,
 };
-use crate::block::{BLOCK_SIZE, Block};
-use crate::fifo::FIFO;
-
-pub const MAX_BLOCKS: usize = 128;
-pub const SHARED_MEM_SIZE: usize = std::mem::size_of::<FIFO>() + MAX_BLOCKS * std::mem::size_of::<Block>();
+use crate::shared::{BLOCK_SIZE, MAX_BLOCKS, Block, FIFO};
 
 pub(crate) struct Descriptor;
 

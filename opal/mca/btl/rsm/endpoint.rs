@@ -1,4 +1,4 @@
-use crate::block::{BLOCK_SIZE, Block};
+use crate::shared::{BLOCK_SIZE, Block};
 use std::mem::MaybeUninit;
 
 /// Info about a given endpoint
