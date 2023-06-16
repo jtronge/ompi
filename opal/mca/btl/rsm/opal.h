@@ -10,6 +10,7 @@ int opal_modex_recv_value_rs(const char *key,
                              void *data, uint32_t data_type);
 int opal_proc_on_local_node_rs(opal_hwloc_locality_t proc_flags);
 void opal_convertor_get_current_pointer_rs(const opal_convertor_t *pConv, void **position);
+int opal_convertor_need_buffers_rs(const opal_convertor_t *pConv);
 
 struct mca_btl_rsm_t {
     /* Actual module instance */

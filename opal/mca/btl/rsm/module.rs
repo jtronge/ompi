@@ -1,5 +1,6 @@
 use std::os::raw::{c_int, c_void};
 use std::sync::Mutex;
+use log::info;
 use crate::opal::{
     mca_btl_base_descriptor_t,
     mca_btl_base_endpoint_t,
@@ -11,7 +12,7 @@ use crate::opal::{
     opal_convertor_get_current_pointer_rs,
     opal_convertor_pack,
     // TODO: Figure out where these are
-    // opal_convertor_need_bufers,
+    opal_convertor_need_buffers_rs,
     // opal_convertor_on_discrete_device,
     // opal_convertor_on_unified_device,
     opal_convertor_t,
@@ -23,19 +24,15 @@ use crate::opal::{
     iovec,
 };
 use crate::modex::{self, Key};
-use crate::shared_mem::Block;
 use crate::proc_info;
-use crate::module_data;
+use crate::local_data;
+use crate::endpoint::Endpoint;
 
-/// Info about a given endpoint
-pub(crate) struct Endpoint {
-    pub(crate) local_rank: u16,
-}
-
-/// Pending block for an endpoint
-pub(crate) struct PendingBlock {
-    pub(crate) local_rank: u16,
-    pub(crate) block: Box<Option<Block>>,
+#[repr(C)]
+struct Descriptor {
+    base: mca_btl_base_descriptor_t,
+    block_id: isize,
+    endpoint_local_rank: u16,
 }
 
 #[no_mangle]
@@ -46,6 +43,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
     peers: *mut *mut mca_btl_base_endpoint_t,
     reachability: *mut opal_bitmap_t,
 ) -> c_int {
+    info!("adding procs");
     let mut rc = 0;
     if reachability.is_null() {
         return 0;
@@ -82,7 +80,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
         let mut endpoint = Box::new(Endpoint { local_rank });
         let endpoint_ptr = Box::into_raw(endpoint);
         *peers.offset(proc) = endpoint_ptr as *mut _;
-        module_data::lock(btl, |data| {
+        local_data::lock(btl, |data| {
             data.endpoints.push(endpoint_ptr);
         });
         // TODO: Get the message size
@@ -99,7 +97,8 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
     procs: *mut *mut opal_proc_t,
     peers: *mut *mut mca_btl_base_endpoint_t,
 ) -> c_int {
-    module_data::lock(btl, |data| {
+    info!("deleting procs");
+    local_data::lock(btl, |data| {
         let nprocs: isize = nprocs.try_into().unwrap();
         for proc in 0..nprocs {
             let peer = peers.offset(proc);
@@ -123,6 +122,7 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
 
 #[no_mangle]
 extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
+    info!("running finalize");
     // TODO: Clean up any resources
     OPAL_SUCCESS
 }
@@ -136,9 +136,11 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
     size: usize,
     flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
-    module_data::lock(btl, |data| {
-        let mut block = data.shmem.alloc(size).unwrap();
-        Box::into_raw(Box::new(Some(block))) as *mut _
+    info!("allocating a descriptor of size {}", size);
+    local_data::lock(btl, |data| {
+        // TODO: Set length
+        let block_id = data.alloc();
+        Box::into_raw(Box::new(data.descriptor(block_id))) as *mut _
     })
 }
 
@@ -148,8 +150,14 @@ unsafe extern "C" fn mca_btl_rsm_free(
     btl: *mut mca_btl_base_module_t,
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    let _ = Box::from_raw(des as *mut Option<Block>);
-    OPAL_SUCCESS
+    info!("freeing descriptor");
+    // let _ = Box::from_raw(des as *mut Option<Block>);
+    let des = Box::from_raw(des as *mut Descriptor);
+    local_data::lock(btl, |data| {
+        // TODO: Release block
+        // data.free(i);
+        OPAL_SUCCESS
+    })
 }
 
 /// Packed data into shared memory.
@@ -163,7 +171,17 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
     size: *mut usize,
     flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
-    module_data::lock(btl, |data| {
+    info!("calling prepare_src");
+    local_data::lock(btl, |data| {
+        let block_id = data.alloc();
+        let rc = data.use_block(block_id, |block| block.prepare_fill(convertor, reserve, size));
+        if rc < 0 {
+            return std::ptr::null_mut();
+        }
+        // TODO: Set order and flags
+        let desc = Box::new(data.descriptor(block_id));
+        Box::into_raw(desc) as *mut _
+/*
         let mut data_ptr: *mut c_void = std::ptr::null_mut();
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
         assert!(!data_ptr.is_null());
@@ -191,6 +209,7 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             // then freed on destruction of the btl
             Box::into_raw(Box::new(Some(block))) as *mut _
         }
+*/
     })
 }
 
@@ -202,8 +221,18 @@ unsafe extern "C" fn mca_btl_rsm_send(
     descriptor: *mut mca_btl_base_descriptor_t,
     tag: mca_btl_base_tag_t,
 ) -> c_int {
-    module_data::lock(btl, |data| {
+    info!("calling send");
+    local_data::lock(btl, |data| {
         let endpoint = endpoint as *mut Endpoint;
+        let desc = descriptor as *mut Descriptor;
+        let block_id = (*desc).block_id;
+        data.use_block(block_id, |block| {
+            block.tag = tag;
+        });
+        // The original SM attempts a write into the peer's fifo, here it
+        // either writes or fails altogether
+        (*endpoint).push(block_id).unwrap();
+/*
         let block = descriptor as *mut Option<Block>;
         let mut block = Box::from_raw(block);
         let block_ref = (*block).as_mut().unwrap();
@@ -214,6 +243,7 @@ unsafe extern "C" fn mca_btl_rsm_send(
             block,
         };
         data.pending.push(pblock);
+*/
         OPAL_SUCCESS
     })
 }
@@ -232,8 +262,29 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     tag: mca_btl_base_tag_t,
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
+    info!("calling sendi");
     // NOTE: Ignoring data pointer here
-    module_data::lock(btl, |data| {
+    local_data::lock(btl, |data| {
+        // TODO: Check pending, return early if there are some
+        if data.pending.len() > 0 {
+            return OPAL_ERR_OUT_OF_RESOURCE;
+        }
+        // Alloc block and set output descriptor
+        let block_id = data.alloc();
+        // Set the block data
+        data.use_block(block_id, |block| {
+            block.next = -1;
+            block.tag = tag;
+            block.complete = false;
+            block.fill(convertor, header, header_size, payload_size);
+        });
+        // Set output descriptor
+        let desc = Box::new(data.descriptor(block_id));
+        *descriptor = Box::into_raw(desc) as *mut _;
+
+        let endpoint = endpoint as *mut Endpoint;
+        (*endpoint).push(block_id).unwrap();
+/*
         let len = header_size + payload_size;
         let mut block = data.shmem.alloc(len).unwrap();
         block.set_tag(tag);
@@ -241,22 +292,29 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
 
         std::ptr::copy_nonoverlapping(header as *const u8, block.as_mut(), header_size);
         if payload_size > 0 {
+            let mut data_ptr = std::ptr::null_mut();
+            opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
             let iov_len = 1;
 
             let mut iov = iovec {
                 iov_base: block.as_mut().offset(header_size.try_into().unwrap()) as *mut _,
                 iov_len,
             };
-            let mut iov_len: u32 = iov_len.try_into().unwrap();
-            let mut length = 0;
-            opal_convertor_pack(convertor, &mut iov, &mut iov_len, &mut length);
-            assert_eq!(length, payload_size);
+            if opal_convertor_need_buffers_rs(convertor) != 0 {
+                let mut iov_len: u32 = iov_len.try_into().unwrap();
+                let mut length = 0;
+                opal_convertor_pack(convertor, &mut iov, &mut iov_len, &mut length);
+                assert_eq!(length, payload_size);
+            } else {
+                std::ptr::copy_nonoverlapping(iov.iov_base, data_ptr, payload_size);
+            }
         }
 
         let endpoint = endpoint as *mut Endpoint;
         data.shmem.lock_fifo((*endpoint).local_rank.try_into().unwrap(), |fifo| {
             fifo.push(block);
         });
+*/
 
         OPAL_SUCCESS
     })
@@ -268,7 +326,8 @@ unsafe extern "C" fn mca_btl_rsm_register_error(
     btl: *mut mca_btl_base_module_t,
     cbfunc: mca_btl_base_module_error_cb_fn_t,
 ) -> c_int {
-    module_data::lock(btl, |data| {
+    info!("registering error");
+    local_data::lock(btl, |data| {
         data.error_cb = cbfunc;
         OPAL_SUCCESS
     })

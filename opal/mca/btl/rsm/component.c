@@ -78,7 +78,7 @@ int opal_modex_recv_value_rs(const char *key,
                              void *data, uint32_t data_type)
 {
     int rc;
-    OPAL_MODEX_RECV_VALUE(rc, key, proc_name, data, data_type);
+    OPAL_MODEX_RECV_VALUE(rc, key, proc_name, &data, data_type);
     return rc;
 }
 
@@ -91,4 +91,9 @@ void opal_convertor_get_current_pointer_rs(const opal_convertor_t *pConv,
                                            void **position)
 {
     opal_convertor_get_current_pointer(pConv, position);
+}
+
+int opal_convertor_need_buffers_rs(const opal_convertor_t *pConv)
+{
+    return opal_convertor_need_buffers(pConv);
 }
