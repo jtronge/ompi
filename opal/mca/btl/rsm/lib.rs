@@ -1,9 +1,10 @@
 /// The component type is defined in C
 use std::os::raw::c_int;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use log::{info, debug};
-use shared_memory::ShmemConf;
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -12,11 +13,12 @@ use shared_memory::ShmemConf;
 #[allow(improper_ctypes)]
 mod opal;
 mod shared;
+mod fifo;
+mod block_store;
 mod endpoint;
 mod module;
 mod modex;
 mod proc_info;
-// mod shared_mem;
 mod local_data;
 use opal::{
     mca_btl_base_module_t,
@@ -34,19 +36,25 @@ use opal::{
     OPAL_SUCCESS,
     calloc,
 };
-// use shared_mem::{SharedMemory, SharedMemoryOptions};
 use endpoint::Endpoint;
-use shared::{SHARED_MEM_SIZE, FIFO};
+use shared::{BLOCK_SIZE, SharedMemoryStore, SharedMemoryRegion, Block, BlockID, make_path};
+use fifo::FIFO;
+use block_store::BlockStore;
+use local_data::LocalData;
 
 extern "C" {
     pub static mut mca_btl_rsm: mca_btl_rsm_t;
     pub static mut mca_btl_rsm_component: mca_btl_base_component_3_0_0_t;
 }
 
+pub type Rank = u32;
+
 #[derive(Clone, Debug)]
 pub enum Error {
     /// Out of memory
     OOM,
+    /// Shared memory error
+    SharedMemoryFailure,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -66,22 +74,19 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
     // Create the shared memory for this rank
     // TODO: Add jobid
-    let fname = format!("{}-{}.shmem", proc_info::node_name(), proc_info::local_rank());
-    let mut path = PathBuf::new();
-    path.push("/dev/shm");
-    path.push(fname);
-    let shmem = ShmemConf::new()
-        .size(SHARED_MEM_SIZE)
-        .flink(path)
-        .create()
-        .unwrap();
-    let ptr = shmem.as_ptr();
-    std::ptr::write_bytes(ptr, 0, SHARED_MEM_SIZE);
-    FIFO::init(ptr as *mut _);
+    let local_rank = proc_info::local_rank();
+    let mut store = SharedMemoryStore { regions: HashMap::new() };
+    let path = make_path(&proc_info::node_name(), local_rank);
+    let shmem = RefCell::new(SharedMemoryRegion::create(path).unwrap());
+    // Insert our local shared memory region
+    store.regions.insert(proc_info::local_rank(), shmem);
+    let store = Arc::new(Mutex::new(store));
+    // Create the local fifo and block store
+    let fifo = FIFO::new(Arc::clone(&store), local_rank);
+    let block_store = BlockStore::new(Arc::clone(&store), local_rank);
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    local_data::init(ptr, shmem);
-    *num_btls = 1;
+    local_data::init(ptr, store, fifo, block_store);
     // Have to allocate using calloc since this will be freed in the base btl
     // code
     let btls = calloc(
@@ -93,118 +98,91 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
         return std::ptr::null_mut();
     }
 
-    *btls = ptr;
-    btls
-
-/*
-    let shmem = SharedMemory::create(SharedMemoryOptions {
-        backing_directory: "/tmp".to_string(),
-        num_local_peers: proc_info::num_local_peers(),
-        node_name: proc_info::node_name(),
-        node_rank: proc_info::node_rank(),
-        // TODO: Not sure where to get the jobid/euid from?
-        euid: 0,
-        // Extract from opal_proc_t
-        jobid: 0,
-    }).unwrap();
-
-    let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    local_data::init(ptr, shmem);
     *num_btls = 1;
     *btls = ptr;
     btls
-*/
 }
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     info!("running progress");
-    // Progress endpoints
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::lock(ptr, |data| {
-        // Progress pending endpoints
+        // Progress pending outgoing blocks
         while let Some((endpoint_rank, block_id)) = data.pending.pop() {
             let rank: usize = endpoint_rank.try_into().unwrap();
             let endpoint: *mut Endpoint = data.endpoints[rank];
-            (*endpoint).push(block_id).unwrap();
+            (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
         }
+
+        // Poll my local fifo
         let mut count = 0;
-        while let Some((endpoint_rank, block_id)) = data.pop() {
+        while let Some((endpoint_rank, block_id)) = data.fifo.pop() {
             let rank: usize = endpoint_rank.try_into().unwrap();
             let endpoint: *mut Endpoint = data.endpoints[rank];
             debug!("Popped block {} from fifo", block_id);
-            (*endpoint).use_block(block_id, |block| {
-                let idx = block.message_trigger;
-                let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
-                let segments = [
-                    mca_btl_base_segment_t {
-                        seg_addr: opal_ptr_t {
-                            pval: block.data.as_mut_ptr() as *mut _,
-                        },
-                        seg_len: block.data.len().try_into().unwrap(),
-                    },
-                ];
-                // TODO: this might be better as a try_lock?
-                let mut recv_de = mca_btl_base_receive_descriptor_t {
-                    endpoint: endpoint as *mut _,
-                    des_segments: segments.as_ptr(),
-                    des_segment_count: segments.len(),
-                    tag: block.tag,
-                    cbdata: reg.cbdata,
-                };
 
-                // Handle fragment, call the receive callback
-                reg.cbfunc.unwrap()(
-                    (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
-                    &mut recv_de,
-                );
+            if handle_incoming(data, endpoint, block_id) {
+                // Now the block is complete, so we return it
+                (*endpoint).fifo.push(endpoint_rank, block_id);
                 count += 1;
-                // See mca_btl_sm_poll_handle_frag in btl/sm
-            });
-        }
-        count
-        // Poll my local fifo
-/*
-        data.shmem.lock_fifo(proc_info::local_rank().try_into().unwrap(), |fifo| {
-            let mut count = 0;
-            while let Some(mut block) = fifo.pop() {
-                let idx: usize = block.tag().into();
-                debug!("Popped block {} from fifo", idx);
-                let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
-                let segments = [
-                    mca_btl_base_segment_t {
-                        seg_addr: opal_ptr_t {
-                            pval: block.as_mut() as *mut _,
-                        },
-                        seg_len: block.len().try_into().unwrap(),
-                    },
-                ];
-                // TODO: this might be better as a try_lock?
-                let endpoint = *data.endpoints
-                    .iter()
-                    .find(|&ep| (**ep).local_rank == block.src())
-                    .expect("Failed to find endpoint");
-                let mut recv_de = mca_btl_base_receive_descriptor_t {
-                    endpoint: endpoint as *mut _,
-                    des_segments: segments.as_ptr(),
-                    des_segment_count: segments.len(),
-                    tag: block.tag(),
-                    cbdata: reg.cbdata,
-                };
-
-                // Handle fragment, call the receive callback
-                reg.cbfunc.unwrap()(
-                    (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
-                    &mut recv_de,
-                );
-                count += 1;
-                // See mca_btl_sm_poll_handle_frag in btl/sm
             }
-            // Return number of blocks received
-            count
-        })
-*/
+            // See mca_btl_sm_poll_handle_frag in btl/sm
+        }
+        // Number of blocks received
+        count
     })
+}
+
+/// Handle an incoming block. Return true if the block needs to be returned to
+/// the sender, and false if this was a block being returned to this rank.
+unsafe fn handle_incoming(
+    data: &mut LocalData,
+    endpoint: *mut Endpoint,
+    block_id: BlockID,
+) -> bool {
+    // TODO: this might be better as a try_lock?
+    let store = data.store.lock().unwrap();
+    let mut region = store.regions.get(&(*endpoint).rank).unwrap().borrow_mut();
+    let block_idx: isize = block_id.try_into().unwrap();
+    let block: &mut Block = region.blocks.offset(block_idx).as_mut().unwrap();
+
+    // Free returned blocks
+    if block.complete && (*endpoint).rank == proc_info::local_rank() {
+        block.complete = false;
+        data.block_store.free(block_id);
+        return false;
+    }
+
+    let idx = block.message_trigger;
+    let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
+    let segments = [
+        mca_btl_base_segment_t {
+            seg_addr: opal_ptr_t {
+                pval: block.data.as_mut_ptr() as *mut _,
+            },
+            seg_len: block.data.len().try_into().unwrap(),
+        },
+    ];
+    let mut recv_de = mca_btl_base_receive_descriptor_t {
+        endpoint: endpoint as *mut _,
+        des_segments: segments.as_ptr(),
+        des_segment_count: segments.len(),
+        tag: block.tag,
+        cbdata: reg.cbdata,
+    };
+
+    // Handle fragment, call the receive callback
+    reg.cbfunc.unwrap()(
+        (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
+        &mut recv_de,
+    );
+
+    // Set the block to complete
+    block.complete = true;
+
+    // The block needs to be returned to sender
+    true
 }
 
 #[no_mangle]
@@ -217,15 +195,19 @@ unsafe extern "C" fn mca_btl_rsm_component_close() -> c_int {
     OPAL_SUCCESS
 }
 
-const MAX_EAGER_LIMIT: usize = 4 * 1024;
-const MAX_RNDV_EAGER_LIMIT: usize = 32 * 1024;
-const MAX_SEND_SIZE: usize = 32 * 1024;
+// const MAX_EAGER_LIMIT: usize = 4 * 1024;
+// const MAX_RNDV_EAGER_LIMIT: usize = 32 * 1024;
+// const MAX_SEND_SIZE: usize = 32 * 1024;
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_register_params() -> c_int {
-    mca_btl_rsm.parent.btl_eager_limit = MAX_EAGER_LIMIT;
-    mca_btl_rsm.parent.btl_rndv_eager_limit = MAX_RNDV_EAGER_LIMIT;
-    mca_btl_rsm.parent.btl_max_send_size = MAX_SEND_SIZE;
+    // TODO: I'm not sure how these eager/rndv variables will affect usage of
+    // this BTL. I see the original sm module has RDMA code, but I think this
+    // is out of scope for this implementation.
+    mca_btl_rsm.parent.btl_eager_limit = BLOCK_SIZE;
+    mca_btl_rsm.parent.btl_rndv_eager_limit = BLOCK_SIZE;
+
+    mca_btl_rsm.parent.btl_max_send_size = BLOCK_SIZE;
     mca_btl_rsm.parent.btl_min_rdma_pipeline_size = i32::MAX.try_into().unwrap();
 
     mca_btl_rsm.parent.btl_flags = MCA_BTL_FLAGS_SEND_INPLACE | MCA_BTL_FLAGS_SEND;

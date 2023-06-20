@@ -1,8 +1,9 @@
 //! Code for handling private data for the module
-use std::sync::Mutex;
 use std::ops::DerefMut;
 use std::os::raw::{c_int, c_void};
 use std::mem::MaybeUninit;
+use std::sync::{Arc, Mutex};
+use std::sync::atomic::AtomicI64;
 use shared_memory::Shmem;
 use crate::endpoint::Endpoint;
 use crate::opal::{
@@ -12,16 +13,22 @@ use crate::opal::{
     mca_btl_rsm_t,
     opal_convertor_t,
 };
-use crate::shared::{BLOCK_SIZE, MAX_BLOCKS, Block, FIFO};
+use crate::shared::{SharedMemoryStore, SharedMemoryRegion, Block, BlockID, BLOCK_SIZE, FIFO_FREE};
+use crate::fifo::FIFO;
+use crate::block_store::BlockStore;
 
 pub(crate) struct Descriptor;
 
 /// Data internal to the module.
 pub(crate) struct LocalData {
-    /// Shared memory store
-    pub(crate) shmem: Shmem,
+    /// Shared memory handle
+    pub(crate) store: Arc<Mutex<SharedMemoryStore>>,
+    /// Local FIFO
+    pub(crate) fifo: FIFO,
+    /// Local block store
+    pub(crate) block_store: BlockStore,
     /// Pending blocks (local_rank, block_id)
-    pub(crate) pending: Vec<(u16, isize)>,
+    pub(crate) pending: Vec<(u16, BlockID)>,
     /// Error handler
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory
@@ -29,19 +36,14 @@ pub(crate) struct LocalData {
 }
 
 impl LocalData {
-    /// Allocate a new block from the free store.
-    pub(crate) fn alloc(&mut self) -> isize {
-        -1
-    }
-
-    /// Use the block with the given block_id.
-    pub(crate) fn use_block<F, R>(&mut self, block_id: isize, f: F) -> R
+    /// Use the block with the given block_id on this rank's memory region.
+    pub fn use_block<F, R>(&mut self, block_id: BlockID, f: F) -> R
     where
         F: FnOnce(&mut Block) -> R,
     {
         let data = unsafe { MaybeUninit::<[u8; BLOCK_SIZE]>::uninit().assume_init() };
         let mut block = Block {
-            next: 0,
+            next: AtomicI64::new(FIFO_FREE),
             tag: 0,
             message_trigger: 0,
             complete: false,
@@ -51,22 +53,24 @@ impl LocalData {
         f(&mut block)
     }
 
-    /// Create and return a descriptor for a block_id.
-    pub(crate) fn descriptor(&self, block_id: isize) -> Descriptor {
+    /// Return a descriptor for the given block for this rank's shared memory region.
+    pub fn descriptor(&self, block_id: BlockID) -> Descriptor {
         Descriptor
-    }
-
-    /// Pop an incoming block off the FIFO.
-    pub(crate) fn pop(&mut self) -> Option<(u16, isize)> {
-        None
     }
 }
 
 /// Initialize the private module data for the BTL module.
-pub(crate) unsafe fn init(btl: *mut mca_btl_base_module_t, shmem: Shmem) {
+pub(crate) unsafe fn init(
+    btl: *mut mca_btl_base_module_t,
+    store: Arc<Mutex<SharedMemoryStore>>,
+    fifo: FIFO,
+    block_store: BlockStore,
+) {
     let btl = btl as *mut mca_btl_rsm_t;
     let data = Mutex::new(LocalData {
-        shmem,
+        store,
+        fifo,
+        block_store,
         pending: vec![],
         error_cb: None,
         endpoints: vec![],

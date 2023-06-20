@@ -1,29 +1,171 @@
-use std::os::raw::{c_int, c_void};
-use std::sync::atomic::AtomicU64;
+//! Shared memory management code.
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::os::raw::{c_void, c_int};
+use shared_memory::{ShmemConf, Shmem};
+use crate::{Result, Error, Rank};
+use std::cell::RefCell;
 use crate::opal::{
+    mca_btl_base_tag_t,
     iovec,
+    opal_convertor_t,
     opal_convertor_get_current_pointer_rs,
     opal_convertor_need_buffers_rs,
     opal_convertor_pack,
-    mca_btl_base_tag_t,
-    opal_convertor_t,
 };
+use crate::local_data::Descriptor;
 
+/// Create a path for a shared memory region.
+pub fn make_path(node_name: &str, local_rank: Rank) -> PathBuf {
+    let fname = format!("{}-{}.shmem", node_name, local_rank);
+    let mut path = PathBuf::new();
+    path.push("/dev/shm");
+    path.push(fname);
+    path
+}
+
+/// Data structure holding all shared memory regions for each reachable process.
+pub(crate) struct SharedMemoryStore {
+    pub regions: HashMap<Rank, RefCell<SharedMemoryRegion>>,
+}
+
+impl SharedMemoryStore {
+    /// Return a descriptor for a block.
+    pub fn descriptor(&self, rank: Rank, block_id: BlockID) -> Descriptor {
+        Descriptor
+    }
+}
+
+/// Block list handle
+pub(crate) struct BlockList {
+    blocks: *mut Block,
+}
+
+impl BlockList {
+    /// Get a slice for all the blocks
+    pub fn get(&mut self) -> &mut [Block] {
+        unsafe {
+            std::slice::from_raw_parts_mut(self.blocks, MAX_BLOCKS)
+        }
+    }
+}
+
+pub(crate) struct FIFOHeaderHandle {
+    header: *mut FIFOHeader,
+}
+
+impl FIFOHeaderHandle {
+    /// Get a reference for the header
+    pub fn get(&mut self) -> &mut FIFOHeader {
+        unsafe {
+            self.header.as_mut().unwrap()
+        }
+    }
+}
+
+/// Shared memory wrapper.
+pub(crate) struct SharedMemoryRegion {
+    /// Shared memory
+    shmem: Shmem,
+    /// Header handle
+    pub fifo: *mut FIFOHeader,
+    /// Block list handle
+    pub blocks: *mut Block,
+}
+
+impl SharedMemoryRegion {
+    /// Create a new shared memory path at a given location.
+    pub fn create<P: AsRef<Path>>(path: P) -> Result<SharedMemoryRegion> {
+        unsafe {
+            // SAFETY: The initialization below is safe assuming that the
+            // shared memory allocates a region of SHARED_MEM_SIZE. Alignment
+            // is checked by comparing the pointer with the value returned by
+            // align_of().
+            let shmem = ShmemConf::new()
+                .size(SHARED_MEM_SIZE)
+                .flink(path)
+                .create();
+            let shmem = if let Ok(shmem) = shmem {
+                shmem
+            } else {
+                return Err(Error::SharedMemoryFailure);
+            };
+
+            // Initialize everything
+            let ptr = shmem.as_ptr();
+            std::ptr::write_bytes(ptr, 0, SHARED_MEM_SIZE);
+            let fifo = ptr as *mut FIFOHeader;
+            (*fifo).head = FIFO_FREE;
+            (*fifo).tail.store(FIFO_FREE, Ordering::Relaxed);
+            let blocks = fifo.offset(1) as *mut Block;
+            let mut tmp = blocks;
+                // Initialize the complete field just in case
+            for _ in 0..MAX_BLOCKS {
+                (*tmp).complete = false;
+                tmp = tmp.offset(1);
+            }
+
+            Ok(SharedMemoryRegion {
+                shmem,
+                fifo,
+                blocks,
+            })
+        }
+    }
+
+    /// Attach to an existing shared memory path.
+    pub fn attach<P: AsRef<Path>>(path: P) -> Result<SharedMemoryRegion> {
+        let shmem = ShmemConf::new()
+            .size(SHARED_MEM_SIZE)
+            .flink(path)
+            .open();
+        let shmem = if let Ok(shmem) = shmem {
+            shmem
+        } else {
+            return Err(Error::SharedMemoryFailure);
+        };
+
+        let fifo = shmem.as_ptr() as *mut FIFOHeader;
+        // I fail to understand why the offset() method is declared unsafe
+        let blocks = unsafe { fifo.offset(1) } as *mut Block;
+
+        Ok(SharedMemoryRegion {
+            shmem,
+            fifo,
+            blocks,
+        })
+    }
+}
+
+pub type BlockID = i32;
+
+/// Block size
 pub const BLOCK_SIZE: usize = 8192;
+/// Max blocks
 pub const MAX_BLOCKS: usize = 128;
-pub const SHARED_MEM_SIZE: usize = std::mem::size_of::<FIFO>() + MAX_BLOCKS * std::mem::size_of::<Block>();
+/// Shared memory size data
+pub const SHARED_MEM_SIZE: usize = std::mem::size_of::<FIFOHeader>() + MAX_BLOCKS * std::mem::size_of::<Block>();
 
-pub(crate) struct Block {
-    pub(crate) next: isize,
-    pub(crate) tag: mca_btl_base_tag_t,
-    pub(crate) message_trigger: usize,
-    pub(crate) complete: bool,
-    pub(crate) len: usize,
-    pub(crate) data: [u8; BLOCK_SIZE],
+/// Block in shared memory.
+pub struct Block {
+    /// Next block in singly linked list
+    pub next: AtomicI64,
+    /// Tag in block
+    pub tag: mca_btl_base_tag_t,
+    /// Message trigger
+    pub message_trigger: usize,
+    /// Indicates that the block is complete and can be freed
+    pub complete: bool,
+    /// Amount of data used in the block [0; BLOCK_SIZE]
+    pub len: usize,
+    /// Actual data in the block
+    pub data: [u8; BLOCK_SIZE],
 }
 
 impl Block {
-    pub(crate) unsafe fn fill(
+    /// Fill the memory location with the given convertor and header data.
+    pub unsafe fn fill(
         &mut self,
         convertor: *mut opal_convertor_t,
         header: *mut c_void,
@@ -49,7 +191,7 @@ impl Block {
 
     /// Fill the block with the given data, with reserve space, and returning
     /// the amount of data used in size.
-    pub(crate) unsafe fn prepare_fill(
+    pub unsafe fn prepare_fill(
         &mut self,
         convertor: *mut opal_convertor_t,
         reserve: usize,
@@ -80,15 +222,20 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
     }
 }
 
+/// FIFO header in shared memory.
 #[repr(C)]
-pub(crate) struct FIFO {
-    head: u64,
-    tail: AtomicU64,
+pub struct FIFOHeader {
+    pub head: i64,
+    pub tail: AtomicI64,
 }
 
-impl FIFO {
+/// Indicates a free FIFO entry
+pub const FIFO_FREE: i64 = -1;
+
+impl FIFOHeader {
     /// Initialize a FIFO at a memory location.
-    pub(crate) unsafe fn init(fifo: *mut FIFO) {
-        // TODO
+    pub unsafe fn init(fifo: *mut FIFOHeader) {
+        (*fifo).head = FIFO_FREE;
+        (*fifo).tail.store(FIFO_FREE, Ordering::Relaxed)
     }
 }

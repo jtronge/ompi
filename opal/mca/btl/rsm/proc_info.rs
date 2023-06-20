@@ -1,4 +1,5 @@
 use std::ffi::CStr;
+use crate::Rank;
 use crate::opal::{
     opal_process_info_t,
 };
@@ -19,16 +20,9 @@ pub(crate) fn num_local_peers() -> u32 {
 }
 
 /// Get the local rank on this node within a job
-pub(crate) fn local_rank() -> u16 {
+pub(crate) fn local_rank() -> Rank {
     unsafe {
-        opal_process_info.my_local_rank
-    }
-}
-
-/// Get the node rank
-pub(crate) fn node_rank() -> u16 {
-    unsafe {
-        opal_process_info.my_node_rank
+        opal_process_info.my_local_rank.into()
     }
 }
 
