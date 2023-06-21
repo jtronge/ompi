@@ -11,13 +11,8 @@ extern {
 // TODO: Is there a way to ensure that these accesses to opal_process_info are
 // safe? Perhaps this is done by assumption that opal doesn't change these
 // during the execution of btl modules.
-
-/// Get the number of local procs on this same node
-pub(crate) fn num_local_peers() -> u32 {
-    unsafe {
-        opal_process_info.num_local_peers
-    }
-}
+//
+// Perhaps need to use UnsafeCell here.
 
 /// Get the local rank on this node within a job
 pub(crate) fn local_rank() -> Rank {

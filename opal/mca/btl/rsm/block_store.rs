@@ -1,20 +1,16 @@
 use std::sync::{Arc, Mutex};
-use std::mem::MaybeUninit;
-use crate::Rank;
-use crate::shared::{SharedMemoryStore, Block, BlockID, BLOCK_SIZE, MAX_BLOCKS};
+use crate::shared::{SharedRegionMap, BlockID, MAX_BLOCKS};
 
 pub(crate) struct BlockStore {
-    store: Arc<Mutex<SharedMemoryStore>>,
-    rank: Rank,
+    _map: Arc<Mutex<SharedRegionMap>>,
     free_blocks: Vec<BlockID>,
 }
 
 impl BlockStore {
-    pub fn new(store: Arc<Mutex<SharedMemoryStore>>, rank: Rank) -> BlockStore {
+    pub fn new(map: Arc<Mutex<SharedRegionMap>>) -> BlockStore {
         let free_blocks = (0..MAX_BLOCKS).map(|block_id| block_id.try_into().unwrap()).collect();
         BlockStore {
-            store,
-            rank,
+            _map: map,
             free_blocks,
         }
     }

@@ -1,56 +1,117 @@
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::Ordering;
-use crate::{Result, Rank};
-use crate::shared::{SharedMemoryStore, Block, BlockID, FIFOHeader, FIFO_FREE};
+use crate::{Result, Error, Rank};
+use crate::shared::{SharedRegionMap, Block, BlockID, FIFOHeader, FIFO_FREE};
 
 pub(crate) struct FIFO {
-    store: Arc<Mutex<SharedMemoryStore>>,
+    map: Arc<Mutex<SharedRegionMap>>,
     pub rank: Rank,
 }
 
 impl FIFO {
-    pub fn new(store: Arc<Mutex<SharedMemoryStore>>, rank: Rank) -> FIFO {
+    pub fn new(map: Arc<Mutex<SharedRegionMap>>, rank: Rank) -> FIFO {
         FIFO {
-            store,
+            map,
             rank,
         }
     }
 
+    /// Pop the block from this FIFO.
+    ///
+    /// TODO: Should this be marked unsafe since it should only be called by the owning process?
     pub fn pop(&self) -> Option<(Rank, BlockID)> {
-        unsafe {
-            let store = match self.store.lock() {
-                Ok(store) => store,
-                Err(_) => return None,
-            };
-            let mut region = store.regions.get(&self.rank).unwrap().borrow_mut();
+        let map = match self.map.lock() {
+            Ok(m) => m,
+            Err(_) => return None,
+        };
 
-            let fifo = region.fifo;
-            if (*fifo).head == FIFO_FREE {
+        map.region_mut(self.rank, |region| {
+            if region.fifo.head == FIFO_FREE {
                 return None;
             }
-            let value = (*fifo).head;
+            let value = region.fifo.head;
             let (rank, block_id) = extract_rank_block_id(value);
-            let block_idx: isize = block_id.try_into().unwrap();
+            let block_idx: usize = block_id.try_into().unwrap();
             if rank == self.rank {
-                let block = region.blocks.offset(block_idx);
                 // Special case
-                update_head(value, fifo.as_mut().unwrap(), block.as_mut().unwrap());
+                pop(value, &mut region.fifo, &mut region.blocks[block_idx]);
             } else {
-                let mut other_region = store.regions.get(&rank).unwrap().borrow_mut();
-                let block = other_region.blocks.offset(block_idx);
-                update_head(value, fifo.as_mut().unwrap(), block.as_mut().unwrap());
+                map.region_mut(rank, |other_region| {
+                    pop(value, &mut region.fifo, &mut other_region.blocks[block_idx]);
+                });
             }
             Some((rank, block_id))
-        }
+        })
     }
 
+    /// Push the block onto this FIFO.
     pub fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
-        Ok(())
+        let map = match self.map.lock() {
+            Ok(m) => m,
+            Err(_) => return Err(Error::LockError),
+        };
+
+        // This seems like too much code for what it's trying to do
+        map.region_mut(self.rank, |region| {
+            let value = encode_rank_block_id(rank, block_id);
+
+            let block_idx: usize = block_id.try_into().unwrap();
+            // See sm_fifo_write_ep() and sm_fifo_write() for the original functions
+            if rank == self.rank {
+                // Need to grab the block from this region (likely a complete
+                // block being returned for freeing)
+                let block = &mut region.blocks[block_idx];
+                block.next.store(FIFO_FREE, Ordering::SeqCst);
+                let prev = region.fifo.tail.swap(value, Ordering::SeqCst);
+
+                assert!(prev != value);
+
+                if prev != FIFO_FREE {
+                    let (prev_rank, prev_block_id) = extract_rank_block_id(value);
+                    let prev_block_idx: usize = prev_block_id.try_into().unwrap();
+                    if prev_rank == self.rank {
+                        region.blocks[prev_block_idx].next.store(value, Ordering::SeqCst);
+                    } else {
+                        map.region_mut(prev_rank, |prev_region| {
+                            prev_region.blocks[prev_block_idx].next.store(value, Ordering::SeqCst);
+                        });
+                    }
+                } else {
+                    region.fifo.head = value;
+                }
+            } else {
+                // Need to grab the block from a different region
+                map.region_mut(rank, |other_region| {
+                    let block = &mut other_region.blocks[block_idx];
+                    block.next.store(FIFO_FREE, Ordering::SeqCst);
+                    let prev = region.fifo.tail.swap(value, Ordering::SeqCst);
+
+                    assert!(prev != value);
+
+                    if prev != FIFO_FREE {
+                        let (prev_rank, prev_block_id) = extract_rank_block_id(value);
+                        let prev_block_idx: usize = prev_block_id.try_into().unwrap();
+                        if prev_rank == self.rank {
+                            region.blocks[prev_block_idx].next.store(value, Ordering::SeqCst);
+                        } else if prev_rank == rank {
+                            other_region.blocks[prev_block_idx].next.store(value, Ordering::SeqCst);
+                        } else {
+                            map.region_mut(prev_rank, |prev_region| {
+                                prev_region.blocks[prev_block_idx].next.store(value, Ordering::SeqCst);
+                            });
+                        }
+                    } else {
+                        region.fifo.head = value;
+                    }
+                });
+            }
+            Ok(())
+        })
     }
 }
 
 /// Update the head for a pop operation (see sm_fifo_read() for the original).
-fn update_head(value: i64, fifo: &mut FIFOHeader, block: &mut Block) {
+fn pop(value: i64, fifo: &mut FIFOHeader, block: &mut Block) {
     if block.next.load(Ordering::SeqCst) == FIFO_FREE {
         if fifo.tail.compare_exchange(value, FIFO_FREE, Ordering::SeqCst, Ordering::SeqCst).is_err() {
             while block.next.load(Ordering::SeqCst) == FIFO_FREE {}
@@ -66,4 +127,11 @@ fn extract_rank_block_id(value: i64) -> (Rank, BlockID) {
     let rank = (value >> 32).try_into().unwrap();
     let block_id = (value & 0xFFFFFFFF).try_into().unwrap();
     (rank, block_id)
+}
+
+/// Encode the rank and block ID into an i64.
+fn encode_rank_block_id(rank: Rank, block_id: BlockID) -> i64 {
+    let rank: i64 = rank.try_into().unwrap();
+    let block_id: i64 = block_id.try_into().unwrap();
+    (rank << 32) | block_id
 }

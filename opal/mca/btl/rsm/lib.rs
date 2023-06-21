@@ -1,6 +1,5 @@
 /// The component type is defined in C
 use std::os::raw::c_int;
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -22,7 +21,6 @@ mod proc_info;
 mod local_data;
 use opal::{
     mca_btl_base_module_t,
-    mca_base_component_var_register,
     mca_btl_active_message_callback_t,
     mca_btl_base_active_message_trigger,
     mca_btl_base_param_register,
@@ -37,7 +35,7 @@ use opal::{
     calloc,
 };
 use endpoint::Endpoint;
-use shared::{BLOCK_SIZE, SharedMemoryStore, SharedMemoryRegion, Block, BlockID, make_path};
+use shared::{BLOCK_SIZE, SharedRegionMap, SharedRegionHandle, BlockID, make_path};
 use fifo::FIFO;
 use block_store::BlockStore;
 use local_data::LocalData;
@@ -55,6 +53,8 @@ pub enum Error {
     OOM,
     /// Shared memory error
     SharedMemoryFailure,
+    /// Failed to lock a data structure
+    LockError,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -63,8 +63,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_init(
     num_btls: *mut c_int,
-    enable_progress_threads: bool,
-    enable_mpi_threads: bool,
+    _enable_progress_threads: bool,
+    _enable_mpi_threads: bool,
 ) -> *mut *mut mca_btl_base_module_t {
     *num_btls = 0;
 
@@ -75,18 +75,16 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     // Create the shared memory for this rank
     // TODO: Add jobid
     let local_rank = proc_info::local_rank();
-    let mut store = SharedMemoryStore { regions: HashMap::new() };
+    let mut map = SharedRegionMap { regions: HashMap::new() };
     let path = make_path(&proc_info::node_name(), local_rank);
-    let shmem = RefCell::new(SharedMemoryRegion::create(path).unwrap());
-    // Insert our local shared memory region
-    store.regions.insert(proc_info::local_rank(), shmem);
-    let store = Arc::new(Mutex::new(store));
-    // Create the local fifo and block store
-    let fifo = FIFO::new(Arc::clone(&store), local_rank);
-    let block_store = BlockStore::new(Arc::clone(&store), local_rank);
+    let region = RefCell::new(SharedRegionHandle::create(path).unwrap());
+    map.regions.insert(local_rank, region);
+    let map = Arc::new(Mutex::new(map));
+    let fifo = FIFO::new(Arc::clone(&map), local_rank);
+    let block_store = BlockStore::new(Arc::clone(&map));
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    local_data::init(ptr, store, fifo, block_store);
+    local_data::init(ptr, map, fifo, block_store);
     // Have to allocate using calloc since this will be freed in the base btl
     // code
     let btls = calloc(
@@ -124,7 +122,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
 
             if handle_incoming(data, endpoint, block_id) {
                 // Now the block is complete, so we return it
-                (*endpoint).fifo.push(endpoint_rank, block_id);
+                (*endpoint).fifo.push(endpoint_rank, block_id).unwrap();
                 count += 1;
             }
             // See mca_btl_sm_poll_handle_frag in btl/sm
@@ -142,47 +140,47 @@ unsafe fn handle_incoming(
     block_id: BlockID,
 ) -> bool {
     // TODO: this might be better as a try_lock?
-    let store = data.store.lock().unwrap();
-    let mut region = store.regions.get(&(*endpoint).rank).unwrap().borrow_mut();
-    let block_idx: isize = block_id.try_into().unwrap();
-    let block: &mut Block = region.blocks.offset(block_idx).as_mut().unwrap();
+    data.map.lock().unwrap().region_mut((*endpoint).rank, |region| {
+        let block_idx: usize = block_id.try_into().unwrap();
+        let block = &mut region.blocks[block_idx];
 
-    // Free returned blocks
-    if block.complete && (*endpoint).rank == proc_info::local_rank() {
-        block.complete = false;
-        data.block_store.free(block_id);
-        return false;
-    }
+        // Free returned blocks
+        if block.complete && (*endpoint).rank == proc_info::local_rank() {
+            block.complete = false;
+            data.block_store.free(block_id);
+            return false;
+        }
 
-    let idx = block.message_trigger;
-    let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
-    let segments = [
-        mca_btl_base_segment_t {
-            seg_addr: opal_ptr_t {
-                pval: block.data.as_mut_ptr() as *mut _,
+        let idx = block.message_trigger;
+        let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
+        let segments = [
+            mca_btl_base_segment_t {
+                seg_addr: opal_ptr_t {
+                    pval: block.data.as_mut_ptr() as *mut _,
+                },
+                seg_len: block.data.len().try_into().unwrap(),
             },
-            seg_len: block.data.len().try_into().unwrap(),
-        },
-    ];
-    let mut recv_de = mca_btl_base_receive_descriptor_t {
-        endpoint: endpoint as *mut _,
-        des_segments: segments.as_ptr(),
-        des_segment_count: segments.len(),
-        tag: block.tag,
-        cbdata: reg.cbdata,
-    };
+        ];
+        let mut recv_de = mca_btl_base_receive_descriptor_t {
+            endpoint: endpoint as *mut _,
+            des_segments: segments.as_ptr(),
+            des_segment_count: segments.len(),
+            tag: block.tag,
+            cbdata: reg.cbdata,
+        };
 
-    // Handle fragment, call the receive callback
-    reg.cbfunc.unwrap()(
-        (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
-        &mut recv_de,
-    );
+        // Handle fragment, call the receive callback
+        reg.cbfunc.unwrap()(
+            (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
+            &mut recv_de,
+        );
 
-    // Set the block to complete
-    block.complete = true;
+        // Set the block to complete
+        block.complete = true;
 
-    // The block needs to be returned to sender
-    true
+        // The block needs to be returned to sender
+        true
+    })
 }
 
 #[no_mangle]

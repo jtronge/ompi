@@ -1,7 +1,7 @@
 use std::os::raw::{c_int, c_void};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::cell::RefCell;
-use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::atomic::Ordering;
 use log::info;
 use crate::opal::{
     mca_btl_base_descriptor_t,
@@ -11,30 +11,19 @@ use crate::opal::{
     mca_btl_base_tag_t,
     opal_bitmap_set_bit,
     opal_bitmap_t,
-    opal_convertor_get_current_pointer_rs,
-    opal_convertor_pack,
-    opal_convertor_need_buffers_rs,
     opal_convertor_t,
     opal_proc_local_get,
     opal_proc_t,
     opal_proc_on_local_node_rs,
     OPAL_SUCCESS,
     OPAL_ERR_OUT_OF_RESOURCE,
-    iovec,
 };
 use crate::modex::{self, Key};
 use crate::Rank;
 use crate::proc_info;
 use crate::local_data;
 use crate::endpoint::Endpoint;
-use crate::shared::{SharedMemoryRegion, BlockID, make_path, FIFO_FREE};
-
-#[repr(C)]
-struct Descriptor {
-    base: mca_btl_base_descriptor_t,
-    block_id: BlockID,
-    endpoint_local_rank: Rank,
-}
+use crate::shared::{SharedRegionHandle, Descriptor, make_path, FIFO_FREE};
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_add_procs(
@@ -83,20 +72,20 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
 
             // Attach to the memory region
             let path = make_path(&proc_info::node_name(), local_rank);
-            let region = match SharedMemoryRegion::attach(path) {
+            let region = match SharedRegionHandle::attach(path) {
                 Ok(reg) => reg,
                 // TODO: Propagate this error
                 Err(_) => continue,
             };
-            data.store.lock().unwrap().regions.insert(local_rank, RefCell::new(region));
+            data.map.lock().unwrap().regions.insert(local_rank, RefCell::new(region));
 
             // Create the endpoint
-            let endpoint = match Endpoint::new(Arc::clone(&data.store), local_rank) {
+            let endpoint = match Endpoint::new(Arc::clone(&data.map), local_rank) {
                 Ok(ep) => ep,
                 // TODO: Propagate this error
                 Err(_) => continue,
             };
-            let mut endpoint = Box::new(endpoint);
+            let endpoint = Box::new(endpoint);
             let endpoint_ptr = Box::into_raw(endpoint);
             *peers.offset(proc) = endpoint_ptr as *mut _;
             data.endpoints.push(endpoint_ptr);
@@ -109,7 +98,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
 unsafe extern "C" fn mca_btl_rsm_del_procs(
     btl: *mut mca_btl_base_module_t,
     nprocs: usize,
-    procs: *mut *mut opal_proc_t,
+    _procs: *mut *mut opal_proc_t,
     peers: *mut *mut mca_btl_base_endpoint_t,
 ) -> c_int {
     info!("deleting procs");
@@ -127,11 +116,10 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
                     let _ = data.endpoints.swap_remove(i);
                 }
                 // Remove the region from the store
-                let rank = (*ep).rank;
-                let _ = data.store.lock().unwrap().regions.remove(&(*ep).rank);
+                let _ = data.map.lock().unwrap().regions.remove(&(*ep).rank);
 
                 // Convert back to a Box and thus free it
-                let ep = Box::from_raw(ep);
+                let _ = Box::from_raw(ep);
                 *peer = std::ptr::null_mut();
             }
         }
@@ -140,9 +128,11 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
 }
 
 #[no_mangle]
-extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
+unsafe extern "C" fn mca_btl_rsm_finalize(
+    btl: *mut mca_btl_base_module_t,
+) -> c_int {
     info!("running finalize");
-    // TODO: Clean up any resources
+    local_data::free(btl);
     OPAL_SUCCESS
 }
 
@@ -150,10 +140,10 @@ extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_alloc(
     btl: *mut mca_btl_base_module_t,
-    endpoint: *mut mca_btl_base_endpoint_t,
-    order: u8,
+    _endpoint: *mut mca_btl_base_endpoint_t,
+    _order: u8,
     size: usize,
-    flags: u32,
+    _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
     info!("allocating a descriptor of size {}", size);
     local_data::lock(btl, |data| {
@@ -163,7 +153,7 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             None => return std::ptr::null_mut(),
         };
         let desc = data
-            .store
+            .map
             .lock()
             .unwrap()
             .descriptor(proc_info::local_rank(), block_id);
@@ -180,8 +170,12 @@ unsafe extern "C" fn mca_btl_rsm_free(
     info!("freeing descriptor");
     let des = Box::from_raw(des as *mut Descriptor);
     local_data::lock(btl, |data| {
-        // TODO: Release block
-        // data.store.release(desc.block_id);
+        if des.rank == proc_info::local_rank() {
+            // Only release block if it's owned by this node
+            data.block_store.free(des.block_id);
+        }
+        // TODO: In what case would this block come from a different node's
+        // shared memory?
         OPAL_SUCCESS
     })
 }
@@ -190,12 +184,12 @@ unsafe extern "C" fn mca_btl_rsm_free(
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_prepare_src(
     btl: *mut mca_btl_base_module_t,
-    endpoint: *mut mca_btl_base_endpoint_t,
+    _endpoint: *mut mca_btl_base_endpoint_t,
     convertor: *mut opal_convertor_t,
-    order: u8,
+    _order: u8,
     reserve: usize,
     size: *mut usize,
-    flags: u32,
+    _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
     info!("calling prepare_src");
     local_data::lock(btl, |data| {
@@ -203,12 +197,15 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             Some(id) => id,
             None => return std::ptr::null_mut(),
         };
-        let rc = data.use_block(block_id, |block| block.prepare_fill(convertor, reserve, size));
+        let rc = data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].prepare_fill(convertor, reserve, size)
+        });
         if rc < 0 {
             return std::ptr::null_mut();
         }
         // TODO: Set order and flags
-        let desc = data.store.lock().unwrap().descriptor(proc_info::local_rank(), block_id);
+        let desc = data.map.lock().unwrap().descriptor(proc_info::local_rank(), block_id);
         let desc = Box::new(desc);
         Box::into_raw(desc) as *mut _
     })
@@ -227,8 +224,9 @@ unsafe extern "C" fn mca_btl_rsm_send(
         let endpoint = endpoint as *mut Endpoint;
         let desc = descriptor as *mut Descriptor;
         let block_id = (*desc).block_id;
-        data.use_block(block_id, |block| {
-            block.tag = tag;
+        let block_idx: usize = block_id.try_into().unwrap();
+        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+            region.blocks[block_idx].tag = tag;
         });
         // The original SM attempts a write into the peer's fifo, here it
         // either writes or fails altogether
@@ -246,8 +244,8 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     header: *mut c_void,
     header_size: usize,
     payload_size: usize,
-    order: u8,
-    flags: u32,
+    _order: u8,
+    _flags: u32,
     tag: mca_btl_base_tag_t,
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
@@ -264,8 +262,11 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
             None => return OPAL_ERR_OUT_OF_RESOURCE,
         };
         let endpoint = endpoint as *mut Endpoint;
-        data.use_block(block_id, |block| {
-            // Set the block data
+
+        // Set the block data
+        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            let block = &mut region.blocks[block_idx];
             block.next.store(FIFO_FREE, Ordering::Relaxed);
             block.tag = tag;
             block.complete = false;
@@ -276,7 +277,13 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
 
         // Set output descriptor
-        let desc = Box::new(data.descriptor(block_id));
+        let desc = Box::new(
+            data
+                .map
+                .lock()
+                .unwrap()
+                .descriptor(proc_info::local_rank(), block_id)
+        );
         *descriptor = Box::into_raw(desc) as *mut _;
 
         OPAL_SUCCESS
