@@ -82,10 +82,19 @@ int opal_modex_recv_value_rs(const char *key,
     return rc;
 }
 
+int opal_modex_recv_string_rs(const char *key,
+                              const opal_process_name_t *proc_name,
+                              void *data)
+{
+    int rc;
+    OPAL_MODEX_RECV_VALUE(rc, key, proc_name, data, PMIX_STRING);
+    return rc;
+}
+
 int opal_modex_send_string_rs(uint32_t scope, const char *key, void *data, size_t size)
 {
     int rc;
-    OPAL_MODEX_SEND_STRING(rc, scope, key, data, size);
+    OPAL_MODEX_SEND_VALUE(rc, scope, key, data, PMIX_STRING)
     return rc;
 }
 

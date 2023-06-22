@@ -81,6 +81,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
                 }
                 Err(_) => return -1,
             };
+            info!("shared memory file: {}", path);
             let region = match SharedRegionHandle::attach(path) {
                 Ok(reg) => reg,
                 // TODO: Propagate this error

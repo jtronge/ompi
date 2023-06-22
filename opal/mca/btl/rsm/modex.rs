@@ -1,14 +1,15 @@
 use std::os::raw::c_char;
 use std::ffi::{CStr, CString};
+use log::debug;
 use crate::{Result, Error};
 use crate::opal::{
     opal_modex_recv_value_rs,
+    opal_modex_recv_string_rs,
     opal_modex_send_string_rs,
     opal_process_name_t,
     PMIX_UINT16,
     PMIX_LOCAL_RANK,
     PMIX_LOCAL,
-    PMIX_STRING,
     OPAL_SUCCESS,
 };
 
@@ -43,14 +44,14 @@ pub fn recv_string(key: &str, proc_name: &opal_process_name_t) -> Result<String>
         let key_nul = key.as_bytes_with_nul();
         let mut ptr: *mut c_char = std::ptr::null_mut();
 
-        let rc = opal_modex_recv_value_rs(
+        let rc = opal_modex_recv_string_rs(
             key_nul.as_ptr() as *const _,
             proc_name,
             (&mut ptr as *mut *mut c_char) as *mut _,
-            PMIX_STRING,
         );
 
         if rc == OPAL_SUCCESS {
+            debug!("ptr: {:?}", ptr);
             if !ptr.is_null() {
                 let value = CStr::from_ptr(ptr)
                     .to_str()
