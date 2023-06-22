@@ -26,6 +26,48 @@ impl FIFO {
         };
 
         map.region_mut(self.rank, |region| {
+            loop {
+                if region.fifo.head == FIFO_FREE {
+                    return None;
+                }
+
+                let old_tail = region.fifo.tail.load(Ordering::SeqCst);
+                let old_head = region.fifo.head;
+                let (rank, block_id) = extract_rank_block_id(old_head);
+                let block_idx: usize = block_id.try_into().unwrap();
+
+                let new_head = if rank == self.rank {
+                    let new_head = region.blocks[block_idx].next.load(Ordering::SeqCst);
+                    let new_tail = if new_head == FIFO_FREE { FIFO_FREE } else { old_tail };
+                    match region.fifo.tail.compare_exchange(
+                        old_tail,
+                        new_tail,
+                        Ordering::SeqCst,
+                        Ordering::SeqCst,
+                    ) {
+                        Ok(_) => new_head,
+                        Err(_) => continue,
+                    }
+                } else {
+                    match map.region_mut(rank, |other_region| {
+                        let new_head = other_region.blocks[block_idx].next.load(Ordering::SeqCst);
+                        let new_tail = if new_head == FIFO_FREE { FIFO_FREE } else { old_tail };
+                        region.fifo.tail.compare_exchange(
+                            old_tail,
+                            new_tail,
+                            Ordering::SeqCst,
+                            Ordering::SeqCst,
+                        ).map(|_| new_head)
+                    }) {
+                        Ok(head) => head,
+                        Err(_) => continue,
+                    }
+                };
+                region.fifo.head = new_head;
+
+                return Some((rank, block_id));
+            }
+/*
             if region.fifo.head == FIFO_FREE {
                 return None;
             }
@@ -41,6 +83,7 @@ impl FIFO {
                 });
             }
             Some((rank, block_id))
+*/
         })
     }
 
@@ -53,6 +96,35 @@ impl FIFO {
 
         // This seems like too much code for what it's trying to do
         map.region_mut(self.rank, |region| {
+            loop {
+                let new_tail = encode_rank_block_id(rank, block_id);
+                let old_tail = region.fifo.tail.load(Ordering::SeqCst);
+
+                if region.fifo.tail.compare_exchange(
+                    old_tail,
+                    new_tail,
+                    Ordering::SeqCst,
+                    Ordering::SeqCst,
+                ).is_err() {
+                    continue;
+                }
+
+                if old_tail == FIFO_FREE {
+                    region.fifo.head = new_tail;
+                } else {
+                    let (old_rank, old_block_id) = extract_rank_block_id(old_tail);
+                    let old_block_idx: usize = old_block_id.try_into().unwrap();
+                    if old_rank == self.rank {
+                        region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
+                    } else {
+                        map.region_mut(self.rank, |other_region| {
+                            other_region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
+                        });
+                    }
+                }
+            }
+            Ok(())
+/*
             let value = encode_rank_block_id(rank, block_id);
 
             let block_idx: usize = block_id.try_into().unwrap();
@@ -106,6 +178,7 @@ impl FIFO {
                 });
             }
             Ok(())
+*/
         })
     }
 }
