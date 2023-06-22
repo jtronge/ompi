@@ -20,9 +20,13 @@ use crate::opal::{
     opal_free_list_item_t,
 };
 
-/// Create a path for a shared memory region.
-pub fn make_path(node_name: &str, local_rank: Rank) -> PathBuf {
-    let fname = format!("{}-{}.shmem", node_name, local_rank);
+/// Create a unique path for a shared memory region.
+pub fn make_path(node_name: String, rank: Rank, pid: u32) -> PathBuf {
+    let rank: u64 = rank.into();
+    let pid: u64 = pid.into();
+    fastrand::seed(rank + pid);
+    let random: String = (0..16).map(|_| fastrand::alphanumeric()).collect();
+    let fname = format!("{}-{}.shmem", node_name, random);
     let mut path = PathBuf::new();
     path.push("/dev/shm");
     path.push(fname);
@@ -123,10 +127,9 @@ impl SharedRegionHandle {
                 .size(SHARED_REGION_SIZE)
                 .flink(path)
                 .create();
-            let shmem = if let Ok(shmem) = shmem {
-                shmem
-            } else {
-                return Err(Error::SharedMemoryFailure);
+            let shmem = match shmem {
+                Ok(shmem) => shmem,
+                Err(err) => return Err(Error::SharedMemoryFailure(err)),
             };
 
             // Check alignment
@@ -156,10 +159,9 @@ impl SharedRegionHandle {
             .size(SHARED_REGION_SIZE)
             .flink(path)
             .open();
-        let shmem = if let Ok(shmem) = shmem {
-            shmem
-        } else {
-            return Err(Error::SharedMemoryFailure);
+        let shmem = match shmem {
+            Ok(shmem) => shmem,
+            Err(err) => return Err(Error::SharedMemoryFailure(err)),
         };
 
         // Check alignment

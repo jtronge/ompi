@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use log::{info, debug};
+use shared_memory::ShmemError;
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -47,17 +48,23 @@ extern "C" {
 
 pub type Rank = u32;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub enum Error {
     /// Out of memory
     OOM,
     /// Shared memory error
-    SharedMemoryFailure,
+    SharedMemoryFailure(ShmemError),
     /// Failed to lock a data structure
     LockError,
+    /// An error occurred in an opal component that was called
+    OpalError(c_int),
+    /// An error occurred receiving a modex value
+    ModexValueRecvFailure,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+pub const SHARED_MEM_NAME_KEY: &'static str = "rsm.shared_mem_name_key";
 
 /// Initialize the RSM component.
 #[no_mangle]
@@ -76,8 +83,25 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     // TODO: Add jobid
     let local_rank = proc_info::local_rank();
     let mut map = SharedRegionMap { regions: HashMap::new() };
-    let path = make_path(&proc_info::node_name(), local_rank);
-    let region = RefCell::new(SharedRegionHandle::create(path).unwrap());
+    let path = make_path(proc_info::node_name(), local_rank, std::process::id());
+    info!("Creating shared memory with path \"{:?}\"", path);
+    // Publish the path
+    match modex::send_string_local(SHARED_MEM_NAME_KEY, path.as_os_str().to_str().unwrap()) {
+        Ok(()) => (),
+        Err(err) => {
+            debug!("Modex error: {:?}", err);
+            return std::ptr::null_mut();
+        }
+    }
+
+    let region = match SharedRegionHandle::create(path) {
+        Ok(region) => region,
+        Err(err) => {
+            debug!("Shared memory error: {:?}", err);
+            return std::ptr::null_mut();
+        }
+    };
+    let region = RefCell::new(region);
     map.regions.insert(local_rank, region);
     let map = Arc::new(Mutex::new(map));
     let fifo = FIFO::new(Arc::clone(&map), local_rank);
@@ -140,7 +164,9 @@ unsafe fn handle_incoming(
     block_id: BlockID,
 ) -> bool {
     // TODO: this might be better as a try_lock?
+    debug!("In handle_incoming()");
     data.map.lock().unwrap().region_mut((*endpoint).rank, |region| {
+        debug!("In region_mut() of handle_incomding()");
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
 
@@ -170,10 +196,12 @@ unsafe fn handle_incoming(
         };
 
         // Handle fragment, call the receive callback
-        reg.cbfunc.unwrap()(
-            (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
-            &mut recv_de,
-        );
+        if reg.cbfunc.is_some() {
+            reg.cbfunc.unwrap()(
+                (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
+                &mut recv_de,
+            );
+        }
 
         // Set the block to complete
         block.complete = true;

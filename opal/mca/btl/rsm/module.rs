@@ -18,12 +18,12 @@ use crate::opal::{
     OPAL_SUCCESS,
     OPAL_ERR_OUT_OF_RESOURCE,
 };
-use crate::modex::{self, Key};
-use crate::Rank;
+use crate::{Error, Rank, SHARED_MEM_NAME_KEY};
+use crate::modex;
 use crate::proc_info;
 use crate::local_data;
 use crate::endpoint::Endpoint;
-use crate::shared::{SharedRegionHandle, Descriptor, make_path, FIFO_FREE};
+use crate::shared::{SharedRegionHandle, Descriptor, FIFO_FREE};
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_add_procs(
@@ -63,15 +63,24 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             }
 
             // Get the local rank of the other process
-            let mut local_rank: u16 = 0;
-            rc = modex::recv_value(Key::LocalRank, &(*(*procs.offset(proc))).proc_name, &mut local_rank);
-            if rc != OPAL_SUCCESS {
-                return rc;
-            }
+            let local_rank = match modex::recv_local_rank(&(*(*procs.offset(proc))).proc_name) {
+                Ok(rank) => rank,
+                Err(Error::OpalError(rc)) => return rc,
+                Err(_) => return -1,
+            };
             let local_rank: Rank = local_rank.into();
 
+            // Get the published path for the rank
+
             // Attach to the memory region
-            let path = make_path(&proc_info::node_name(), local_rank);
+            let path = match modex::recv_string(SHARED_MEM_NAME_KEY, &(*(*procs.offset(proc))).proc_name) {
+                Ok(path) => path,
+                Err(Error::OpalError(rc)) => {
+                    info!("Error occurred in recv_string()");
+                    return rc;
+                }
+                Err(_) => return -1,
+            };
             let region = match SharedRegionHandle::attach(path) {
                 Ok(reg) => reg,
                 // TODO: Propagate this error
@@ -276,15 +285,17 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         // Push the block on to the endpoint's FIFO
         (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
 
-        // Set output descriptor
-        let desc = Box::new(
-            data
-                .map
-                .lock()
-                .unwrap()
-                .descriptor(proc_info::local_rank(), block_id)
-        );
-        *descriptor = Box::into_raw(desc) as *mut _;
+        if !descriptor.is_null() {
+            // Set output descriptor
+            let desc = Box::new(
+                data
+                    .map
+                    .lock()
+                    .unwrap()
+                    .descriptor(proc_info::local_rank(), block_id)
+            );
+            *descriptor = Box::into_raw(desc) as *mut _;
+        }
 
         OPAL_SUCCESS
     })

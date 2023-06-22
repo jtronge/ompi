@@ -82,6 +82,13 @@ int opal_modex_recv_value_rs(const char *key,
     return rc;
 }
 
+int opal_modex_send_string_rs(uint32_t scope, const char *key, void *data, size_t size)
+{
+    int rc;
+    OPAL_MODEX_SEND_STRING(rc, scope, key, data, size);
+    return rc;
+}
+
 int opal_proc_on_local_node_rs(opal_hwloc_locality_t proc_flags)
 {
     return OPAL_PROC_ON_LOCAL_NODE(proc_flags);
