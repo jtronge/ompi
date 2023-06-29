@@ -280,3 +280,5 @@ pub struct FIFOHeader {
 
 /// Indicates a free FIFO entry
 pub const FIFO_FREE: i64 = -1;
+/// Indicates a locked FIFO entry
+pub const FIFO_LOCK: i64 = -2;
