@@ -113,3 +113,9 @@ int opal_convertor_need_buffers_rs(const opal_convertor_t *pConv)
 {
     return opal_convertor_need_buffers(pConv);
 }
+
+void obj_construct_rs(opal_list_item_t *list)
+{
+    /* Using name 'mca_btl_rsm_type_t' for any rust types that need to be constructed */
+    /* OBJ_CONSTRUCT(list, mca_btl_rsm_type_t); */
+}

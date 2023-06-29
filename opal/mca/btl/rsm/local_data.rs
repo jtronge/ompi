@@ -7,7 +7,7 @@ use crate::opal::{
     mca_btl_base_module_t,
     mca_btl_rsm_t,
 };
-use crate::shared::{SharedRegionMap, BlockID};
+use crate::shared::{SharedRegionMap, BlockID, Descriptor};
 use crate::fifo::FIFO;
 use crate::block_store::BlockStore;
 
@@ -25,6 +25,8 @@ pub(crate) struct LocalData {
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory
     pub(crate) endpoints: Vec<*mut Endpoint>,
+    /// Descriptor list
+    pub(crate) descriptors: Vec<*mut Descriptor>,
 }
 
 /// Initialize the private module data for the BTL module.
@@ -42,6 +44,7 @@ pub(crate) unsafe fn init(
         pending: vec![],
         error_cb: None,
         endpoints: vec![],
+        descriptors: vec![],
     });
     (*btl).internal = Box::into_raw(Box::new(data)) as *mut _;
 }
@@ -50,7 +53,7 @@ pub(crate) unsafe fn init(
 pub(crate) unsafe fn free(btl: *mut mca_btl_base_module_t) {
     let btl = btl as *mut mca_btl_rsm_t;
     let data = Box::from_raw((*btl).internal as *mut Mutex<LocalData>);
-    // Destory remaining endpoints
+    // Destroy remaining endpoints
     let handle = data.lock().expect("Failed to lock module data");
     for ep in &handle.endpoints {
         let _ = Box::from_raw(*ep);

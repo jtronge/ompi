@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::Ordering;
+use log::debug;
 use crate::{Result, Error, Rank};
 use crate::shared::{SharedRegionMap, Block, BlockID, FIFOHeader, FIFO_FREE};
 
@@ -89,6 +90,7 @@ impl FIFO {
 
     /// Push the block onto this FIFO.
     pub fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
+        debug!("Pushing block: ({}, {})", rank, block_id);
         let map = match self.map.lock() {
             Ok(m) => m,
             Err(_) => return Err(Error::LockError),
@@ -117,13 +119,14 @@ impl FIFO {
                     if old_rank == self.rank {
                         region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
                     } else {
-                        map.region_mut(self.rank, |other_region| {
+                        map.region_mut(old_rank, |other_region| {
                             other_region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
                         });
                     }
                 }
+
+                return Ok(());
             }
-            Ok(())
 /*
             let value = encode_rank_block_id(rank, block_id);
 

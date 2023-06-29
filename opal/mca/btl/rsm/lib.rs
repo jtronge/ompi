@@ -3,6 +3,7 @@ use std::os::raw::c_int;
 use std::sync::{Arc, Mutex};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::Write;
 use log::{info, debug};
 use shared_memory::ShmemError;
 #[allow(non_camel_case_types)]
@@ -76,7 +77,11 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     *num_btls = 0;
 
     // Initialize logging (this would be better with a special ompi or opal implementation)
-    env_logger::init();
+    env_logger::builder()
+        .format(|buf, record| {
+            writeln!(buf, "(rank = {}) {}: {}", proc_info::local_rank(), record.level(), record.args())
+        })
+        .init();
     info!("running init");
 
     // Create the shared memory for this rank
@@ -109,6 +114,17 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::init(ptr, map, fifo, block_store);
+    // Create a self endpoint
+    match local_data::lock(ptr, |data| {
+        let endpoint = Endpoint::new(Arc::clone(&data.map), proc_info::local_rank())?;
+        let endpoint_ptr = Box::into_raw(Box::new(endpoint));
+        info!("my endpoint pointer: {}", endpoint_ptr as usize);
+        data.endpoints.push(endpoint_ptr);
+        Ok::<(), Error>(())
+    }) {
+        Ok(()) => (),
+        Err(_) => return std::ptr::null_mut(),
+    };
     // Have to allocate using calloc since this will be freed in the base btl
     // code
     let btls = calloc(
@@ -127,24 +143,29 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
-    info!("running progress");
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::lock(ptr, |data| {
         // Progress pending outgoing blocks
         while let Some((endpoint_rank, block_id)) = data.pending.pop() {
-            let rank: usize = endpoint_rank.try_into().unwrap();
-            let endpoint: *mut Endpoint = data.endpoints[rank];
+            let endpoint: *mut Endpoint = *data.endpoints
+                .iter()
+                .find(|ep| (*(*(*ep))).rank == endpoint_rank.into())
+                .unwrap();
+            info!("Pushing pending block: {}", block_id);
             (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
         }
 
         // Poll my local fifo
         let mut count = 0;
+        info!("Polling local fifo...");
         while let Some((endpoint_rank, block_id)) = data.fifo.pop() {
-            let rank: usize = endpoint_rank.try_into().unwrap();
-            let endpoint: *mut Endpoint = data.endpoints[rank];
-            debug!("Popped block {} from fifo", block_id);
+            let endpoint: *mut Endpoint = *data.endpoints
+                .iter()
+                .find(|ep| (*(*(*ep))).rank == endpoint_rank)
+                .unwrap();
 
-            if handle_incoming(data, endpoint, block_id) {
+            if handle_incoming(data, endpoint, endpoint_rank, block_id) {
+                info!("Pushing complete block: ({}, {})", endpoint_rank, block_id);
                 // Now the block is complete, so we return it
                 (*endpoint).fifo.push(endpoint_rank, block_id).unwrap();
                 count += 1;
@@ -161,23 +182,43 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
 unsafe fn handle_incoming(
     data: &mut LocalData,
     endpoint: *mut Endpoint,
+    rank: Rank,
     block_id: BlockID,
 ) -> bool {
     // TODO: this might be better as a try_lock?
-    debug!("In handle_incoming()");
-    data.map.lock().unwrap().region_mut((*endpoint).rank, |region| {
-        debug!("In region_mut() of handle_incomding()");
+    data.map.lock().unwrap().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
+        info!("Handling block: block_id = {}, len = {}, tag = {}, complete = {}, endpoint.rank = {}", block_id, block.len, block.tag, block.complete, (*endpoint).rank);
 
         // Free returned blocks
-        if block.complete && (*endpoint).rank == proc_info::local_rank() {
+        // TODO: Something is wrong with this logic here
+        if block.complete {
+            info!("descriptors: {:?}", data.descriptors);
+            // Find the descriptor
+            if let Some(desc) = data
+                    .descriptors
+                    .iter()
+                    .find(|desc| (*(*(*desc))).rank == rank && (*(*(*desc))).block_id == block_id) {
+                if let Some(cbfunc) = (*(*desc)).base.des_cbfunc {
+                    cbfunc(
+                        (&mut mca_btl_rsm as *mut _) as *mut _,
+                        endpoint as *mut _,
+                        *desc as *mut _,
+                        OPAL_SUCCESS,
+                    );
+                }
+            } else {
+                info!("Descriptor not found");
+            }
             block.complete = false;
-            data.block_store.free(block_id);
+            if (*endpoint).rank == proc_info::local_rank() {
+                data.block_store.free(block_id);
+            }
             return false;
         }
 
-        let idx = block.message_trigger;
+        let idx: usize = block.tag.try_into().unwrap();
         let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
         let segments = [
             mca_btl_base_segment_t {
@@ -196,8 +237,8 @@ unsafe fn handle_incoming(
         };
 
         // Handle fragment, call the receive callback
-        if reg.cbfunc.is_some() {
-            reg.cbfunc.unwrap()(
+        if let Some(cbfunc) = reg.cbfunc {
+            cbfunc(
                 (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
                 &mut recv_de,
             );

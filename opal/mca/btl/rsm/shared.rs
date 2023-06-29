@@ -4,9 +4,10 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::mem::MaybeUninit;
 use std::os::raw::{c_void, c_int};
-use shared_memory::{ShmemConf, Shmem};
-use crate::{Result, Error, Rank};
 use std::cell::RefCell;
+use shared_memory::{ShmemConf, Shmem};
+use log::debug;
+use crate::{Result, Error, Rank};
 use crate::opal::{
     mca_btl_base_descriptor_t,
     mca_btl_base_segment_t,
@@ -195,13 +196,13 @@ pub const BLOCK_SIZE: usize = 8192;
 pub const MAX_BLOCKS: usize = 128;
 
 /// Block in shared memory.
+#[derive(Debug)]
+#[repr(C)]
 pub struct Block {
     /// Next block in singly linked list
     pub next: AtomicI64,
-    /// Tag in block
+    /// Tag in block (used for indexing into message callback table)
     pub tag: mca_btl_base_tag_t,
-    /// Message trigger
-    pub message_trigger: usize,
     /// Indicates that the block is complete and can be freed
     pub complete: bool,
     /// Amount of data used in the block [0; BLOCK_SIZE]
@@ -223,8 +224,6 @@ impl Block {
         let block_data = self.data.as_mut_ptr();
         std::ptr::copy_nonoverlapping(header as *const u8, block_data, header_size);
         if payload_size > 0 {
-            let mut data_ptr = std::ptr::null_mut();
-            opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
             let iov_len = 1;
             let iov = iovec {
                 iov_base: block_data.offset(header_size.try_into().unwrap()) as *mut _,
@@ -244,12 +243,14 @@ impl Block {
         reserve: usize,
         size: *mut usize,
     ) -> c_int {
-        // TODO: Need to use resever here?
+        // TODO: Need to use reserve here?
+        assert!((reserve + *size) < self.data.len());
         let iov = iovec {
             iov_len: *size,
-            iov_base: self.data.as_mut_ptr() as *mut _,
+            iov_base: self.data.as_mut_ptr().offset(reserve.try_into().unwrap()) as *mut _,
         };
         convert_data(convertor, iov, *size);
+        self.len = reserve + *size;
         0
     }
 }
@@ -265,7 +266,8 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
     } else {
         let mut data_ptr = std::ptr::null_mut();
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
-        std::ptr::copy_nonoverlapping(iov.iov_base, data_ptr, payload_size);
+        debug!("copying data pointer here: {:x}", data_ptr as usize);
+        std::ptr::copy_nonoverlapping(data_ptr, iov.iov_base, payload_size);
     }
 }
 

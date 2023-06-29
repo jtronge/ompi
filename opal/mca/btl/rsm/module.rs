@@ -2,7 +2,7 @@ use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::Ordering;
-use log::info;
+use log::{info, debug};
 use crate::opal::{
     mca_btl_base_descriptor_t,
     mca_btl_base_endpoint_t,
@@ -33,7 +33,6 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
     peers: *mut *mut mca_btl_base_endpoint_t,
     reachability: *mut opal_bitmap_t,
 ) -> c_int {
-    info!("adding procs");
     if reachability.is_null() {
         return 0;
     }
@@ -81,8 +80,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
                 }
                 Err(_) => return -1,
             };
-            info!("shared memory file: {}", path);
-            let region = match SharedRegionHandle::attach(path) {
+            let region = match SharedRegionHandle::attach(&path) {
                 Ok(reg) => reg,
                 // TODO: Propagate this error
                 Err(_) => continue,
@@ -98,7 +96,9 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             let endpoint = Box::new(endpoint);
             let endpoint_ptr = Box::into_raw(endpoint);
             *peers.offset(proc) = endpoint_ptr as *mut _;
+            info!("endpoint pointer: {}", endpoint_ptr as usize);
             data.endpoints.push(endpoint_ptr);
+            info!("Added process with local_rank = {}, path = {}", local_rank, path);
         }
         rc
     })
@@ -111,11 +111,11 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
     _procs: *mut *mut opal_proc_t,
     peers: *mut *mut mca_btl_base_endpoint_t,
 ) -> c_int {
-    info!("deleting procs");
     local_data::lock(btl, |data| {
         let nprocs: isize = nprocs.try_into().unwrap();
         for proc in 0..nprocs {
             let peer = peers.offset(proc);
+            info!("attempting free endpoint pointer: {}", peer as usize);
             if !peer.is_null() {
                 let ep = peer as *mut Endpoint;
                 // Remove it from the endpoints list
@@ -124,12 +124,15 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
                     .position(|&other_ep| other_ep == ep)
                 {
                     let _ = data.endpoints.swap_remove(i);
+                } else {
+                    info!("NOT FOUND!!!!!");
                 }
                 // Remove the region from the store
                 let _ = data.map.lock().unwrap().regions.remove(&(*ep).rank);
 
                 // Convert back to a Box and thus free it
-                let _ = Box::from_raw(ep);
+                // TODO: There is something wrong with the pointer it returns here
+                // let _ = Box::from_raw(ep);
                 *peer = std::ptr::null_mut();
             }
         }
@@ -141,7 +144,6 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
 unsafe extern "C" fn mca_btl_rsm_finalize(
     btl: *mut mca_btl_base_module_t,
 ) -> c_int {
-    info!("running finalize");
     local_data::free(btl);
     OPAL_SUCCESS
 }
@@ -155,7 +157,7 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
     size: usize,
     _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
-    info!("allocating a descriptor of size {}", size);
+    info!("mca_btl_rsm_alloc(..., size = {}, ...)", size);
     local_data::lock(btl, |data| {
         // TODO: Set length
         let block_id = match data.block_store.alloc() {
@@ -167,7 +169,9 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             .lock()
             .unwrap()
             .descriptor(proc_info::local_rank(), block_id);
-        Box::into_raw(Box::new(desc)) as *mut _
+        let desc = Box::into_raw(Box::new(desc));
+        data.descriptors.push(desc);
+        desc as *mut _
     })
 }
 
@@ -177,12 +181,16 @@ unsafe extern "C" fn mca_btl_rsm_free(
     btl: *mut mca_btl_base_module_t,
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    info!("freeing descriptor");
-    let des = Box::from_raw(des as *mut Descriptor);
+    info!("mca_btl_rsm_free(..., des = {})", des as usize);
+    let des_ptr = des as *mut Descriptor;
+    let des = Box::from_raw(des_ptr);
     local_data::lock(btl, |data| {
         if des.rank == proc_info::local_rank() {
             // Only release block if it's owned by this node
             data.block_store.free(des.block_id);
+        }
+        if let Some(pos) = data.descriptors.iter().position(|elem| *elem == des_ptr) {
+            data.descriptors.swap_remove(pos);
         }
         // TODO: In what case would this block come from a different node's
         // shared memory?
@@ -201,7 +209,7 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
     size: *mut usize,
     _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
-    info!("calling prepare_src");
+    info!("mca_btl_rsm_prepare_src(..., reserve = {}, size = {}, ...)", reserve, *size);
     local_data::lock(btl, |data| {
         let block_id = match data.block_store.alloc() {
             Some(id) => id,
@@ -217,7 +225,9 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
         // TODO: Set order and flags
         let desc = data.map.lock().unwrap().descriptor(proc_info::local_rank(), block_id);
         let desc = Box::new(desc);
-        Box::into_raw(desc) as *mut _
+        let desc_ptr = Box::into_raw(desc);
+        data.descriptors.push(desc_ptr);
+        desc_ptr as *mut _
     })
 }
 
@@ -229,7 +239,7 @@ unsafe extern "C" fn mca_btl_rsm_send(
     descriptor: *mut mca_btl_base_descriptor_t,
     tag: mca_btl_base_tag_t,
 ) -> c_int {
-    info!("calling send");
+    info!("mca_btl_rsm_send(..., descriptor = {}, tag = {})", descriptor as usize, tag);
     local_data::lock(btl, |data| {
         let endpoint = endpoint as *mut Endpoint;
         let desc = descriptor as *mut Descriptor;
@@ -259,7 +269,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     tag: mca_btl_base_tag_t,
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
-    info!("calling sendi");
+    info!("mca_btl_rsm_sendi(..., header_size = {}, payload_size = {}, ..., tag = {}, ...)", header_size, payload_size, tag);
     local_data::lock(btl, |data| {
         // Check pending, return early if there are some
         if data.pending.len() > 0 {
@@ -281,6 +291,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
             block.tag = tag;
             block.complete = false;
             block.fill(convertor, header, header_size, payload_size);
+            debug!("block data: {:?}", &block.data[16..20]);
         });
 
         // Push the block on to the endpoint's FIFO
@@ -295,7 +306,9 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
                     .unwrap()
                     .descriptor(proc_info::local_rank(), block_id)
             );
-            *descriptor = Box::into_raw(desc) as *mut _;
+            let desc_ptr = Box::into_raw(desc);
+            data.descriptors.push(desc_ptr);
+            *descriptor = desc_ptr as *mut _;
         }
 
         OPAL_SUCCESS
@@ -308,7 +321,6 @@ unsafe extern "C" fn mca_btl_rsm_register_error(
     btl: *mut mca_btl_base_module_t,
     cbfunc: mca_btl_base_module_error_cb_fn_t,
 ) -> c_int {
-    info!("registering error");
     local_data::lock(btl, |data| {
         data.error_cb = cbfunc;
         OPAL_SUCCESS
