@@ -244,7 +244,8 @@ impl Block {
         size: *mut usize,
     ) -> c_int {
         // TODO: Need to use reserve here?
-        assert!((reserve + *size) < self.data.len());
+        debug!("reserve: {}, size: {}", reserve, *size);
+        assert!((reserve + *size) <= self.data.len());
         let iov = iovec {
             iov_len: *size,
             iov_base: self.data.as_mut_ptr().offset(reserve.try_into().unwrap()) as *mut _,

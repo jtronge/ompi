@@ -25,6 +25,7 @@ use opal::{
     mca_btl_base_module_t,
     mca_btl_active_message_callback_t,
     mca_btl_base_active_message_trigger,
+    mca_btl_base_module_recv_cb_fn_t,
     mca_btl_base_param_register,
     mca_btl_base_receive_descriptor_t,
     mca_btl_base_component_3_0_0_t,
@@ -37,7 +38,7 @@ use opal::{
     calloc,
 };
 use endpoint::Endpoint;
-use shared::{BLOCK_SIZE, SharedRegionMap, SharedRegionHandle, BlockID, make_path};
+use shared::{BLOCK_SIZE, SharedRegionMap, SharedRegionHandle, Descriptor, BlockID, make_path};
 use fifo::FIFO;
 use block_store::BlockStore;
 use local_data::LocalData;
@@ -82,14 +83,12 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
             writeln!(buf, "(rank = {}) {}: {}", proc_info::local_rank(), record.level(), record.args())
         })
         .init();
-    info!("running init");
 
     // Create the shared memory for this rank
     // TODO: Add jobid
     let local_rank = proc_info::local_rank();
     let mut map = SharedRegionMap { regions: HashMap::new() };
     let path = make_path(proc_info::node_name(), local_rank, std::process::id());
-    info!("Creating shared memory with path \"{:?}\"", path);
     // Publish the path
     match modex::send_string_local(SHARED_MEM_NAME_KEY, path.as_os_str().to_str().unwrap()) {
         Ok(()) => (),
@@ -143,8 +142,11 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
-    let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    local_data::lock(ptr, |data| {
+    // TODO: Use of below pointer could very well be UB
+    let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
+    debug!("BEFORE LOCK!!");
+    local_data::lock(btl, |data| {
+        debug!("WITHIN LOCK!!");
         // Progress pending outgoing blocks
         while let Some((endpoint_rank, block_id)) = data.pending.pop() {
             let endpoint: *mut Endpoint = *data.endpoints
@@ -154,27 +156,106 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
             info!("Pushing pending block: {}", block_id);
             (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
         }
+    });
 
-        // Poll my local fifo
-        let mut count = 0;
-        info!("Polling local fifo...");
-        while let Some((endpoint_rank, block_id)) = data.fifo.pop() {
-            let endpoint: *mut Endpoint = *data.endpoints
-                .iter()
-                .find(|ep| (*(*(*ep))).rank == endpoint_rank)
-                .unwrap();
+    // Poll my local fifo
+    let mut count = 0;
+    loop {
+        let handler = local_data::lock(btl, |data| {
+            if let Some((endpoint_rank, block_id)) = data.fifo.pop() {
+                let endpoint: *mut Endpoint = *data.endpoints
+                    .iter()
+                    .find(|ep| (*(*(*ep))).rank == endpoint_rank)
+                    .unwrap();
 
-            if handle_incoming(data, endpoint, endpoint_rank, block_id) {
-                info!("Pushing complete block: ({}, {})", endpoint_rank, block_id);
+                Some((handle_incoming(data, endpoint, endpoint_rank, block_id), endpoint))
+            } else {
+                None
+            }
+        });
+
+        // See mca_btl_sm_poll_handle_frag in btl/sm
+        if let Some((mut handler, endpoint)) = handler {
+            if handler.run(btl) {
+                info!("Pushing complete block: ({}, {})", handler.rank, handler.block_id);
                 // Now the block is complete, so we return it
-                (*endpoint).fifo.push(endpoint_rank, block_id).unwrap();
+                (*endpoint).fifo.push(handler.rank, handler.block_id).unwrap();
                 count += 1;
             }
-            // See mca_btl_sm_poll_handle_frag in btl/sm
+        } else {
+            break;
         }
-        // Number of blocks received
-        count
-    })
+    }
+    // Number of blocks received
+    count
+}
+
+enum HandlerKind {
+    CompleteCallback(Option<(*mut Descriptor, *mut Endpoint)>),
+    ReceiveCallback(mca_btl_base_module_recv_cb_fn_t, mca_btl_base_receive_descriptor_t),
+}
+
+struct Handler {
+    rank: Rank,
+    block_id: BlockID,
+    kind: Option<HandlerKind>,
+}
+
+impl Handler {
+    /// Run the handler, returning whether or not this block should be returned
+    /// (to complete it) to the sending process.
+    ///
+    /// WARNING: This must not be called while the local_data lock is held, or
+    /// deadlock will ensue.
+    unsafe fn run(&mut self, btl: *mut mca_btl_base_module_t) -> bool {
+        let complete = if let Some(kind) = self.kind.take() {
+            match kind {
+                HandlerKind::CompleteCallback(Some((desc, endpoint))) => {
+                    if let Some(cbfunc) = (*desc).base.des_cbfunc {
+                        cbfunc(
+                            // (&mut mca_btl_rsm as *mut _) as *mut _,
+                            btl,
+                            endpoint as *mut _,
+                            desc as *mut _,
+                            OPAL_SUCCESS,
+                        );
+                    }
+                    true
+                }
+                HandlerKind::CompleteCallback(None) => true,
+                HandlerKind::ReceiveCallback(cbfunc, mut recv_de) => {
+                    if let Some(cbfunc) = cbfunc {
+                        cbfunc(
+                            // (&mut mca_btl_rsm as *mut _) as *mut _,
+                            btl,
+                            &mut recv_de as *mut _,
+                        );
+                    }
+                    false
+                }
+            }
+        } else {
+            false
+        };
+
+        // Now lock local_data, the region, set the block complete value, and
+        // free the block if necessary.
+        local_data::lock(btl, |data| {
+            data.map.lock().unwrap().region_mut(self.rank, |region| {
+                // Set the complete value
+                let block_idx: usize = self.block_id.try_into().unwrap();
+                region.blocks[block_idx].complete = !complete;
+            });
+
+            if complete {
+                // Free the block
+                assert_eq!(self.rank, proc_info::local_rank());
+                data.block_store.free(self.block_id);
+            }
+        });
+
+        complete
+    }
 }
 
 /// Handle an incoming block. Return true if the block needs to be returned to
@@ -184,9 +265,9 @@ unsafe fn handle_incoming(
     endpoint: *mut Endpoint,
     rank: Rank,
     block_id: BlockID,
-) -> bool {
+) -> Handler {
     // TODO: this might be better as a try_lock?
-    data.map.lock().unwrap().region_mut(rank, |region| {
+    let kind = data.map.lock().unwrap().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
         info!("Handling block: block_id = {}, len = {}, tag = {}, complete = {}, endpoint.rank = {}", block_id, block.len, block.tag, block.complete, (*endpoint).rank);
@@ -196,60 +277,48 @@ unsafe fn handle_incoming(
         if block.complete {
             info!("descriptors: {:?}", data.descriptors);
             // Find the descriptor
-            if let Some(desc) = data
+            return if let Some(desc) = data
                     .descriptors
                     .iter()
                     .find(|desc| (*(*(*desc))).rank == rank && (*(*(*desc))).block_id == block_id) {
-                if let Some(cbfunc) = (*(*desc)).base.des_cbfunc {
-                    cbfunc(
-                        (&mut mca_btl_rsm as *mut _) as *mut _,
-                        endpoint as *mut _,
-                        *desc as *mut _,
-                        OPAL_SUCCESS,
-                    );
-                }
+                Some(HandlerKind::CompleteCallback(Some((*desc, endpoint))))
             } else {
                 info!("Descriptor not found");
-            }
-            block.complete = false;
-            if (*endpoint).rank == proc_info::local_rank() {
-                data.block_store.free(block_id);
-            }
-            return false;
+                Some(HandlerKind::CompleteCallback(None))
+            };
         }
 
+        // Prepare the callback descriptor
         let idx: usize = block.tag.try_into().unwrap();
         let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
-        let segments = [
-            mca_btl_base_segment_t {
-                seg_addr: opal_ptr_t {
-                    pval: block.data.as_mut_ptr() as *mut _,
-                },
-                seg_len: block.data.len().try_into().unwrap(),
+        // Segment to be passed to callback (initialized here to avoid drop within block)
+        let segment = Box::new(mca_btl_base_segment_t {
+            seg_addr: opal_ptr_t {
+                pval: block.data.as_mut_ptr() as *mut _,
             },
-        ];
-        let mut recv_de = mca_btl_base_receive_descriptor_t {
+            seg_len: block.data.len().try_into().unwrap(),
+        });
+        let segment_ptr = Box::into_raw(segment);
+        let recv_de = mca_btl_base_receive_descriptor_t {
             endpoint: endpoint as *mut _,
-            des_segments: segments.as_ptr(),
-            des_segment_count: segments.len(),
+            des_segments: segment_ptr as *mut _,
+            des_segment_count: 1,
             tag: block.tag,
             cbdata: reg.cbdata,
         };
 
-        // Handle fragment, call the receive callback
-        if let Some(cbfunc) = reg.cbfunc {
-            cbfunc(
-                (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t,
-                &mut recv_de,
-            );
-        }
-
-        // Set the block to complete
-        block.complete = true;
-
         // The block needs to be returned to sender
-        true
-    })
+        Some(HandlerKind::ReceiveCallback(reg.cbfunc, recv_de))
+    });
+
+    // The callback must be made outside of the lock since it will possibly
+    // make a recursive call back into the BTL module which will try to lock
+    // again, leading to deadlock if not called here.
+    Handler {
+        rank,
+        block_id,
+        kind,
+    }
 }
 
 #[no_mangle]

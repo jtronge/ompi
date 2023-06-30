@@ -2,7 +2,7 @@ use std::os::raw::{c_int, c_void};
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::Ordering;
-use log::{info, debug};
+use log::{info, error};
 use crate::opal::{
     mca_btl_base_descriptor_t,
     mca_btl_base_endpoint_t,
@@ -75,7 +75,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             let path = match modex::recv_string(SHARED_MEM_NAME_KEY, &(*(*procs.offset(proc))).proc_name) {
                 Ok(path) => path,
                 Err(Error::OpalError(rc)) => {
-                    info!("Error occurred in recv_string()");
+                    error!("Error occurred in recv_string()");
                     return rc;
                 }
                 Err(_) => return -1,
@@ -291,7 +291,6 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
             block.tag = tag;
             block.complete = false;
             block.fill(convertor, header, header_size, payload_size);
-            debug!("block data: {:?}", &block.data[16..20]);
         });
 
         // Push the block on to the endpoint's FIFO
