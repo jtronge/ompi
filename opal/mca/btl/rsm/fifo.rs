@@ -145,7 +145,6 @@ fn pop(value: i64, fifo: &mut FIFOHeader, block: &mut Block) {
 
 /// Extract the rank and block ID from an i64.
 fn extract_rank_block_id(value: i64) -> (Rank, BlockID) {
-    debug!("value: {:x}, {:x}", value, value >> 32);
     let rank = (value >> 32).try_into().unwrap();
     let block_id = (value & 0xFFFFFFFF).try_into().unwrap();
     (rank, block_id)

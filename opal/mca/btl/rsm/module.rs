@@ -23,7 +23,7 @@ use crate::modex;
 use crate::proc_info;
 use crate::local_data;
 use crate::endpoint::Endpoint;
-use crate::shared::{SharedRegionHandle, Descriptor, FIFO_FREE};
+use crate::shared::{SharedRegionHandle, Descriptor, FIFO_FREE, BLOCK_SIZE};
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_add_procs(
@@ -125,7 +125,7 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
                 {
                     let _ = data.endpoints.swap_remove(i);
                 } else {
-                    info!("NOT FOUND!!!!!");
+                    info!("Not found!");
                 }
                 // Remove the region from the store
                 let _ = data.map.lock().unwrap().regions.remove(&(*ep).rank);
@@ -158,12 +158,17 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
     _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
     info!("mca_btl_rsm_alloc(..., size = {}, ...)", size);
+    assert!(size < BLOCK_SIZE);
     local_data::lock(btl, |data| {
-        // TODO: Set length
         let block_id = match data.block_store.alloc() {
             Some(id) => id,
             None => return std::ptr::null_mut(),
         };
+        // Set the length
+        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].len = size;
+        });
         let desc = data
             .map
             .lock()

@@ -144,9 +144,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     // TODO: Use of below pointer could very well be UB
     let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    debug!("BEFORE LOCK!!");
     local_data::lock(btl, |data| {
-        debug!("WITHIN LOCK!!");
         // Progress pending outgoing blocks
         while let Some((endpoint_rank, block_id)) = data.pending.pop() {
             let endpoint: *mut Endpoint = *data.endpoints
@@ -220,9 +218,9 @@ impl Handler {
                             OPAL_SUCCESS,
                         );
                     }
-                    true
+                    false
                 }
-                HandlerKind::CompleteCallback(None) => true,
+                HandlerKind::CompleteCallback(None) => false,
                 HandlerKind::ReceiveCallback(cbfunc, mut recv_de) => {
                     if let Some(cbfunc) = cbfunc {
                         cbfunc(
@@ -231,7 +229,7 @@ impl Handler {
                             &mut recv_de as *mut _,
                         );
                     }
-                    false
+                    true
                 }
             }
         } else {
@@ -244,11 +242,11 @@ impl Handler {
             data.map.lock().unwrap().region_mut(self.rank, |region| {
                 // Set the complete value
                 let block_idx: usize = self.block_id.try_into().unwrap();
-                region.blocks[block_idx].complete = !complete;
+                region.blocks[block_idx].complete = complete;
             });
 
-            if complete {
-                // Free the block
+            if !complete {
+                // Free the block (this rank sent the block previously)
                 assert_eq!(self.rank, proc_info::local_rank());
                 data.block_store.free(self.block_id);
             }
@@ -296,7 +294,7 @@ unsafe fn handle_incoming(
             seg_addr: opal_ptr_t {
                 pval: block.data.as_mut_ptr() as *mut _,
             },
-            seg_len: block.data.len().try_into().unwrap(),
+            seg_len: block.len.try_into().unwrap(),
         });
         let segment_ptr = Box::into_raw(segment);
         let recv_de = mca_btl_base_receive_descriptor_t {
