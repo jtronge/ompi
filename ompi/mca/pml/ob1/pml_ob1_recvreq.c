@@ -565,7 +565,6 @@ void mca_pml_ob1_recv_request_progress_frag( mca_pml_ob1_recv_request_t* recvreq
     bytes_received = mca_pml_ob1_compute_segment_length_base (segments, num_segments,
                                                               sizeof(mca_pml_ob1_frag_hdr_t));
     data_offset     = hdr->hdr_frag.hdr_frag_offset;
-    fprintf(stderr, "(rank = %d) bytes_received = %ld, data_offset = %ld\n", opal_process_info.my_local_rank, bytes_received, data_offset);
 
     /*
      *  Make user buffer accessible(defined) before unpacking.
@@ -599,11 +598,8 @@ void mca_pml_ob1_recv_request_progress_frag( mca_pml_ob1_recv_request_t* recvreq
     /* check completion status */
     if(recv_request_pml_complete_check(recvreq) == false &&
             recvreq->req_rdma_offset < recvreq->req_send_offset) {
-        fprintf(stderr, "(rank = %d) Scheduilng additional requests...\n", opal_process_info.my_local_rank);
         /* schedule additional rdma operations */
         mca_pml_ob1_recv_request_schedule(recvreq, NULL);
-    } else {
-        fprintf(stderr, "(rank = %d) Not scheduling additional requests...\n", opal_process_info.my_local_rank);
     }
 }
 

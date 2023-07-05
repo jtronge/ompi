@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicI64, Ordering};
 use std::mem::MaybeUninit;
 use std::os::raw::{c_void, c_int};
 use std::cell::RefCell;
+use std::time::{SystemTime, UNIX_EPOCH};
 use shared_memory::{ShmemConf, Shmem};
 use log::debug;
 use crate::{Result, Error, Rank};
@@ -25,7 +26,8 @@ use crate::opal::{
 pub fn make_path(node_name: String, rank: Rank, pid: u32) -> PathBuf {
     let rank: u64 = rank.into();
     let pid: u64 = pid.into();
-    fastrand::seed(rank + pid);
+    let time: u64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    fastrand::seed(rank + pid + time);
     let random: String = (0..16).map(|_| fastrand::alphanumeric()).collect();
     let fname = format!("{}-{}.shmem", node_name, random);
     let mut path = PathBuf::new();
@@ -191,9 +193,9 @@ impl SharedRegionHandle {
 pub type BlockID = i32;
 
 /// Block size
-pub const BLOCK_SIZE: usize = 8192;
+pub const BLOCK_SIZE: usize = 16384;
 /// Max blocks
-pub const MAX_BLOCKS: usize = 128;
+pub const MAX_BLOCKS: usize = 256;
 
 /// Block in shared memory.
 #[derive(Debug)]

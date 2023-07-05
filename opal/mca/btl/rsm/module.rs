@@ -169,6 +169,7 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             let block_idx: usize = block_id.try_into().unwrap();
             region.blocks[block_idx].len = size;
         });
+/*
         let desc = data
             .map
             .lock()
@@ -176,6 +177,8 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             .descriptor(proc_info::local_rank(), block_id);
         let desc = Box::into_raw(Box::new(desc));
         data.descriptors.push(desc);
+*/
+        let desc = data.new_descriptor(proc_info::local_rank(), block_id);
         desc as *mut _
     })
 }
@@ -187,16 +190,16 @@ unsafe extern "C" fn mca_btl_rsm_free(
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
     info!("mca_btl_rsm_free(..., des = {})", des as usize);
-    let des_ptr = des as *mut Descriptor;
-    let des = Box::from_raw(des_ptr);
+    let des = des as *mut Descriptor;
     local_data::lock(btl, |data| {
-        if des.rank == proc_info::local_rank() {
-            // Only release block if it's owned by this node
-            data.block_store.free(des.block_id);
-        }
+        assert_eq!((*des).rank, proc_info::local_rank());
+        data.free_descriptor(des);
+/*
         if let Some(pos) = data.descriptors.iter().position(|elem| *elem == des_ptr) {
+        data.free_descriptor();
             data.descriptors.swap_remove(pos);
         }
+*/
         // TODO: In what case would this block come from a different node's
         // shared memory?
         OPAL_SUCCESS
@@ -228,11 +231,13 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             return std::ptr::null_mut();
         }
         // TODO: Set order and flags
+/*
         let desc = data.map.lock().unwrap().descriptor(proc_info::local_rank(), block_id);
         let desc = Box::new(desc);
         let desc_ptr = Box::into_raw(desc);
         data.descriptors.push(desc_ptr);
-        desc_ptr as *mut _
+*/
+        data.new_descriptor(proc_info::local_rank(), block_id) as *mut _
     })
 }
 
@@ -303,6 +308,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
 
         if !descriptor.is_null() {
             // Set output descriptor
+/*
             let desc = Box::new(
                 data
                     .map
@@ -312,7 +318,8 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
             );
             let desc_ptr = Box::into_raw(desc);
             data.descriptors.push(desc_ptr);
-            *descriptor = desc_ptr as *mut _;
+*/
+            *descriptor = data.new_descriptor(proc_info::local_rank(), block_id) as *mut _;
         }
 
         OPAL_SUCCESS

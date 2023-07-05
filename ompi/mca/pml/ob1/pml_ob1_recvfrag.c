@@ -778,7 +778,6 @@ void mca_pml_ob1_recv_frag_callback_frag (mca_btl_base_module_t *btl,
     const mca_btl_base_segment_t *segments = descriptor->des_segments;
     const mca_pml_ob1_hdr_t *hdr = (mca_pml_ob1_hdr_t *) segments->seg_addr.pval;
     mca_pml_ob1_recv_request_t* recvreq;
-    fprintf(stderr, "(rank = %d) mca_pml_ob1_recv_frag_callback_frag()\n", opal_process_info.my_local_rank);
 
     if (OPAL_UNLIKELY(segments->seg_len < sizeof(mca_pml_ob1_common_hdr_t))) {
         return;
@@ -791,7 +790,6 @@ void mca_pml_ob1_recv_frag_callback_frag (mca_btl_base_module_t *btl,
      * the next phase. */
     if (recvreq->req_recv.req_base.req_convertor.flags & CONVERTOR_ACCELERATOR_ASYNC) {
         assert(btl->btl_flags & MCA_BTL_FLAGS_ACCELERATOR_COPY_ASYNC_RECV);
-        fprintf(stderr, "(rank = %d) CONVERTOR_ACCELERATOR_ASYNC\n", opal_process_info.my_local_rank);
 
         /* This will trigger the opal_convertor_pack to start asynchronous copy. */
         mca_pml_ob1_recv_request_frag_copy_start(recvreq, btl, segments, descriptor->des_segment_count, NULL);
@@ -802,7 +800,6 @@ void mca_pml_ob1_recv_frag_callback_frag (mca_btl_base_module_t *btl,
         return;
     }
 
-    fprintf(stderr, "(rank = %d) Calling mca_pml_ob1_recv_request_progress_frag()\n", opal_process_info.my_local_rank);
     mca_pml_ob1_recv_request_progress_frag(recvreq,btl,segments,descriptor->des_segment_count);
 }
 

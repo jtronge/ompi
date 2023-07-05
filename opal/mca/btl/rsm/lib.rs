@@ -218,6 +218,10 @@ impl Handler {
                             OPAL_SUCCESS,
                         );
                     }
+                    // Now destroy the callback
+                    local_data::lock(btl, |data| {
+                        data.free_descriptor(desc);
+                    });
                     false
                 }
                 HandlerKind::CompleteCallback(None) => false,
@@ -273,13 +277,10 @@ unsafe fn handle_incoming(
         // Free returned blocks
         // TODO: Something is wrong with this logic here
         if block.complete {
-            info!("descriptors: {:?}", data.descriptors);
+            data.show_descriptor_info();
             // Find the descriptor
-            return if let Some(desc) = data
-                    .descriptors
-                    .iter()
-                    .find(|desc| (*(*(*desc))).rank == rank && (*(*(*desc))).block_id == block_id) {
-                Some(HandlerKind::CompleteCallback(Some((*desc, endpoint))))
+            return if let Some(des) = data.find_descriptor(rank, block_id) {
+                Some(HandlerKind::CompleteCallback(Some((des, endpoint))))
             } else {
                 info!("Descriptor not found");
                 Some(HandlerKind::CompleteCallback(None))

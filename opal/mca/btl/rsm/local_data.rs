@@ -1,6 +1,8 @@
 //! Code for handling private data for the module
 use std::ops::DerefMut;
 use std::sync::{Arc, Mutex};
+use log::info;
+use crate::Rank;
 use crate::endpoint::Endpoint;
 use crate::opal::{
     mca_btl_base_module_error_cb_fn_t,
@@ -26,7 +28,47 @@ pub(crate) struct LocalData {
     /// Endpoints that have access to the shared memory
     pub(crate) endpoints: Vec<*mut Endpoint>,
     /// Descriptor list
-    pub(crate) descriptors: Vec<*mut Descriptor>,
+    descriptors: Vec<*mut Descriptor>,
+}
+
+impl LocalData {
+    /// Create a new descriptor for the rank and block ID and return the pointer.
+    pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
+        let desc = self.map.lock().unwrap().descriptor(rank, block_id);
+        let desc = Box::new(desc);
+        let desc_ptr = Box::into_raw(desc);
+        self.descriptors.push(desc_ptr);
+        desc_ptr
+    }
+
+    /// Free a descriptor allocated above.
+    pub(crate) unsafe fn free_descriptor(&mut self, des: *mut Descriptor) {
+        if let Some(pos) = self.descriptors.iter().position(|elem| *elem == des) {
+            self.descriptors.swap_remove(pos);
+        }
+        let _ = Box::from_raw(des);
+    }
+
+    pub(crate) fn show_descriptor_info(&self) {
+        info!("descriptors count: {}", self.descriptors.len());
+    }
+
+    /// Find the descriptor with the rank and block ID (used on return of a
+    /// descriptor from another process).
+    pub(crate) fn find_descriptor(
+        &self,
+        rank: Rank,
+        block_id: BlockID,
+    ) -> Option<*mut Descriptor> {
+        unsafe {
+            // SAFETY: All pointers dereferenced below should be valid, as they
+            // can only allocated and freed through the interface of LocalData.
+            self.descriptors
+                .iter()
+                .find(|des| (*(*(*des))).rank == rank && (*(*(*des))).block_id == block_id)
+                .map(|des| *des)
+        }
+    }
 }
 
 /// Initialize the private module data for the BTL module.
