@@ -1,6 +1,7 @@
 /// The component type is defined in C
 use std::os::raw::c_int;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
+use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::Write;
@@ -107,15 +108,15 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     };
     let region = RefCell::new(region);
     map.regions.insert(local_rank, region);
-    let map = Arc::new(Mutex::new(map));
-    let fifo = FIFO::new(Arc::clone(&map), local_rank);
-    let block_store = BlockStore::new(Arc::clone(&map));
+    let map = Rc::new(Mutex::new(map));
+    let fifo = FIFO::new(Rc::clone(&map), local_rank);
+    let block_store = BlockStore::new(Rc::clone(&map));
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::init(ptr, map, fifo, block_store);
     // Create a self endpoint
     match local_data::lock(ptr, |data| {
-        let endpoint = Endpoint::new(Arc::clone(&data.map), proc_info::local_rank())?;
+        let endpoint = Endpoint::new(Rc::clone(&data.map), proc_info::local_rank())?;
         let endpoint_ptr = Box::into_raw(Box::new(endpoint));
         info!("my endpoint pointer: {}", endpoint_ptr as usize);
         data.endpoints.push(endpoint_ptr);

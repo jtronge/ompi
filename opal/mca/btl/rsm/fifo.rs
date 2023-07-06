@@ -1,16 +1,17 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
+use std::rc::Rc;
 use std::sync::atomic::Ordering;
 use log::debug;
 use crate::{Result, Error, Rank};
 use crate::shared::{SharedRegionMap, Block, BlockID, FIFOHeader, FIFO_FREE, FIFO_LOCK};
 
 pub(crate) struct FIFO {
-    map: Arc<Mutex<SharedRegionMap>>,
+    map: Rc<Mutex<SharedRegionMap>>,
     pub rank: Rank,
 }
 
 impl FIFO {
-    pub fn new(map: Arc<Mutex<SharedRegionMap>>, rank: Rank) -> FIFO {
+    pub fn new(map: Rc<Mutex<SharedRegionMap>>, rank: Rank) -> FIFO {
         FIFO {
             map,
             rank,

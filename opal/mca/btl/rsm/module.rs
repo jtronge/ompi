@@ -1,5 +1,5 @@
 use std::os::raw::{c_int, c_void};
-use std::sync::Arc;
+use std::rc::Rc;
 use std::cell::RefCell;
 use std::sync::atomic::Ordering;
 use log::{info, error};
@@ -88,7 +88,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             data.map.lock().unwrap().regions.insert(local_rank, RefCell::new(region));
 
             // Create the endpoint
-            let endpoint = match Endpoint::new(Arc::clone(&data.map), local_rank) {
+            let endpoint = match Endpoint::new(Rc::clone(&data.map), local_rank) {
                 Ok(ep) => ep,
                 // TODO: Propagate this error
                 Err(_) => continue,

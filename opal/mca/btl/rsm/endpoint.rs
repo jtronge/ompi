@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
+use std::rc::Rc;
 use std::mem::MaybeUninit;
 use crate::{Result, Rank};
 use crate::opal::{
@@ -18,8 +19,8 @@ pub(crate) struct Endpoint {
 
 impl Endpoint {
     /// Create a new endpoint.
-    pub fn new(map: Arc<Mutex<SharedRegionMap>>, rank: Rank) -> Result<Endpoint> {
-        let fifo = FIFO::new(Arc::clone(&map), rank);
+    pub fn new(map: Rc<Mutex<SharedRegionMap>>, rank: Rank) -> Result<Endpoint> {
+        let fifo = FIFO::new(Rc::clone(&map), rank);
         let _base = unsafe {
             let mut base = MaybeUninit::uninit();
             obj_construct_rs(base.as_mut_ptr());

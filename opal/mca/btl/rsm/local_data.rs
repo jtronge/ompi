@@ -1,6 +1,7 @@
 //! Code for handling private data for the module
 use std::ops::DerefMut;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
+use std::rc::Rc;
 use log::info;
 use crate::Rank;
 use crate::endpoint::Endpoint;
@@ -16,7 +17,7 @@ use crate::block_store::BlockStore;
 /// Data internal to the module.
 pub(crate) struct LocalData {
     /// Shared memory for all ranks
-    pub(crate) map: Arc<Mutex<SharedRegionMap>>,
+    pub(crate) map: Rc<Mutex<SharedRegionMap>>,
     /// Local FIFO
     pub(crate) fifo: FIFO,
     /// Local block store
@@ -74,7 +75,7 @@ impl LocalData {
 /// Initialize the private module data for the BTL module.
 pub(crate) unsafe fn init(
     btl: *mut mca_btl_base_module_t,
-    map: Arc<Mutex<SharedRegionMap>>,
+    map: Rc<Mutex<SharedRegionMap>>,
     fifo: FIFO,
     block_store: BlockStore,
 ) {
