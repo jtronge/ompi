@@ -1,5 +1,4 @@
 //! Shared memory management code.
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::mem::MaybeUninit;
@@ -8,6 +7,7 @@ use std::cell::RefCell;
 use std::time::{SystemTime, UNIX_EPOCH};
 use shared_memory::{ShmemConf, Shmem};
 use log::debug;
+use rustc_hash::FxHashMap;
 use crate::{Result, Error, Rank};
 use crate::opal::{
     mca_btl_base_descriptor_t,
@@ -38,22 +38,48 @@ pub fn make_path(node_name: String, rank: Rank, pid: u32) -> PathBuf {
 }
 
 pub struct SharedRegionMap {
-    pub regions: HashMap<Rank, RefCell<SharedRegionHandle>>,
+    // pub regions: FxHashMap<Rank, RefCell<SharedRegionHandle>>,
+    regions: Vec<Option<RefCell<SharedRegionHandle>>>,
 }
 
 impl SharedRegionMap {
+    pub fn new() -> SharedRegionMap {
+        SharedRegionMap {
+            regions: vec![],
+        }
+    }
+
+    /// Insert a shared region handle.
+    pub fn insert(&mut self, rank: Rank, handle: RefCell<SharedRegionHandle>) {
+        let rank: usize = rank.try_into().unwrap();
+        if rank >= self.regions.len() {
+            self.regions.resize_with(rank + 1, || None);
+        }
+        self.regions[rank].insert(handle);
+    }
+
+    /// Remove a shared region handle for the given rank.
+    pub fn remove(&mut self, rank: Rank) -> Option<RefCell<SharedRegionHandle>> {
+        let rank: usize = rank.try_into().unwrap();
+        self.regions[rank].take()
+    }
+
     /// Use a mutable region reference in a callback.
+    #[inline]
     pub fn region_mut<F, R>(&self, rank: Rank, f: F) -> R
     where
         F: FnOnce(&mut SharedRegion) -> R,
     {
-        let mut handle = self.regions.get(&rank).unwrap().borrow_mut();
+        let rank: usize = rank.try_into().unwrap();
+        let mut handle = self.regions[rank].as_ref().unwrap().borrow_mut();
         f(handle.get())
     }
 
     /// Return a descriptor for a block.
+    #[inline]
     pub fn descriptor(&self, rank: Rank, block_id: BlockID) -> Descriptor {
-        let mut handle = self.regions.get(&rank).unwrap().borrow_mut();
+        let rank: usize = rank.try_into().unwrap();
+        let mut handle = self.regions[rank].as_ref().unwrap().borrow_mut();
         let region = handle.get();
         let block_idx: usize = block_id.try_into().unwrap();
         let block: &mut Block = &mut region.blocks[block_idx];
@@ -82,7 +108,7 @@ impl SharedRegionMap {
                 des_flags: 0,
                 order: 0,
             },
-            rank,
+            rank: rank.try_into().unwrap(),
             block_id,
         }
     }
@@ -216,6 +242,7 @@ pub struct Block {
 
 impl Block {
     /// Fill the memory location with the given convertor and header data.
+    #[inline]
     pub unsafe fn fill(
         &mut self,
         convertor: *mut opal_convertor_t,
@@ -240,6 +267,7 @@ impl Block {
 
     /// Fill the block with the given data, with reserve space, and returning
     /// the amount of data used in size.
+    #[inline]
     pub unsafe fn prepare_fill(
         &mut self,
         convertor: *mut opal_convertor_t,
@@ -260,6 +288,7 @@ impl Block {
 }
 
 /// Copy or convert the data and store it in the iov buffer.
+#[inline]
 unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload_size: usize) {
     if opal_convertor_need_buffers_rs(convertor) != 0 {
         let iov_len = 1;

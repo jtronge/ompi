@@ -2,6 +2,7 @@
 use std::ops::DerefMut;
 use std::sync::Mutex;
 use std::rc::Rc;
+use std::cell::RefCell;
 use log::info;
 use crate::Rank;
 use crate::endpoint::Endpoint;
@@ -15,9 +16,14 @@ use crate::fifo::FIFO;
 use crate::block_store::BlockStore;
 
 /// Data internal to the module.
+///
+/// This data is stored on the btl handle with a wrapping Mutex. In effect,
+/// this works a coarse grained lock.
+///
+/// TODO: What about for objects that are not locked, such as endpoints?
 pub(crate) struct LocalData {
     /// Shared memory for all ranks
-    pub(crate) map: Rc<Mutex<SharedRegionMap>>,
+    pub(crate) map: Rc<RefCell<SharedRegionMap>>,
     /// Local FIFO
     pub(crate) fifo: FIFO,
     /// Local block store
@@ -37,7 +43,7 @@ pub(crate) struct LocalData {
 impl LocalData {
     /// Create a new descriptor for the rank and block ID and return the pointer.
     pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
-        let desc = self.map.lock().unwrap().descriptor(rank, block_id);
+        let desc = self.map.borrow_mut().descriptor(rank, block_id);
         let desc = Box::new(desc);
         let desc_ptr = Box::into_raw(desc);
         self.descriptors.push(desc_ptr);
@@ -77,7 +83,7 @@ impl LocalData {
 /// Initialize the private module data for the BTL module.
 pub(crate) unsafe fn init(
     btl: *mut mca_btl_base_module_t,
-    map: Rc<Mutex<SharedRegionMap>>,
+    map: Rc<RefCell<SharedRegionMap>>,
     fifo: FIFO,
     block_store: BlockStore,
 ) {

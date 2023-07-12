@@ -13,6 +13,7 @@ raw_sync = "0.1.5"
 log = "0.4.19"
 env_logger = "0.10.0"
 fastrand = "2.0.0"
+rustc-hash = "1.1.0"
 
 # Add debugging symbols to release code
 [profile.release]

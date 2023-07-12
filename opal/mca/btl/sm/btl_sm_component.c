@@ -332,7 +332,8 @@ mca_btl_sm_component_init(int *num_btls, bool enable_progress_threads, bool enab
     /* no fast boxes allocated initially */
     component->num_fbox_in_endpoints = 0;
 
-    bool have_smsc = (NULL != mca_smsc);
+    // bool have_smsc = (NULL != mca_smsc);
+    bool have_smsc = false;
     if (have_smsc) {
         mca_btl_sm.super.btl_flags |= MCA_BTL_FLAGS_RDMA;
         mca_btl_sm.super.btl_get = mca_btl_sm_get;

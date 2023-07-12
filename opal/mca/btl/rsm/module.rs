@@ -84,7 +84,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
                 // TODO: Propagate this error
                 Err(_) => continue,
             };
-            data.map.lock().unwrap().regions.insert(local_rank, RefCell::new(region));
+            data.map.borrow_mut().insert(local_rank, RefCell::new(region));
 
             // Create the endpoint
             let endpoint = match Endpoint::new(Rc::clone(&data.map), local_rank) {
@@ -127,7 +127,7 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
                     info!("Not found!");
                 }
                 // Remove the region from the store
-                let _ = data.map.lock().unwrap().regions.remove(&(*ep).rank);
+                let _ = data.map.borrow_mut().remove((*ep).rank);
 
                 // Convert back to a Box and thus free it
                 // TODO: There is something wrong with the pointer it returns here
@@ -164,7 +164,7 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             None => return std::ptr::null_mut(),
         };
         // Set the length
-        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+        data.map.borrow_mut().region_mut(proc_info::local_rank(), |region| {
             let block_idx: usize = block_id.try_into().unwrap();
             region.blocks[block_idx].len = size;
         });
@@ -222,7 +222,7 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             Some(id) => id,
             None => return std::ptr::null_mut(),
         };
-        let rc = data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+        let rc = data.map.borrow_mut().region_mut(proc_info::local_rank(), |region| {
             let block_idx: usize = block_id.try_into().unwrap();
             region.blocks[block_idx].prepare_fill(convertor, reserve, size)
         });
@@ -254,7 +254,7 @@ unsafe extern "C" fn mca_btl_rsm_send(
         let desc = descriptor as *mut Descriptor;
         let block_id = (*desc).block_id;
         let block_idx: usize = block_id.try_into().unwrap();
-        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+        data.map.borrow_mut().region_mut(proc_info::local_rank(), |region| {
             region.blocks[block_idx].tag = tag;
         });
         data.pending.push((endpoint, block_id));
@@ -294,7 +294,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         let endpoint = endpoint as *mut Endpoint;
 
         // Set the block data
-        data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
+        data.map.borrow_mut().region_mut(proc_info::local_rank(), |region| {
             let block_idx: usize = block_id.try_into().unwrap();
             let block = &mut region.blocks[block_idx];
             block.next = FIFO_FREE;

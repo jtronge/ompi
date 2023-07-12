@@ -1,14 +1,14 @@
-use std::sync::Mutex;
+use std::cell::RefCell;
 use std::rc::Rc;
 use crate::shared::{SharedRegionMap, BlockID, MAX_BLOCKS};
 
 pub(crate) struct BlockStore {
-    _map: Rc<Mutex<SharedRegionMap>>,
+    _map: Rc<RefCell<SharedRegionMap>>,
     free_blocks: Vec<BlockID>,
 }
 
 impl BlockStore {
-    pub fn new(map: Rc<Mutex<SharedRegionMap>>) -> BlockStore {
+    pub fn new(map: Rc<RefCell<SharedRegionMap>>) -> BlockStore {
         let free_blocks = (0..MAX_BLOCKS).map(|block_id| block_id.try_into().unwrap()).collect();
         BlockStore {
             _map: map,

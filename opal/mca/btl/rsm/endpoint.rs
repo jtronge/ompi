@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::mem::MaybeUninit;
 use crate::{Result, Rank};
@@ -19,7 +19,7 @@ pub(crate) struct Endpoint {
 
 impl Endpoint {
     /// Create a new endpoint.
-    pub fn new(map: Rc<Mutex<SharedRegionMap>>, rank: Rank) -> Result<Endpoint> {
+    pub fn new(map: Rc<RefCell<SharedRegionMap>>, rank: Rank) -> Result<Endpoint> {
         let fifo = FIFO::new(Rc::clone(&map), rank);
         let _base = unsafe {
             let mut base = MaybeUninit::uninit();

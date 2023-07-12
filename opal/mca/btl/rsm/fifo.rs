@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
 use log::debug;
@@ -6,12 +6,12 @@ use crate::{Result, Error, Rank};
 use crate::shared::{SharedRegionMap, Block, BlockID, FIFOHeader, FIFO_FREE, FIFO_LOCK};
 
 pub(crate) struct FIFO {
-    map: Rc<Mutex<SharedRegionMap>>,
+    map: Rc<RefCell<SharedRegionMap>>,
     pub rank: Rank,
 }
 
 impl FIFO {
-    pub fn new(map: Rc<Mutex<SharedRegionMap>>, rank: Rank) -> FIFO {
+    pub fn new(map: Rc<RefCell<SharedRegionMap>>, rank: Rank) -> FIFO {
         FIFO {
             map,
             rank,
@@ -21,8 +21,9 @@ impl FIFO {
     /// Pop the block from this FIFO.
     ///
     /// TODO: Should this be marked unsafe since it should only be called by the owning process?
+    #[inline]
     pub fn pop(&self) -> Option<(Rank, BlockID)> {
-        let map = match self.map.lock() {
+        let map = match self.map.try_borrow_mut() {
             Ok(m) => m,
             Err(_) => return None,
         };
@@ -72,9 +73,10 @@ impl FIFO {
     }
 
     /// Push the block onto this FIFO.
+    #[inline]
     pub fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
         debug!("FIFO::push() - Pushing block: ({}, {})", rank, block_id);
-        let map = match self.map.lock() {
+        let map = match self.map.try_borrow_mut() {
             Ok(m) => m,
             Err(_) => return Err(Error::LockError),
         };
@@ -132,19 +134,8 @@ impl FIFO {
     }
 }
 
-/// Update the head for a pop operation (see sm_fifo_read() for the original).
-fn pop(value: i64, fifo: &mut FIFOHeader, block: &mut Block) {
-    if block.next == FIFO_FREE {
-        if fifo.tail.compare_exchange(value, FIFO_FREE, Ordering::SeqCst, Ordering::SeqCst).is_err() {
-            while block.next == FIFO_FREE {}
-            fifo.head = block.next;
-        }
-    } else {
-        fifo.head = block.next;
-    }
-}
-
 /// Extract the rank and block ID from an i64.
+#[inline]
 fn extract_rank_block_id(value: i64) -> (Rank, BlockID) {
     let rank = (value >> 32).try_into().unwrap();
     let block_id = (value & 0xFFFFFFFF).try_into().unwrap();
@@ -152,6 +143,7 @@ fn extract_rank_block_id(value: i64) -> (Rank, BlockID) {
 }
 
 /// Encode the rank and block ID into an i64.
+#[inline]
 fn encode_rank_block_id(rank: Rank, block_id: BlockID) -> i64 {
     let rank: i64 = rank.try_into().unwrap();
     let block_id: i64 = block_id.try_into().unwrap();

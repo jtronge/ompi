@@ -1,9 +1,7 @@
 /// The component type is defined in C
 use std::os::raw::c_int;
-use std::sync::Mutex;
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::io::Write;
 use log::{info, debug};
 use shared_memory::ShmemError;
@@ -88,7 +86,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     // Create the shared memory for this rank
     // TODO: Add jobid
     let local_rank = proc_info::local_rank();
-    let mut map = SharedRegionMap { regions: HashMap::new() };
+    let mut map = SharedRegionMap::new();
     let path = make_path(proc_info::node_name(), local_rank, std::process::id());
     // Publish the path
     match modex::send_string_local(SHARED_MEM_NAME_KEY, path.as_os_str().to_str().unwrap()) {
@@ -107,8 +105,8 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
         }
     };
     let region = RefCell::new(region);
-    map.regions.insert(local_rank, region);
-    let map = Rc::new(Mutex::new(map));
+    map.insert(local_rank, region);
+    let map = Rc::new(RefCell::new(map));
     let fifo = FIFO::new(Rc::clone(&map), local_rank);
     let block_store = BlockStore::new(Rc::clone(&map));
 
@@ -173,8 +171,11 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
         if let Some((mut handler, endpoint)) = handler {
             if handler.run(btl) {
                 info!("Pushing complete block: ({}, {})", handler.rank, handler.block_id);
-                // Now the block is complete, so we return it
-                (*endpoint).fifo.push(handler.rank, handler.block_id).unwrap();
+                // Ensure thread safety by invoking the local_data lock
+                local_data::lock(btl, |_| {
+                    // Now the block is complete, so we return it
+                    (*endpoint).fifo.push(handler.rank, handler.block_id).unwrap();
+                });
                 count += 1;
             }
         } else {
@@ -202,6 +203,7 @@ impl Handler {
     ///
     /// WARNING: This must not be called while the local_data lock is held, or
     /// deadlock will ensue.
+    #[inline]
     unsafe fn run(&mut self, btl: *mut mca_btl_base_module_t) -> bool {
         let complete = if let Some(kind) = self.kind.take() {
             match kind {
@@ -240,7 +242,7 @@ impl Handler {
         // Now lock local_data, the region, set the block complete value, and
         // free the block if necessary.
         local_data::lock(btl, |data| {
-            data.map.lock().unwrap().region_mut(self.rank, |region| {
+            data.map.borrow_mut().region_mut(self.rank, |region| {
                 // Set the complete value
                 let block_idx: usize = self.block_id.try_into().unwrap();
                 region.blocks[block_idx].complete = complete;
@@ -259,6 +261,7 @@ impl Handler {
 
 /// Handle an incoming block. Return true if the block needs to be returned to
 /// the sender, and false if this was a block being returned to this rank.
+#[inline]
 unsafe fn handle_incoming(
     data: &mut LocalData,
     endpoint: *mut Endpoint,
@@ -266,7 +269,7 @@ unsafe fn handle_incoming(
     block_id: BlockID,
 ) -> Handler {
     // TODO: this might be better as a try_lock?
-    let kind = data.map.lock().unwrap().region_mut(rank, |region| {
+    let kind = data.map.borrow_mut().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
         info!("Handling block: block_id = {}, len = {}, tag = {}, complete = {}, endpoint.rank = {}", block_id, block.len, block.tag, block.complete, (*endpoint).rank);
