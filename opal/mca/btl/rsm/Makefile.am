@@ -5,6 +5,8 @@ BINDGEN_FLAGS = --blocklist-item IPPORT_RESERVED
 # TODO: Need to determine how to switch between --debug/--release versions
 CARGO_BUILD_ARGS = --release
 TARGET_DIR = target/release
+# CARGO_BUILD_ARGS = --debug
+# TARGET_DIR = target/debug
 
 opal.rs: opal.h
 	$(BINDGEN) $(BINDGEN_FLAGS) $< -- $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) > $@

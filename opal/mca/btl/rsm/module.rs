@@ -1,7 +1,6 @@
 use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::sync::atomic::Ordering;
 use log::{info, error};
 use crate::opal::{
     mca_btl_base_descriptor_t,
@@ -258,9 +257,10 @@ unsafe extern "C" fn mca_btl_rsm_send(
         data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
             region.blocks[block_idx].tag = tag;
         });
+        data.pending.push((endpoint, block_id));
         // The original SM attempts a write into the peer's fifo, here it
         // either writes or fails altogether
-        (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
+        // (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
         OPAL_SUCCESS
     })
 }
@@ -297,7 +297,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         data.map.lock().unwrap().region_mut(proc_info::local_rank(), |region| {
             let block_idx: usize = block_id.try_into().unwrap();
             let block = &mut region.blocks[block_idx];
-            block.next.store(FIFO_FREE, Ordering::Relaxed);
+            block.next = FIFO_FREE;
             block.tag = tag;
             block.complete = false;
             block.fill(convertor, header, header_size, payload_size);

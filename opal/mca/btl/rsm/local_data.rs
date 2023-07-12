@@ -22,8 +22,10 @@ pub(crate) struct LocalData {
     pub(crate) fifo: FIFO,
     /// Local block store
     pub(crate) block_store: BlockStore,
-    /// Pending blocks (local_rank, block_id)
-    pub(crate) pending: Vec<(u16, BlockID)>,
+    /// Pending blocks (endpoint, block_id)
+    ///
+    /// TODO: What if the endpoint get's freed before the pending entry is cleared?
+    pub(crate) pending: Vec<(*mut Endpoint, BlockID)>,
     /// Error handler
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory

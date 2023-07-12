@@ -20,6 +20,7 @@ use crate::opal::{
     opal_convertor_need_buffers_rs,
     opal_convertor_pack,
     opal_free_list_item_t,
+    // memcpy,
 };
 
 /// Create a unique path for a shared memory region.
@@ -202,7 +203,7 @@ pub const MAX_BLOCKS: usize = 256;
 #[repr(C)]
 pub struct Block {
     /// Next block in singly linked list
-    pub next: AtomicI64,
+    pub next: i64,
     /// Tag in block (used for indexing into message callback table)
     pub tag: mca_btl_base_tag_t,
     /// Indicates that the block is complete and can be freed
@@ -271,6 +272,7 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
         debug!("copying data pointer here: {:x}", data_ptr as usize);
         std::ptr::copy_nonoverlapping(data_ptr, iov.iov_base, payload_size);
+        // memcpy(iov.iov_base, data_ptr, payload_size.try_into().unwrap());
     }
 }
 

@@ -147,11 +147,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::lock(btl, |data| {
         // Progress pending outgoing blocks
-        while let Some((endpoint_rank, block_id)) = data.pending.pop() {
-            let endpoint: *mut Endpoint = *data.endpoints
-                .iter()
-                .find(|ep| (*(*(*ep))).rank == endpoint_rank.into())
-                .unwrap();
+        while let Some((endpoint, block_id)) = data.pending.pop() {
             info!("Pushing pending block: {}", block_id);
             (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
         }

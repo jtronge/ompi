@@ -54,10 +54,10 @@ impl FIFO {
                 let block_idx: usize = block_id.try_into().unwrap();
 
                 let new_head = if rank == self.rank {
-                    region.blocks[block_idx].next.load(Ordering::SeqCst)
+                    region.blocks[block_idx].next
                 } else {
                     map.region_mut(rank, |other_region| {
-                        other_region.blocks[block_idx].next.load(Ordering::SeqCst)
+                        other_region.blocks[block_idx].next
                     })
                 };
                 region.fifo.head = new_head;
@@ -105,10 +105,10 @@ impl FIFO {
                     let (old_rank, old_block_id) = extract_rank_block_id(old_tail);
                     let old_block_idx: usize = old_block_id.try_into().unwrap();
                     if old_rank == self.rank {
-                        region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
+                        region.blocks[old_block_idx].next = new_tail;
                     } else {
                         map.region_mut(old_rank, |other_region| {
-                            other_region.blocks[old_block_idx].next.store(new_tail, Ordering::SeqCst);
+                            other_region.blocks[old_block_idx].next = new_tail;
                         });
                     }
                 }
@@ -116,10 +116,10 @@ impl FIFO {
                 // Ensure next is FIFO_FREE
                 let block_idx: usize = block_id.try_into().unwrap();
                 if rank == self.rank {
-                    region.blocks[block_idx].next.store(FIFO_FREE, Ordering::SeqCst);
+                    region.blocks[block_idx].next = FIFO_FREE;
                 } else {
                     map.region_mut(rank, |other_region| {
-                        other_region.blocks[block_idx].next.store(FIFO_FREE, Ordering::SeqCst);
+                        other_region.blocks[block_idx].next = FIFO_FREE;
                     });
                 }
 
@@ -134,13 +134,13 @@ impl FIFO {
 
 /// Update the head for a pop operation (see sm_fifo_read() for the original).
 fn pop(value: i64, fifo: &mut FIFOHeader, block: &mut Block) {
-    if block.next.load(Ordering::SeqCst) == FIFO_FREE {
+    if block.next == FIFO_FREE {
         if fifo.tail.compare_exchange(value, FIFO_FREE, Ordering::SeqCst, Ordering::SeqCst).is_err() {
-            while block.next.load(Ordering::SeqCst) == FIFO_FREE {}
-            fifo.head = block.next.load(Ordering::SeqCst);
+            while block.next == FIFO_FREE {}
+            fifo.head = block.next;
         }
     } else {
-        fifo.head = block.next.load(Ordering::SeqCst);
+        fifo.head = block.next;
     }
 }
 
