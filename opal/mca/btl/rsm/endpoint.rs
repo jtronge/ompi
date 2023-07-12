@@ -1,13 +1,10 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::mem::MaybeUninit;
-use crate::{Result, Rank};
-use crate::opal::{
-    opal_list_item_t,
-    obj_construct_rs,
-};
-use crate::shared::SharedRegionMap;
 use crate::fifo::FIFO;
+use crate::opal::{obj_construct_rs, opal_list_item_t};
+use crate::shared::SharedRegionMap;
+use crate::{Rank, Result};
+use std::cell::RefCell;
+use std::mem::MaybeUninit;
+use std::rc::Rc;
 
 /// Info about a given endpoint
 #[repr(C)]
@@ -27,10 +24,6 @@ impl Endpoint {
             // SAFETY: This was initialized by obj_construct_rs()
             base.assume_init()
         };
-        Ok(Endpoint {
-            _base,
-            rank,
-            fifo,
-        })
+        Ok(Endpoint { _base, rank, fifo })
     }
 }

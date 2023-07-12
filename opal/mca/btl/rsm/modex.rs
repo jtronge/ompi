@@ -1,23 +1,15 @@
-use std::os::raw::c_char;
-use std::ffi::{CStr, CString};
-use log::debug;
-use crate::{Result, Error};
 use crate::opal::{
-    opal_modex_recv_value_rs,
-    opal_modex_recv_string_rs,
-    opal_modex_send_string_rs,
-    opal_process_name_t,
-    PMIX_UINT16,
-    PMIX_LOCAL_RANK,
-    PMIX_LOCAL,
-    OPAL_SUCCESS,
+    opal_modex_recv_string_rs, opal_modex_recv_value_rs, opal_modex_send_string_rs,
+    opal_process_name_t, OPAL_SUCCESS, PMIX_LOCAL, PMIX_LOCAL_RANK, PMIX_UINT16,
 };
+use crate::{Error, Result};
+use log::debug;
+use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 
 /// Receive local rank modex data from another process. Uses the
 /// OPAL_MODEX_RECV_VALUE macro in C.
-pub fn recv_local_rank(
-    proc_name: &opal_process_name_t,
-) -> Result<u16> {
+pub fn recv_local_rank(proc_name: &opal_process_name_t) -> Result<u16> {
     let mut rank = 0;
 
     // This should be safe since all of the pointers here are valid.

@@ -1,19 +1,14 @@
 //! Code for handling private data for the module
-use std::ops::DerefMut;
-use std::sync::Mutex;
-use std::rc::Rc;
-use std::cell::RefCell;
-use log::info;
-use crate::Rank;
-use crate::endpoint::Endpoint;
-use crate::opal::{
-    mca_btl_base_module_error_cb_fn_t,
-    mca_btl_base_module_t,
-    mca_btl_rsm_t,
-};
-use crate::shared::{SharedRegionMap, BlockID, Descriptor};
-use crate::fifo::FIFO;
 use crate::block_store::BlockStore;
+use crate::endpoint::Endpoint;
+use crate::fifo::FIFO;
+use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_btl_rsm_t};
+use crate::shared::{BlockID, Descriptor, SharedRegionMap};
+use crate::Rank;
+use std::cell::RefCell;
+use std::ops::DerefMut;
+use std::rc::Rc;
+use std::sync::Mutex;
 
 /// Data internal to the module.
 ///
@@ -31,17 +26,18 @@ pub(crate) struct LocalData {
     /// Pending blocks (endpoint, block_id)
     ///
     /// TODO: What if the endpoint get's freed before the pending entry is cleared?
-    pub(crate) pending: Vec<(*mut Endpoint, BlockID)>,
+    pub(crate) pending: Vec<(usize, BlockID)>,
     /// Error handler
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory
-    pub(crate) endpoints: Vec<*mut Endpoint>,
+    pub(crate) endpoints: Vec<Option<Endpoint>>,
     /// Descriptor list
     descriptors: Vec<*mut Descriptor>,
 }
 
 impl LocalData {
     /// Create a new descriptor for the rank and block ID and return the pointer.
+    #[inline]
     pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
         let desc = self.map.borrow_mut().descriptor(rank, block_id);
         let desc = Box::new(desc);
@@ -51,6 +47,7 @@ impl LocalData {
     }
 
     /// Free a descriptor allocated above.
+    #[inline]
     pub(crate) unsafe fn free_descriptor(&mut self, des: *mut Descriptor) {
         if let Some(pos) = self.descriptors.iter().position(|elem| *elem == des) {
             self.descriptors.swap_remove(pos);
@@ -58,17 +55,20 @@ impl LocalData {
         let _ = Box::from_raw(des);
     }
 
-    pub(crate) fn show_descriptor_info(&self) {
-        info!("descriptors count: {}", self.descriptors.len());
+    /// Add an endpoint
+    pub(crate) fn add_endpoint(&mut self, endpoint: Endpoint) -> usize {
+        self.endpoints.push(Some(endpoint));
+        self.endpoints.len() - 1
+    }
+
+    /// Delete endpoint
+    pub(crate) fn del_endpoint(&mut self, endpoint_idx: usize) {
+        let _ = self.endpoints[endpoint_idx].take();
     }
 
     /// Find the descriptor with the rank and block ID (used on return of a
     /// descriptor from another process).
-    pub(crate) fn find_descriptor(
-        &self,
-        rank: Rank,
-        block_id: BlockID,
-    ) -> Option<*mut Descriptor> {
+    pub(crate) fn find_descriptor(&self, rank: Rank, block_id: BlockID) -> Option<*mut Descriptor> {
         unsafe {
             // SAFETY: All pointers dereferenced below should be valid, as they
             // can only allocated and freed through the interface of LocalData.
@@ -106,9 +106,6 @@ pub(crate) unsafe fn free(btl: *mut mca_btl_base_module_t) {
     let data = Box::from_raw((*btl).internal as *mut Mutex<LocalData>);
     // Destroy remaining endpoints
     let handle = data.lock().expect("Failed to lock module data");
-    for ep in &handle.endpoints {
-        let _ = Box::from_raw(*ep);
-    }
 }
 
 /// Use the module data for the given BTL pointer. The BTL pointer must be
@@ -119,7 +116,6 @@ where
 {
     let btl = btl as *mut mca_btl_rsm_t;
     let data = (*btl).internal as *mut Mutex<LocalData>;
-    // TODO: This might be better as a try_lock?
     let mut data = (*data).lock().expect("Failed to lock module data");
     f(data.deref_mut())
 }

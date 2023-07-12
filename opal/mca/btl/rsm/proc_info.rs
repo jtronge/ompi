@@ -1,10 +1,8 @@
-use std::ffi::CStr;
+use crate::opal::opal_process_info_t;
 use crate::Rank;
-use crate::opal::{
-    opal_process_info_t,
-};
+use std::ffi::CStr;
 
-extern {
+extern "C" {
     static mut opal_process_info: opal_process_info_t;
 }
 
@@ -16,9 +14,7 @@ extern {
 
 /// Get the local rank on this node within a job
 pub(crate) fn local_rank() -> Rank {
-    unsafe {
-        opal_process_info.my_local_rank.into()
-    }
+    unsafe { opal_process_info.my_local_rank.into() }
 }
 
 /// Get the name of the node

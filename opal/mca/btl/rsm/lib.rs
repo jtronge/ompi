@@ -1,10 +1,16 @@
+use log::error;
+use shared_memory::ShmemError;
+use std::cell::RefCell;
+use std::io::Write;
 /// The component type is defined in C
 use std::os::raw::c_int;
 use std::rc::Rc;
-use std::cell::RefCell;
-use std::io::Write;
-use log::{info, debug};
-use shared_memory::ShmemError;
+mod block_store;
+mod endpoint;
+mod fifo;
+mod local_data;
+mod modex;
+mod module;
 #[allow(non_camel_case_types)]
 #[allow(non_upper_case_globals)]
 #[allow(non_snake_case)]
@@ -12,35 +18,19 @@ use shared_memory::ShmemError;
 #[allow(unused_variables)]
 #[allow(improper_ctypes)]
 mod opal;
-mod shared;
-mod fifo;
-mod block_store;
-mod endpoint;
-mod module;
-mod modex;
 mod proc_info;
-mod local_data;
-use opal::{
-    mca_btl_base_module_t,
-    mca_btl_active_message_callback_t,
-    mca_btl_base_active_message_trigger,
-    mca_btl_base_module_recv_cb_fn_t,
-    mca_btl_base_param_register,
-    mca_btl_base_receive_descriptor_t,
-    mca_btl_base_component_3_0_0_t,
-    mca_btl_base_segment_t,
-    mca_btl_rsm_t,
-    opal_ptr_t,
-    MCA_BTL_FLAGS_SEND_INPLACE,
-    MCA_BTL_FLAGS_SEND,
-    OPAL_SUCCESS,
-    calloc,
-};
-use endpoint::Endpoint;
-use shared::{BLOCK_SIZE, SharedRegionMap, SharedRegionHandle, Descriptor, BlockID, make_path};
-use fifo::FIFO;
+mod shared;
 use block_store::BlockStore;
+use endpoint::Endpoint;
+use fifo::FIFO;
 use local_data::LocalData;
+use opal::{
+    calloc, mca_btl_active_message_callback_t, mca_btl_base_active_message_trigger,
+    mca_btl_base_component_3_0_0_t, mca_btl_base_module_recv_cb_fn_t, mca_btl_base_module_t,
+    mca_btl_base_param_register, mca_btl_base_receive_descriptor_t, mca_btl_base_segment_t,
+    mca_btl_rsm_t, opal_ptr_t, MCA_BTL_FLAGS_SEND, MCA_BTL_FLAGS_SEND_INPLACE, OPAL_SUCCESS,
+};
+use shared::{make_path, BlockID, Descriptor, SharedRegionHandle, SharedRegionMap, BLOCK_SIZE};
 
 extern "C" {
     pub static mut mca_btl_rsm: mca_btl_rsm_t;
@@ -79,12 +69,17 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     // Initialize logging (this would be better with a special ompi or opal implementation)
     env_logger::builder()
         .format(|buf, record| {
-            writeln!(buf, "(rank = {}) {}: {}", proc_info::local_rank(), record.level(), record.args())
+            writeln!(
+                buf,
+                "(rank = {}) {}: {}",
+                proc_info::local_rank(),
+                record.level(),
+                record.args()
+            )
         })
         .init();
 
     // Create the shared memory for this rank
-    // TODO: Add jobid
     let local_rank = proc_info::local_rank();
     let mut map = SharedRegionMap::new();
     let path = make_path(proc_info::node_name(), local_rank, std::process::id());
@@ -92,7 +87,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     match modex::send_string_local(SHARED_MEM_NAME_KEY, path.as_os_str().to_str().unwrap()) {
         Ok(()) => (),
         Err(err) => {
-            debug!("Modex error: {:?}", err);
+            error!("Modex error: {:?}", err);
             return std::ptr::null_mut();
         }
     }
@@ -100,7 +95,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     let region = match SharedRegionHandle::create(path) {
         Ok(region) => region,
         Err(err) => {
-            debug!("Shared memory error: {:?}", err);
+            error!("Shared memory error: {:?}", err);
             return std::ptr::null_mut();
         }
     };
@@ -115,9 +110,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     // Create a self endpoint
     match local_data::lock(ptr, |data| {
         let endpoint = Endpoint::new(Rc::clone(&data.map), proc_info::local_rank())?;
-        let endpoint_ptr = Box::into_raw(Box::new(endpoint));
-        info!("my endpoint pointer: {}", endpoint_ptr as usize);
-        data.endpoints.push(endpoint_ptr);
+        let _ = data.add_endpoint(endpoint);
         Ok::<(), Error>(())
     }) {
         Ok(()) => (),
@@ -128,7 +121,9 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     let btls = calloc(
         1,
         // Assume this will never be bigger than about 8-16 bytes
-        std::mem::size_of::<*mut mca_btl_base_module_t>().try_into().unwrap(),
+        std::mem::size_of::<*mut mca_btl_base_module_t>()
+            .try_into()
+            .unwrap(),
     ) as *mut *mut mca_btl_base_module_t;
     if btls.is_null() {
         return std::ptr::null_mut();
@@ -145,9 +140,13 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::lock(btl, |data| {
         // Progress pending outgoing blocks
-        while let Some((endpoint, block_id)) = data.pending.pop() {
-            info!("Pushing pending block: {}", block_id);
-            (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
+        while let Some((endpoint_idx, block_id)) = data.pending.pop() {
+            data.endpoints[endpoint_idx]
+                .as_ref()
+                .unwrap()
+                .fifo
+                .push(proc_info::local_rank(), block_id)
+                .unwrap();
         }
     });
 
@@ -156,25 +155,33 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     loop {
         let handler = local_data::lock(btl, |data| {
             if let Some((endpoint_rank, block_id)) = data.fifo.pop() {
-                let endpoint: *mut Endpoint = *data.endpoints
+                let endpoint_idx: usize = data
+                    .endpoints
                     .iter()
-                    .find(|ep| (*(*(*ep))).rank == endpoint_rank)
+                    .position(|ep| ep.as_ref().unwrap().rank == endpoint_rank)
                     .unwrap();
 
-                Some((handle_incoming(data, endpoint, endpoint_rank, block_id), endpoint))
+                Some((
+                    handle_incoming(data, endpoint_idx, endpoint_rank, block_id),
+                    endpoint_idx,
+                ))
             } else {
                 None
             }
         });
 
         // See mca_btl_sm_poll_handle_frag in btl/sm
-        if let Some((mut handler, endpoint)) = handler {
+        if let Some((mut handler, endpoint_idx)) = handler {
             if handler.run(btl) {
-                info!("Pushing complete block: ({}, {})", handler.rank, handler.block_id);
                 // Ensure thread safety by invoking the local_data lock
-                local_data::lock(btl, |_| {
+                local_data::lock(btl, |data| {
                     // Now the block is complete, so we return it
-                    (*endpoint).fifo.push(handler.rank, handler.block_id).unwrap();
+                    data.endpoints[endpoint_idx]
+                        .as_ref()
+                        .unwrap()
+                        .fifo
+                        .push(handler.rank, handler.block_id)
+                        .unwrap();
                 });
                 count += 1;
             }
@@ -187,8 +194,11 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
 }
 
 enum HandlerKind {
-    CompleteCallback(Option<(*mut Descriptor, *mut Endpoint)>),
-    ReceiveCallback(mca_btl_base_module_recv_cb_fn_t, mca_btl_base_receive_descriptor_t),
+    CompleteCallback(Option<(*mut Descriptor, usize)>),
+    ReceiveCallback(
+        mca_btl_base_module_recv_cb_fn_t,
+        mca_btl_base_receive_descriptor_t,
+    ),
 }
 
 struct Handler {
@@ -207,12 +217,12 @@ impl Handler {
     unsafe fn run(&mut self, btl: *mut mca_btl_base_module_t) -> bool {
         let complete = if let Some(kind) = self.kind.take() {
             match kind {
-                HandlerKind::CompleteCallback(Some((desc, endpoint))) => {
+                HandlerKind::CompleteCallback(Some((desc, endpoint_idx))) => {
                     if let Some(cbfunc) = (*desc).base.des_cbfunc {
                         cbfunc(
                             // (&mut mca_btl_rsm as *mut _) as *mut _,
                             btl,
-                            endpoint as *mut _,
+                            endpoint_idx as *mut _,
                             desc as *mut _,
                             OPAL_SUCCESS,
                         );
@@ -264,7 +274,7 @@ impl Handler {
 #[inline]
 unsafe fn handle_incoming(
     data: &mut LocalData,
-    endpoint: *mut Endpoint,
+    endpoint_idx: usize,
     rank: Rank,
     block_id: BlockID,
 ) -> Handler {
@@ -272,17 +282,13 @@ unsafe fn handle_incoming(
     let kind = data.map.borrow_mut().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
-        info!("Handling block: block_id = {}, len = {}, tag = {}, complete = {}, endpoint.rank = {}", block_id, block.len, block.tag, block.complete, (*endpoint).rank);
 
         // Free returned blocks
-        // TODO: Something is wrong with this logic here
         if block.complete {
-            data.show_descriptor_info();
             // Find the descriptor
             return if let Some(des) = data.find_descriptor(rank, block_id) {
-                Some(HandlerKind::CompleteCallback(Some((des, endpoint))))
+                Some(HandlerKind::CompleteCallback(Some((des, endpoint_idx))))
             } else {
-                info!("Descriptor not found");
                 Some(HandlerKind::CompleteCallback(None))
             };
         }
@@ -299,7 +305,7 @@ unsafe fn handle_incoming(
         });
         let segment_ptr = Box::into_raw(segment);
         let recv_de = mca_btl_base_receive_descriptor_t {
-            endpoint: endpoint as *mut _,
+            endpoint: endpoint_idx as *mut _,
             des_segments: segment_ptr as *mut _,
             des_segment_count: 1,
             tag: block.tag,

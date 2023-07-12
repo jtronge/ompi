@@ -1,9 +1,8 @@
+use crate::shared::{Block, BlockID, FIFOHeader, SharedRegionMap, FIFO_FREE, FIFO_LOCK};
+use crate::{Error, Rank, Result};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
-use log::debug;
-use crate::{Result, Error, Rank};
-use crate::shared::{SharedRegionMap, Block, BlockID, FIFOHeader, FIFO_FREE, FIFO_LOCK};
 
 pub(crate) struct FIFO {
     map: Rc<RefCell<SharedRegionMap>>,
@@ -12,10 +11,7 @@ pub(crate) struct FIFO {
 
 impl FIFO {
     pub fn new(map: Rc<RefCell<SharedRegionMap>>, rank: Rank) -> FIFO {
-        FIFO {
-            map,
-            rank,
-        }
+        FIFO { map, rank }
     }
 
     /// Pop the block from this FIFO.
@@ -42,12 +38,12 @@ impl FIFO {
                 }
 
                 // We lock the tail always
-                if region.fifo.tail.compare_exchange(
-                    old_tail,
-                    FIFO_LOCK,
-                    Ordering::SeqCst,
-                    Ordering::SeqCst,
-                ).is_err() {
+                if region
+                    .fifo
+                    .tail
+                    .compare_exchange(old_tail, FIFO_LOCK, Ordering::SeqCst, Ordering::SeqCst)
+                    .is_err()
+                {
                     continue;
                 }
 
@@ -57,12 +53,14 @@ impl FIFO {
                 let new_head = if rank == self.rank {
                     region.blocks[block_idx].next
                 } else {
-                    map.region_mut(rank, |other_region| {
-                        other_region.blocks[block_idx].next
-                    })
+                    map.region_mut(rank, |other_region| other_region.blocks[block_idx].next)
                 };
                 region.fifo.head = new_head;
-                let new_tail = if new_head == FIFO_FREE { FIFO_FREE } else { old_tail };
+                let new_tail = if new_head == FIFO_FREE {
+                    FIFO_FREE
+                } else {
+                    old_tail
+                };
 
                 // Unlock
                 region.fifo.tail.store(new_tail, Ordering::SeqCst);
@@ -75,7 +73,6 @@ impl FIFO {
     /// Push the block onto this FIFO.
     #[inline]
     pub fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
-        debug!("FIFO::push() - Pushing block: ({}, {})", rank, block_id);
         let map = match self.map.try_borrow_mut() {
             Ok(m) => m,
             Err(_) => return Err(Error::LockError),
@@ -92,12 +89,12 @@ impl FIFO {
                 }
 
                 // Lock
-                if region.fifo.tail.compare_exchange(
-                    old_tail,
-                    FIFO_LOCK,
-                    Ordering::SeqCst,
-                    Ordering::SeqCst,
-                ).is_err() {
+                if region
+                    .fifo
+                    .tail
+                    .compare_exchange(old_tail, FIFO_LOCK, Ordering::SeqCst, Ordering::SeqCst)
+                    .is_err()
+                {
                     continue;
                 }
 

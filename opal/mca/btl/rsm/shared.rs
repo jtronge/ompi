@@ -1,33 +1,36 @@
 //! Shared memory management code.
-use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicI64, Ordering};
-use std::mem::MaybeUninit;
-use std::os::raw::{c_void, c_int};
-use std::cell::RefCell;
-use std::time::{SystemTime, UNIX_EPOCH};
-use shared_memory::{ShmemConf, Shmem};
-use log::debug;
-use rustc_hash::FxHashMap;
-use crate::{Result, Error, Rank};
 use crate::opal::{
+    iovec,
     mca_btl_base_descriptor_t,
     mca_btl_base_segment_t,
     mca_btl_base_tag_t,
-    iovec,
-    opal_ptr_t,
-    opal_convertor_t,
     opal_convertor_get_current_pointer_rs,
     opal_convertor_need_buffers_rs,
     opal_convertor_pack,
+    opal_convertor_t,
     opal_free_list_item_t,
     // memcpy,
+    opal_ptr_t,
 };
+use crate::{Error, Rank, Result};
+use log::debug;
+use rustc_hash::FxHashMap;
+use shared_memory::{Shmem, ShmemConf};
+use std::cell::RefCell;
+use std::mem::MaybeUninit;
+use std::os::raw::{c_int, c_void};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Create a unique path for a shared memory region.
 pub fn make_path(node_name: String, rank: Rank, pid: u32) -> PathBuf {
     let rank: u64 = rank.into();
     let pid: u64 = pid.into();
-    let time: u64 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let time: u64 = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
     fastrand::seed(rank + pid + time);
     let random: String = (0..16).map(|_| fastrand::alphanumeric()).collect();
     let fname = format!("{}-{}.shmem", node_name, random);
@@ -44,9 +47,7 @@ pub struct SharedRegionMap {
 
 impl SharedRegionMap {
     pub fn new() -> SharedRegionMap {
-        SharedRegionMap {
-            regions: vec![],
-        }
+        SharedRegionMap { regions: vec![] }
     }
 
     /// Insert a shared region handle.
@@ -94,9 +95,7 @@ impl SharedRegionMap {
         // SAFETY: This parameter does not seem to be getting initialized by
         // any of the other BTLs so here we just leave it uninitilized, but this
         // is UB.
-        let super_ = unsafe {
-            MaybeUninit::<opal_free_list_item_t>::uninit().assume_init()
-        };
+        let super_ = unsafe { MaybeUninit::<opal_free_list_item_t>::uninit().assume_init() };
         Descriptor {
             base: mca_btl_base_descriptor_t {
                 super_,
@@ -185,10 +184,7 @@ impl SharedRegionHandle {
 
     /// Attach to an existing shared memory path.
     pub fn attach<P: AsRef<Path>>(path: P) -> Result<SharedRegionHandle> {
-        let shmem = ShmemConf::new()
-            .size(SHARED_REGION_SIZE)
-            .flink(path)
-            .open();
+        let shmem = ShmemConf::new().size(SHARED_REGION_SIZE).flink(path).open();
         let shmem = match shmem {
             Ok(shmem) => shmem,
             Err(err) => return Err(Error::SharedMemoryFailure(err)),
@@ -275,7 +271,6 @@ impl Block {
         size: *mut usize,
     ) -> c_int {
         // TODO: Need to use reserve here?
-        debug!("reserve: {}, size: {}", reserve, *size);
         assert!((reserve + *size) <= self.data.len());
         let iov = iovec {
             iov_len: *size,
@@ -299,7 +294,6 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
     } else {
         let mut data_ptr = std::ptr::null_mut();
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
-        debug!("copying data pointer here: {:x}", data_ptr as usize);
         std::ptr::copy_nonoverlapping(data_ptr, iov.iov_base, payload_size);
         // memcpy(iov.iov_base, data_ptr, payload_size.try_into().unwrap());
     }
