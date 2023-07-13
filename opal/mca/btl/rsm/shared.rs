@@ -13,8 +13,6 @@ use crate::opal::{
     opal_ptr_t,
 };
 use crate::{Error, Rank, Result};
-use log::debug;
-use rustc_hash::FxHashMap;
 use shared_memory::{Shmem, ShmemConf};
 use std::cell::RefCell;
 use std::mem::MaybeUninit;
@@ -56,7 +54,7 @@ impl SharedRegionMap {
         if rank >= self.regions.len() {
             self.regions.resize_with(rank + 1, || None);
         }
-        self.regions[rank].insert(handle);
+        let _ = self.regions[rank].insert(handle);
     }
 
     /// Remove a shared region handle for the given rank.

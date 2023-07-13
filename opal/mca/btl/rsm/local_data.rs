@@ -14,8 +14,6 @@ use std::sync::Mutex;
 ///
 /// This data is stored on the btl handle with a wrapping Mutex. In effect,
 /// this works a coarse grained lock.
-///
-/// TODO: What about for objects that are not locked, such as endpoints?
 pub(crate) struct LocalData {
     /// Shared memory for all ranks
     pub(crate) map: Rc<RefCell<SharedRegionMap>>,
@@ -105,7 +103,7 @@ pub(crate) unsafe fn free(btl: *mut mca_btl_base_module_t) {
     let btl = btl as *mut mca_btl_rsm_t;
     let data = Box::from_raw((*btl).internal as *mut Mutex<LocalData>);
     // Destroy remaining endpoints
-    let handle = data.lock().expect("Failed to lock module data");
+    let _ = data.lock().expect("Failed to lock module data");
 }
 
 /// Use the module data for the given BTL pointer. The BTL pointer must be

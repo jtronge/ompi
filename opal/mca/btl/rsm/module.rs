@@ -77,7 +77,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             let region = match SharedRegionHandle::attach(&path) {
                 Ok(reg) => reg,
                 // TODO: Propagate this error
-                Err(_) => continue,
+                Err(_) => panic!("Shared region handle attach failed"),
             };
             data.map
                 .borrow_mut()
@@ -87,7 +87,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             let endpoint = match Endpoint::new(Rc::clone(&data.map), local_rank) {
                 Ok(ep) => ep,
                 // TODO: Propagate this error
-                Err(_) => continue,
+                Err(_) => panic!("Endpoint creation failed"),
             };
             let endpoint_idx = data.add_endpoint(endpoint);
             *peers.offset(proc) = endpoint_idx as *mut _;
@@ -280,17 +280,6 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
 
         if !descriptor.is_null() {
             // Set output descriptor
-            /*
-                        let desc = Box::new(
-                            data
-                                .map
-                                .lock()
-                                .unwrap()
-                                .descriptor(proc_info::local_rank(), block_id)
-                        );
-                        let desc_ptr = Box::into_raw(desc);
-                        data.descriptors.push(desc_ptr);
-            */
             *descriptor = data.new_descriptor(proc_info::local_rank(), block_id) as *mut _;
         }
 

@@ -1,4 +1,4 @@
-use crate::shared::{Block, BlockID, FIFOHeader, SharedRegionMap, FIFO_FREE, FIFO_LOCK};
+use crate::shared::{BlockID, SharedRegionMap, FIFO_FREE, FIFO_LOCK};
 use crate::{Error, Rank, Result};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -15,16 +15,13 @@ impl FIFO {
     }
 
     /// Pop the block from this FIFO.
-    ///
-    /// TODO: Should this be marked unsafe since it should only be called by the owning process?
     #[inline]
-    pub fn pop(&self) -> Option<(Rank, BlockID)> {
+    pub unsafe fn pop(&self) -> Option<(Rank, BlockID)> {
         let map = match self.map.try_borrow_mut() {
             Ok(m) => m,
             Err(_) => return None,
         };
 
-        // TODO: How do we make this not UB?
         map.region_mut(self.rank, |region| {
             loop {
                 let old_head = region.fifo.head;

@@ -278,7 +278,6 @@ unsafe fn handle_incoming(
     rank: Rank,
     block_id: BlockID,
 ) -> Handler {
-    // TODO: this might be better as a try_lock?
     let kind = data.map.borrow_mut().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
