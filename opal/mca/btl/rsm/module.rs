@@ -10,7 +10,7 @@ use crate::opal::{
 use crate::proc_info;
 use crate::shared::{Descriptor, SharedRegionHandle, BLOCK_SIZE, FIFO_FREE};
 use crate::{Error, Rank, SHARED_MEM_NAME_KEY};
-use log::{error, info};
+use log::error;
 use std::cell::RefCell;
 use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
@@ -91,11 +91,6 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             };
             let endpoint_idx = data.add_endpoint(endpoint);
             *peers.offset(proc) = endpoint_idx as *mut _;
-            info!("endpoint pointer: {}", endpoint_idx);
-            info!(
-                "Added process with local_rank = {}, path = {}",
-                local_rank, path
-            );
         }
         rc
     })
@@ -112,7 +107,6 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
         let nprocs: isize = nprocs.try_into().unwrap();
         for proc in 0..nprocs {
             let peer = peers.offset(proc);
-            info!("attempting free endpoint pointer: {}", peer as usize);
             if !peer.is_null() {
                 let endpoint_idx = *(peer as *mut usize);
                 let rank = data.endpoints[endpoint_idx].as_ref().unwrap().rank;

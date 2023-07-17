@@ -15,5 +15,5 @@ env_logger = "0.10.0"
 fastrand = "2.0.0"
 
 # Add debugging symbols to release code for performance analysis
-# [profile.release]
-# debug = true
+[profile.release]
+debug = true

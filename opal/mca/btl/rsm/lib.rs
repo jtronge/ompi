@@ -5,6 +5,7 @@ use std::io::Write;
 /// The component type is defined in C
 use std::os::raw::c_int;
 use std::rc::Rc;
+use std::marker::PhantomData;
 mod block_store;
 mod endpoint;
 mod fifo;
@@ -29,6 +30,7 @@ use opal::{
     mca_btl_base_component_3_0_0_t, mca_btl_base_module_recv_cb_fn_t, mca_btl_base_module_t,
     mca_btl_base_param_register, mca_btl_base_receive_descriptor_t, mca_btl_base_segment_t,
     mca_btl_rsm_t, opal_ptr_t, MCA_BTL_FLAGS_SEND, MCA_BTL_FLAGS_SEND_INPLACE, OPAL_SUCCESS,
+    MCA_BTL_TAG_MAX,
 };
 use shared::{make_path, BlockID, Descriptor, SharedRegionHandle, SharedRegionMap, BLOCK_SIZE};
 
@@ -152,6 +154,12 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
 
     // Poll my local fifo
     let mut count = 0;
+    let mut tmp_segment = mca_btl_base_segment_t {
+        seg_addr: opal_ptr_t {
+            pval: std::ptr::null_mut(),
+        },
+        seg_len: 0,
+    };
     loop {
         let handler = local_data::lock(btl, |data| {
             if let Some((endpoint_rank, block_id)) = data.fifo.pop() {
@@ -162,7 +170,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
                     .unwrap();
 
                 Some((
-                    handle_incoming(data, endpoint_idx, endpoint_rank, block_id),
+                    handle_incoming(data, endpoint_idx, endpoint_rank, block_id, &mut tmp_segment),
                     endpoint_idx,
                 ))
             } else {
@@ -173,9 +181,8 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
         // See mca_btl_sm_poll_handle_frag in btl/sm
         if let Some((mut handler, endpoint_idx)) = handler {
             if handler.run(btl) {
-                // Ensure thread safety by invoking the local_data lock
+                // Block is complete, so we need to return it
                 local_data::lock(btl, |data| {
-                    // Now the block is complete, so we return it
                     data.endpoints[endpoint_idx]
                         .as_ref()
                         .unwrap()
@@ -189,6 +196,9 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
             break;
         }
     }
+    // info!("count ---- {}", count);
+    // println!("count: {}", count);
+
     // Number of blocks received
     count
 }
@@ -201,13 +211,14 @@ enum HandlerKind {
     ),
 }
 
-struct Handler {
+struct Handler<'a> {
     rank: Rank,
     block_id: BlockID,
     kind: Option<HandlerKind>,
+    phantom: PhantomData<&'a mut ()>,
 }
 
-impl Handler {
+impl<'a> Handler<'a> {
     /// Run the handler, returning whether or not this block should be returned
     /// (to complete it) to the sending process.
     ///
@@ -272,12 +283,13 @@ impl Handler {
 /// Handle an incoming block. Return true if the block needs to be returned to
 /// the sender, and false if this was a block being returned to this rank.
 #[inline]
-unsafe fn handle_incoming(
+fn handle_incoming<'a>(
     data: &mut LocalData,
     endpoint_idx: usize,
     rank: Rank,
     block_id: BlockID,
-) -> Handler {
+    segment: &'a mut mca_btl_base_segment_t,
+) -> Handler<'a> {
     let kind = data.map.borrow_mut().region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
@@ -294,18 +306,23 @@ unsafe fn handle_incoming(
 
         // Prepare the callback descriptor
         let idx: usize = block.tag.try_into().unwrap();
-        let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
+        assert!(idx < MCA_BTL_TAG_MAX.try_into().unwrap());
+        let reg: mca_btl_active_message_callback_t = unsafe {
+            mca_btl_base_active_message_trigger[idx]
+        };
         // Segment to be passed to callback (initialized here to avoid drop within block)
-        let segment = Box::new(mca_btl_base_segment_t {
-            seg_addr: opal_ptr_t {
-                pval: block.data.as_mut_ptr() as *mut _,
-            },
-            seg_len: block.len.try_into().unwrap(),
-        });
-        let segment_ptr = Box::into_raw(segment);
+        segment.seg_addr.pval = block.data.as_mut_ptr() as *mut _;
+        segment.seg_len = block.len.try_into().unwrap();
+        // let segment = Box::new(mca_btl_base_segment_t {
+        //     seg_addr: opal_ptr_t {
+        //        pval: block.data.as_mut_ptr() as *mut _,
+        //    },
+        //    seg_len: block.len.try_into().unwrap(),
+        // });
+        // let segment_ptr = Box::into_raw(segment);
         let recv_de = mca_btl_base_receive_descriptor_t {
             endpoint: endpoint_idx as *mut _,
-            des_segments: segment_ptr as *mut _,
+            des_segments: segment as *mut _,
             des_segment_count: 1,
             tag: block.tag,
             cbdata: reg.cbdata,
@@ -322,6 +339,7 @@ unsafe fn handle_incoming(
         rank,
         block_id,
         kind,
+        phantom: PhantomData,
     }
 }
 

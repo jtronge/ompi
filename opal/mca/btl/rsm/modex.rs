@@ -3,7 +3,6 @@ use crate::opal::{
     opal_process_name_t, OPAL_SUCCESS, PMIX_LOCAL, PMIX_LOCAL_RANK, PMIX_UINT16,
 };
 use crate::{Error, Result};
-use log::debug;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 
@@ -43,7 +42,6 @@ pub fn recv_string(key: &str, proc_name: &opal_process_name_t) -> Result<String>
         );
 
         if rc == OPAL_SUCCESS {
-            debug!("ptr: {:?}", ptr);
             if !ptr.is_null() {
                 let value = CStr::from_ptr(ptr)
                     .to_str()
