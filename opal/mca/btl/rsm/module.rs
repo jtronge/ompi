@@ -10,10 +10,11 @@ use crate::opal::{
 use crate::proc_info;
 use crate::shared::{Descriptor, SharedRegionHandle, BLOCK_SIZE, FIFO_FREE};
 use crate::{Error, Rank, SHARED_MEM_NAME_KEY};
-use log::error;
+use log::{error, info};
 use std::cell::RefCell;
 use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
+use std::sync::atomic::Ordering;
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_add_procs(
@@ -216,6 +217,7 @@ unsafe extern "C" fn mca_btl_rsm_send(
             .borrow_mut()
             .region_mut(proc_info::local_rank(), |region| {
                 region.blocks[block_idx].tag = tag;
+                region.blocks[block_idx].next.store(FIFO_FREE, Ordering::Release);
             });
         data.pending.push((endpoint_idx, block_id));
         // The original SM attempts a write into the peer's fifo, here it
@@ -258,13 +260,14 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
             .region_mut(proc_info::local_rank(), |region| {
                 let block_idx: usize = block_id.try_into().unwrap();
                 let block = &mut region.blocks[block_idx];
-                block.next = FIFO_FREE;
                 block.tag = tag;
                 block.complete = false;
                 block.fill(convertor, header, header_size, payload_size);
+                block.next.store(FIFO_FREE, Ordering::Release);
             });
 
         // Push the block on to the endpoint's FIFO
+        info!("sendi push ({}, {})", proc_info::local_rank(), block_id);
         data.endpoints[endpoint_idx]
             .as_ref()
             .unwrap()

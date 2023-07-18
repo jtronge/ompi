@@ -6,9 +6,9 @@ use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_
 use crate::shared::{BlockID, Descriptor, SharedRegionMap};
 use crate::Rank;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::ops::DerefMut;
 use std::rc::Rc;
+use rustc_hash::FxHashMap;
 
 /// Data internal to the module.
 pub(crate) struct LocalData {
@@ -27,7 +27,7 @@ pub(crate) struct LocalData {
     /// Endpoints that have access to the shared memory
     pub(crate) endpoints: Vec<Option<Endpoint>>,
     /// Descriptor list
-    descriptors: HashMap<(Rank, BlockID), *mut Descriptor>,
+    descriptors: FxHashMap<(Rank, BlockID), *mut Descriptor>,
 }
 
 impl LocalData {
@@ -85,7 +85,7 @@ pub(crate) unsafe fn init(
         pending: vec![],
         error_cb: None,
         endpoints: vec![],
-        descriptors: HashMap::new(),
+        descriptors: FxHashMap::default(),
     };
     (*btl).internal = Box::into_raw(Box::new(data)) as *mut _;
 }

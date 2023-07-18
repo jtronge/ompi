@@ -1,4 +1,4 @@
-use log::error;
+use log::{error, info};
 use shared_memory::ShmemError;
 use std::cell::RefCell;
 use std::io::Write;
@@ -6,6 +6,7 @@ use std::io::Write;
 use std::os::raw::c_int;
 use std::rc::Rc;
 use std::marker::PhantomData;
+use std::sync::atomic::Ordering;
 mod block_store;
 mod endpoint;
 mod fifo;
@@ -32,7 +33,7 @@ use opal::{
     mca_btl_rsm_t, opal_ptr_t, MCA_BTL_FLAGS_SEND, MCA_BTL_FLAGS_SEND_INPLACE, OPAL_SUCCESS,
     MCA_BTL_TAG_MAX,
 };
-use shared::{make_path, BlockID, Descriptor, SharedRegionHandle, SharedRegionMap, BLOCK_SIZE};
+use shared::{make_path, BlockID, Descriptor, SharedRegionHandle, SharedRegionMap, BLOCK_SIZE, FIFO_FREE, EAGER_LIMIT};
 
 extern "C" {
     pub static mut mca_btl_rsm: mca_btl_rsm_t;
@@ -142,6 +143,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     local_data::lock(btl, |data| {
         // Progress pending outgoing blocks
         while let Some((endpoint_idx, block_id)) = data.pending.pop() {
+            info!("pushing ({}, {})", proc_info::local_rank(), block_id);
             data.endpoints[endpoint_idx]
                 .as_ref()
                 .unwrap()
@@ -162,6 +164,8 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     loop {
         let handler = local_data::lock(btl, |data| {
             if let Some((endpoint_rank, block_id)) = data.fifo.pop() {
+                info!("popping block ({}, {})", endpoint_rank, block_id);
+
                 let endpoint_idx: usize = data
                     .endpoints
                     .iter()
@@ -182,6 +186,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
             if handler.run(btl) {
                 // Block is complete, so we need to return it
                 local_data::lock(btl, |data| {
+                    info!("completing ({}, {})", handler.rank, handler.block_id);
                     data.endpoints[endpoint_idx]
                         .as_ref()
                         .unwrap()
@@ -266,6 +271,7 @@ impl<'a> Handler<'a> {
                 // Set the complete value
                 let block_idx: usize = self.block_id.try_into().unwrap();
                 region.blocks[block_idx].complete = complete;
+                region.blocks[block_idx].next.store(FIFO_FREE, Ordering::Release);
             });
 
             if !complete {
@@ -361,7 +367,7 @@ unsafe extern "C" fn mca_btl_rsm_component_register_params() -> c_int {
     // TODO: I'm not sure how these eager/rndv variables will affect usage of
     // this BTL. I see the original sm module has RDMA code, but I think this
     // is out of scope for this implementation.
-    mca_btl_rsm.parent.btl_eager_limit = BLOCK_SIZE;
+    mca_btl_rsm.parent.btl_eager_limit = EAGER_LIMIT;
     mca_btl_rsm.parent.btl_rndv_eager_limit = BLOCK_SIZE;
 
     mca_btl_rsm.parent.btl_max_send_size = BLOCK_SIZE;

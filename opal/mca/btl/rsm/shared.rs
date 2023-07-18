@@ -168,8 +168,8 @@ impl SharedRegionHandle {
             // Initialize everything
             std::ptr::write_bytes(ptr, 0, SHARED_REGION_SIZE);
             let region = ptr as *mut SharedRegion;
-            (*region).fifo.head = FIFO_FREE;
-            (*region).fifo.tail.store(FIFO_FREE, Ordering::Relaxed);
+            (*region).fifo.head.store(FIFO_FREE, Ordering::Release);
+            (*region).fifo.tail.store(FIFO_FREE, Ordering::Release);
             // Initialize the complete field just in case
             for block in (*region).blocks.iter_mut() {
                 block.complete = false;
@@ -215,8 +215,9 @@ impl SharedRegionHandle {
 
 pub type BlockID = i32;
 
+pub const EAGER_LIMIT: usize = 4 * 1024;
 /// Block size
-pub const BLOCK_SIZE: usize = 16384;
+pub const BLOCK_SIZE: usize = 32 * 1024;
 /// Max blocks
 pub const MAX_BLOCKS: usize = 256;
 
@@ -225,7 +226,7 @@ pub const MAX_BLOCKS: usize = 256;
 #[repr(C)]
 pub struct Block {
     /// Next block in singly linked list
-    pub next: i64,
+    pub next: AtomicI64,
     /// Tag in block (used for indexing into message callback table)
     pub tag: mca_btl_base_tag_t,
     /// Indicates that the block is complete and can be freed
@@ -302,7 +303,7 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
 /// FIFO header in shared memory.
 #[repr(C)]
 pub struct FIFOHeader {
-    pub head: i64,
+    pub head: AtomicI64,
     pub tail: AtomicI64,
 }
 
