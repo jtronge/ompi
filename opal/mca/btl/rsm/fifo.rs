@@ -69,7 +69,7 @@ impl FIFO {
 
     /// Push the block onto this FIFO.
     #[inline]
-    pub fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
+    pub unsafe fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
         let map = match self.map.try_borrow_mut() {
             Ok(m) => m,
             Err(_) => return Err(Error::LockError),

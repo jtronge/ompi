@@ -81,7 +81,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
             };
             data.map
                 .borrow_mut()
-                .insert(local_rank, RefCell::new(region));
+                .insert(local_rank, region);
 
             // Create the endpoint
             let endpoint = match Endpoint::new(Rc::clone(&data.map), local_rank) {

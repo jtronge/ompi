@@ -101,7 +101,6 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
             return std::ptr::null_mut();
         }
     };
-    let region = RefCell::new(region);
     map.insert(local_rank, region);
     let map = Rc::new(RefCell::new(map));
     let fifo = FIFO::new(Rc::clone(&map), local_rank);
@@ -283,7 +282,7 @@ impl<'a> Handler<'a> {
 /// Handle an incoming block. Return true if the block needs to be returned to
 /// the sender, and false if this was a block being returned to this rank.
 #[inline]
-fn handle_incoming<'a>(
+unsafe fn handle_incoming<'a>(
     data: &mut LocalData,
     endpoint_idx: usize,
     rank: Rank,

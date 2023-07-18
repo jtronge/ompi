@@ -6,14 +6,11 @@ use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_
 use crate::shared::{BlockID, Descriptor, SharedRegionMap};
 use crate::Rank;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ops::DerefMut;
 use std::rc::Rc;
-use std::sync::Mutex;
 
 /// Data internal to the module.
-///
-/// This data is stored on the btl handle with a wrapping Mutex. In effect,
-/// this works a coarse grained lock.
 pub(crate) struct LocalData {
     /// Shared memory for all ranks
     pub(crate) map: Rc<RefCell<SharedRegionMap>>,
@@ -30,26 +27,34 @@ pub(crate) struct LocalData {
     /// Endpoints that have access to the shared memory
     pub(crate) endpoints: Vec<Option<Endpoint>>,
     /// Descriptor list
-    descriptors: Vec<*mut Descriptor>,
+    descriptors: HashMap<(Rank, BlockID), *mut Descriptor>,
 }
 
 impl LocalData {
     /// Create a new descriptor for the rank and block ID and return the pointer.
     #[inline]
     pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
-        let desc = self.map.borrow_mut().descriptor(rank, block_id);
-        let desc = Box::new(desc);
-        let desc_ptr = Box::into_raw(desc);
-        self.descriptors.push(desc_ptr);
-        desc_ptr
+        let des = self.map.borrow_mut().descriptor(rank, block_id);
+        let des = Box::new(des);
+        let des_ptr = Box::into_raw(des);
+        self.descriptors.insert((rank, block_id), des_ptr);
+        des_ptr
+    }
+
+    /// Find the descriptor with the rank and block ID (used on return of a
+    /// descriptor from another process).
+    pub(crate) fn find_descriptor(&self, rank: Rank, block_id: BlockID) -> Option<*mut Descriptor> {
+        self.descriptors
+            .get(&(rank, block_id))
+            .map(|des| *des)
     }
 
     /// Free a descriptor allocated above.
     #[inline]
     pub(crate) unsafe fn free_descriptor(&mut self, des: *mut Descriptor) {
-        if let Some(pos) = self.descriptors.iter().position(|elem| *elem == des) {
-            self.descriptors.swap_remove(pos);
-        }
+        let rank = (*des).rank;
+        let block_id = (*des).block_id;
+        let _ = self.descriptors.remove(&(rank, block_id));
         let _ = Box::from_raw(des);
     }
 
@@ -63,19 +68,6 @@ impl LocalData {
     pub(crate) fn del_endpoint(&mut self, endpoint_idx: usize) {
         let _ = self.endpoints[endpoint_idx].take();
     }
-
-    /// Find the descriptor with the rank and block ID (used on return of a
-    /// descriptor from another process).
-    pub(crate) fn find_descriptor(&self, rank: Rank, block_id: BlockID) -> Option<*mut Descriptor> {
-        unsafe {
-            // SAFETY: All pointers dereferenced below should be valid, as they
-            // can only allocated and freed through the interface of LocalData.
-            self.descriptors
-                .iter()
-                .find(|des| (*(*(*des))).rank == rank && (*(*(*des))).block_id == block_id)
-                .map(|des| *des)
-        }
-    }
 }
 
 /// Initialize the private module data for the BTL module.
@@ -86,24 +78,22 @@ pub(crate) unsafe fn init(
     block_store: BlockStore,
 ) {
     let btl = btl as *mut mca_btl_rsm_t;
-    let data = Mutex::new(LocalData {
+    let data = LocalData {
         map,
         fifo,
         block_store,
         pending: vec![],
         error_cb: None,
         endpoints: vec![],
-        descriptors: vec![],
-    });
+        descriptors: HashMap::new(),
+    };
     (*btl).internal = Box::into_raw(Box::new(data)) as *mut _;
 }
 
 /// Free the private module data for the BTL module.
 pub(crate) unsafe fn free(btl: *mut mca_btl_base_module_t) {
     let btl = btl as *mut mca_btl_rsm_t;
-    let data = Box::from_raw((*btl).internal as *mut Mutex<LocalData>);
-    // Destroy remaining endpoints
-    let _ = data.lock().expect("Failed to lock module data");
+    let _ = Box::from_raw((*btl).internal as *mut LocalData);
 }
 
 /// Use the module data for the given BTL pointer. The BTL pointer must be
@@ -113,7 +103,6 @@ where
     F: FnOnce(&mut LocalData) -> R,
 {
     let btl = btl as *mut mca_btl_rsm_t;
-    let data = (*btl).internal as *mut Mutex<LocalData>;
-    let mut data = (*data).lock().expect("Failed to lock module data");
-    f(data.deref_mut())
+    let data = (*btl).internal as *mut LocalData;
+    f(data.as_mut().unwrap())
 }

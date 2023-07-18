@@ -39,8 +39,7 @@ pub fn make_path(node_name: String, rank: Rank, pid: u32) -> PathBuf {
 }
 
 pub struct SharedRegionMap {
-    // pub regions: FxHashMap<Rank, RefCell<SharedRegionHandle>>,
-    regions: Vec<Option<RefCell<SharedRegionHandle>>>,
+    regions: Vec<Option<SharedRegionHandle>>,
 }
 
 impl SharedRegionMap {
@@ -49,7 +48,7 @@ impl SharedRegionMap {
     }
 
     /// Insert a shared region handle.
-    pub fn insert(&mut self, rank: Rank, handle: RefCell<SharedRegionHandle>) {
+    pub fn insert(&mut self, rank: Rank, handle: SharedRegionHandle) {
         let rank: usize = rank.try_into().unwrap();
         if rank >= self.regions.len() {
             self.regions.resize_with(rank + 1, || None);
@@ -58,55 +57,58 @@ impl SharedRegionMap {
     }
 
     /// Remove a shared region handle for the given rank.
-    pub fn remove(&mut self, rank: Rank) -> Option<RefCell<SharedRegionHandle>> {
+    pub fn remove(&mut self, rank: Rank) -> Option<SharedRegionHandle> {
         let rank: usize = rank.try_into().unwrap();
         self.regions[rank].take()
     }
 
     /// Use a mutable region reference in a callback.
     #[inline]
-    pub fn region_mut<F, R>(&self, rank: Rank, f: F) -> R
+    pub unsafe fn region_mut<F, R>(&self, rank: Rank, f: F) -> R
     where
         F: FnOnce(&mut SharedRegion) -> R,
     {
-        let rank: usize = rank.try_into().unwrap();
-        let mut handle = self.regions[rank].as_ref().unwrap().borrow_mut();
-        f(handle.get())
+        // let rank: isize = rank.try_into().unwrap();
+        let ptr: *mut Option<SharedRegionHandle> = self.regions.as_ptr() as *mut _;
+        let handle_ptr = ptr.offset(rank as isize);
+        // let mut handle = self.regions[rank].as_ref().unwrap();
+        f((*handle_ptr).as_mut().unwrap().get())
     }
 
     /// Return a descriptor for a block.
     #[inline]
     pub fn descriptor(&self, rank: Rank, block_id: BlockID) -> Descriptor {
-        let rank: usize = rank.try_into().unwrap();
-        let mut handle = self.regions[rank].as_ref().unwrap().borrow_mut();
-        let region = handle.get();
-        let block_idx: usize = block_id.try_into().unwrap();
-        let block: &mut Block = &mut region.blocks[block_idx];
-        let segment = Box::new(mca_btl_base_segment_t {
-            seg_addr: opal_ptr_t {
-                pval: block.data.as_ptr() as *mut _,
-            },
-            seg_len: block.len.try_into().unwrap(),
-        });
-        let des_segments = Box::into_raw(segment);
+        unsafe {
+            self.region_mut(rank, |region| {
+                let block_idx: usize = block_id.try_into().unwrap();
+                let block: &mut Block = &mut region.blocks[block_idx];
+                let segment = Box::new(mca_btl_base_segment_t {
+                    seg_addr: opal_ptr_t {
+                        pval: block.data.as_ptr() as *mut _,
+                    },
+                    seg_len: block.len.try_into().unwrap(),
+                });
+                let des_segments = Box::into_raw(segment);
 
-        // SAFETY: This parameter does not seem to be getting initialized by
-        // any of the other BTLs so here we just leave it uninitilized, but this
-        // is UB.
-        let super_ = unsafe { MaybeUninit::<opal_free_list_item_t>::uninit().assume_init() };
-        Descriptor {
-            base: mca_btl_base_descriptor_t {
-                super_,
-                des_segments,
-                des_segment_count: 1,
-                des_cbfunc: None,
-                des_cbdata: std::ptr::null_mut(),
-                des_context: std::ptr::null_mut(),
-                des_flags: 0,
-                order: 0,
-            },
-            rank: rank.try_into().unwrap(),
-            block_id,
+                // SAFETY: This parameter does not seem to be getting initialized by
+                // any of the other BTLs so here we just leave it uninitilized, but this
+                // is UB.
+                let super_ = unsafe { MaybeUninit::<opal_free_list_item_t>::uninit().assume_init() };
+                Descriptor {
+                    base: mca_btl_base_descriptor_t {
+                        super_,
+                        des_segments,
+                        des_segment_count: 1,
+                        des_cbfunc: None,
+                        des_cbdata: std::ptr::null_mut(),
+                        des_context: std::ptr::null_mut(),
+                        des_flags: 0,
+                        order: 0,
+                    },
+                    rank: rank.try_into().unwrap(),
+                    block_id,
+                }
+            })
         }
     }
 }
