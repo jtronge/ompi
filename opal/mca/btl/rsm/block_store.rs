@@ -1,14 +1,12 @@
 use crate::shared::{BlockID, SharedRegionMap, MAX_BLOCKS};
-use std::cell::RefCell;
-use std::rc::Rc;
 
 pub(crate) struct BlockStore {
-    _map: Rc<RefCell<SharedRegionMap>>,
+    _map: *mut SharedRegionMap,
     free_blocks: Vec<BlockID>,
 }
 
 impl BlockStore {
-    pub fn new(map: Rc<RefCell<SharedRegionMap>>) -> BlockStore {
+    pub fn new(map: *mut SharedRegionMap) -> BlockStore {
         let free_blocks = (0..MAX_BLOCKS)
             .map(|block_id| block_id.try_into().unwrap())
             .collect();

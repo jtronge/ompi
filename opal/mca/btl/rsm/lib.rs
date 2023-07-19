@@ -1,10 +1,8 @@
 use log::{error, info};
 use shared_memory::ShmemError;
-use std::cell::RefCell;
 use std::io::Write;
 /// The component type is defined in C
 use std::os::raw::c_int;
-use std::rc::Rc;
 use std::marker::PhantomData;
 use std::sync::atomic::Ordering;
 mod block_store;
@@ -103,15 +101,15 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
         }
     };
     map.insert(local_rank, region);
-    let map = Rc::new(RefCell::new(map));
-    let fifo = FIFO::new(Rc::clone(&map), local_rank);
-    let block_store = BlockStore::new(Rc::clone(&map));
+    let map = Box::into_raw(Box::new(map));
+    let fifo = FIFO::new(map, local_rank);
+    let block_store = BlockStore::new(map);
 
     let ptr = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
     local_data::init(ptr, map, fifo, block_store);
     // Create a self endpoint
     match local_data::lock(ptr, |data| {
-        let endpoint = Endpoint::new(Rc::clone(&data.map), proc_info::local_rank())?;
+        let endpoint = Endpoint::new(data.map, proc_info::local_rank())?;
         let _ = data.add_endpoint(endpoint);
         Ok::<(), Error>(())
     }) {
@@ -253,7 +251,7 @@ impl<'a> Handler<'a> {
         // Now lock local_data, the region, set the block complete value, and
         // free the block if necessary.
         local_data::lock(btl, |data| {
-            data.map.borrow_mut().region_mut(self.rank, |region| {
+            (*data.map).region_mut(self.rank, |region| {
                 // Set the complete value
                 let block_idx: usize = self.block_id.try_into().unwrap();
                 region.blocks[block_idx].complete = complete;
@@ -281,7 +279,7 @@ unsafe fn handle_incoming<'a>(
     block_id: BlockID,
     segment: &'a mut mca_btl_base_segment_t,
 ) -> Handler<'a> {
-    let kind = data.map.borrow_mut().region_mut(rank, |region| {
+    let kind = (*data.map).region_mut(rank, |region| {
         let block_idx: usize = block_id.try_into().unwrap();
         let block = &mut region.blocks[block_idx];
 

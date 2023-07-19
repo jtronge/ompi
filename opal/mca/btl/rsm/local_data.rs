@@ -5,14 +5,12 @@ use crate::fifo::FIFO;
 use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_btl_rsm_t};
 use crate::shared::{BlockID, Descriptor, SharedRegionMap};
 use crate::Rank;
-use std::cell::RefCell;
-use std::rc::Rc;
 use rustc_hash::FxHashMap;
 
 /// Data internal to the module.
 pub(crate) struct LocalData {
     /// Shared memory for all ranks
-    pub(crate) map: Rc<RefCell<SharedRegionMap>>,
+    pub(crate) map: *mut SharedRegionMap,
     /// Local FIFO
     pub(crate) fifo: FIFO,
     /// Local block store
@@ -28,8 +26,8 @@ pub(crate) struct LocalData {
 impl LocalData {
     /// Create a new descriptor for the rank and block ID and return the pointer.
     #[inline]
-    pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
-        let des = self.map.borrow_mut().descriptor(rank, block_id);
+    pub(crate) unsafe fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
+        let des = (*self.map).descriptor(rank, block_id);
         let des = Box::new(des);
         let des_ptr = Box::into_raw(des);
         self.descriptors.insert((rank, block_id), des_ptr);
@@ -68,7 +66,7 @@ impl LocalData {
 /// Initialize the private module data for the BTL module.
 pub(crate) unsafe fn init(
     btl: *mut mca_btl_base_module_t,
-    map: Rc<RefCell<SharedRegionMap>>,
+    map: *mut SharedRegionMap,
     fifo: FIFO,
     block_store: BlockStore,
 ) {

@@ -12,7 +12,6 @@ use crate::shared::{Descriptor, SharedRegionHandle, BLOCK_SIZE, FIFO_FREE};
 use crate::{Error, Rank, SHARED_MEM_NAME_KEY};
 use log::{error, info};
 use std::os::raw::{c_int, c_void};
-use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
 #[no_mangle]
@@ -79,12 +78,10 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
                 // TODO: Propagate this error
                 Err(_) => panic!("Shared region handle attach failed"),
             };
-            data.map
-                .borrow_mut()
-                .insert(local_rank, region);
+            (*data.map).insert(local_rank, region);
 
             // Create the endpoint
-            let endpoint = match Endpoint::new(Rc::clone(&data.map), local_rank) {
+            let endpoint = match Endpoint::new(data.map, local_rank) {
                 Ok(ep) => ep,
                 // TODO: Propagate this error
                 Err(_) => panic!("Endpoint creation failed"),
@@ -111,7 +108,7 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
                 let endpoint_idx = *(peer as *mut usize);
                 let rank = data.endpoints[endpoint_idx].as_ref().unwrap().rank;
                 data.del_endpoint(endpoint_idx);
-                data.map.borrow_mut().remove(rank);
+                (*data.map).remove(rank);
                 *peer = std::ptr::null_mut();
             }
         }
@@ -141,12 +138,10 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             None => return std::ptr::null_mut(),
         };
         // Set the length
-        data.map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                let block_idx: usize = block_id.try_into().unwrap();
-                region.blocks[block_idx].len = size;
-            });
+        (*data.map).region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].len = size;
+        });
         let desc = data.new_descriptor(proc_info::local_rank(), block_id);
         desc as *mut _
     })
@@ -184,13 +179,10 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             Some(id) => id,
             None => return std::ptr::null_mut(),
         };
-        let rc = data
-            .map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                let block_idx: usize = block_id.try_into().unwrap();
-                region.blocks[block_idx].prepare_fill(convertor, reserve, size)
-            });
+        let rc = (*data.map).region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].prepare_fill(convertor, reserve, size)
+        });
         if rc < 0 {
             return std::ptr::null_mut();
         }
@@ -212,12 +204,10 @@ unsafe extern "C" fn mca_btl_rsm_send(
         let desc = descriptor as *mut Descriptor;
         let block_id = (*desc).block_id;
         let block_idx: usize = block_id.try_into().unwrap();
-        data.map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                region.blocks[block_idx].tag = tag;
-                region.blocks[block_idx].next.store(FIFO_FREE, Ordering::Release);
-            });
+        (*data.map).region_mut(proc_info::local_rank(), |region| {
+            region.blocks[block_idx].tag = tag;
+            region.blocks[block_idx].next.store(FIFO_FREE, Ordering::Release);
+        });
         data.endpoints[endpoint_idx]
             .as_ref()
             .unwrap()
@@ -254,16 +244,14 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
         let endpoint_idx = endpoint as usize;
 
         // Set the block data
-        data.map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                let block_idx: usize = block_id.try_into().unwrap();
-                let block = &mut region.blocks[block_idx];
-                block.tag = tag;
-                block.complete = false;
-                block.fill(convertor, header, header_size, payload_size);
-                block.next.store(FIFO_FREE, Ordering::Release);
-            });
+        (*data.map).region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            let block = &mut region.blocks[block_idx];
+            block.tag = tag;
+            block.complete = false;
+            block.fill(convertor, header, header_size, payload_size);
+            block.next.store(FIFO_FREE, Ordering::Release);
+        });
 
         // Push the block on to the endpoint's FIFO
         info!("sendi push ({}, {})", proc_info::local_rank(), block_id);

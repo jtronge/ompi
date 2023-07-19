@@ -1,26 +1,22 @@
 use crate::shared::{BlockID, Block, SharedRegionMap, FIFO_FREE};
 use crate::{Rank, Result};
 use log::info;
-use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
 pub(crate) struct FIFO {
-    map: Rc<RefCell<SharedRegionMap>>,
+    map: *mut SharedRegionMap,
     pub rank: Rank,
 }
 
 impl FIFO {
-    pub fn new(map: Rc<RefCell<SharedRegionMap>>, rank: Rank) -> FIFO {
+    pub fn new(map: *mut SharedRegionMap, rank: Rank) -> FIFO {
         FIFO { map, rank }
     }
 
     /// Pop the block from this FIFO.
     #[inline]
     pub unsafe fn pop(&self) -> Option<(Rank, BlockID)> {
-        let map = self.map.borrow_mut();
-
-        map.region_mut(self.rank, |region| {
+        (*self.map).region_mut(self.rank, |region| {
             if region.fifo.head.load(Ordering::Acquire) == FIFO_FREE {
                 return None;
             }
@@ -30,7 +26,7 @@ impl FIFO {
             let block: *mut Block = if rank == self.rank {
                 &mut region.blocks[block_id as usize] as *mut _
             } else {
-                map.region_mut(rank, |oregion| &mut oregion.blocks[block_id as usize] as *mut _)
+                (*self.map).region_mut(rank, |oregion| &mut oregion.blocks[block_id as usize] as *mut _)
             };
 
             region.fifo.head.store(FIFO_FREE, Ordering::Relaxed);
@@ -53,11 +49,9 @@ impl FIFO {
     /// Push the block onto this FIFO.
     #[inline]
     pub unsafe fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
-        let map = self.map.borrow_mut();
-
         // This seems like too much code for what it's trying to do
         let value = encode_rank_block_id(rank, block_id);
-        map.region_mut(self.rank, |region| {
+        (*self.map).region_mut(self.rank, |region| {
             let prev = region.fifo.tail.swap(value, Ordering::AcqRel);
 
             if prev != FIFO_FREE {
@@ -72,7 +66,7 @@ impl FIFO {
                 let block: *mut Block = if prev_rank == self.rank {
                     &mut region.blocks[prev_block_id as usize] as *mut _
                 } else {
-                    map.region_mut(prev_rank, |oregion| &mut oregion.blocks[prev_block_id as usize] as *mut _)
+                    (*self.map).region_mut(prev_rank, |oregion| &mut oregion.blocks[prev_block_id as usize] as *mut _)
                 };
                 (*block).next.store(value, Ordering::Release);
             } else {
