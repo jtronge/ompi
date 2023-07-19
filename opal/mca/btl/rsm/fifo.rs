@@ -1,5 +1,5 @@
 use crate::shared::{BlockID, Block, SharedRegionMap, FIFO_FREE};
-use crate::{Error, Rank, Result};
+use crate::{Rank, Result};
 use log::info;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -18,10 +18,7 @@ impl FIFO {
     /// Pop the block from this FIFO.
     #[inline]
     pub unsafe fn pop(&self) -> Option<(Rank, BlockID)> {
-        let map = match self.map.try_borrow_mut() {
-            Ok(m) => m,
-            Err(_) => return None,
-        };
+        let map = self.map.borrow_mut();
 
         map.region_mut(self.rank, |region| {
             if region.fifo.head.load(Ordering::Acquire) == FIFO_FREE {
@@ -56,10 +53,7 @@ impl FIFO {
     /// Push the block onto this FIFO.
     #[inline]
     pub unsafe fn push(&self, rank: Rank, block_id: BlockID) -> Result<()> {
-        let map = match self.map.try_borrow_mut() {
-            Ok(m) => m,
-            Err(_) => return Err(Error::LockError),
-        };
+        let map = self.map.borrow_mut();
 
         // This seems like too much code for what it's trying to do
         let value = encode_rank_block_id(rank, block_id);

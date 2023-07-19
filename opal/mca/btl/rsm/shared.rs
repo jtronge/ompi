@@ -202,6 +202,7 @@ impl SharedRegionHandle {
     }
 
     /// Return a reference to the shared memory region.
+    #[inline]
     pub fn get<'a>(&'a mut self) -> &'a mut SharedRegion {
         unsafe {
             // SAFETY: The region pointer is valid since it could only have
@@ -295,7 +296,6 @@ unsafe fn convert_data(convertor: *mut opal_convertor_t, mut iov: iovec, payload
         let mut data_ptr = std::ptr::null_mut();
         opal_convertor_get_current_pointer_rs(convertor, &mut data_ptr);
         std::ptr::copy_nonoverlapping(data_ptr, iov.iov_base, payload_size);
-        // memcpy(iov.iov_base, data_ptr, payload_size.try_into().unwrap());
     }
 }
 

@@ -188,8 +188,6 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
             break;
         }
     }
-    // info!("count ---- {}", count);
-    // println!("count: {}", count);
 
     // Number of blocks received
     count
@@ -304,13 +302,6 @@ unsafe fn handle_incoming<'a>(
         // Segment to be passed to callback (initialized here to avoid drop within block)
         segment.seg_addr.pval = block.data.as_mut_ptr() as *mut _;
         segment.seg_len = block.len.try_into().unwrap();
-        // let segment = Box::new(mca_btl_base_segment_t {
-        //     seg_addr: opal_ptr_t {
-        //        pval: block.data.as_mut_ptr() as *mut _,
-        //    },
-        //    seg_len: block.len.try_into().unwrap(),
-        // });
-        // let segment_ptr = Box::into_raw(segment);
         let recv_de = mca_btl_base_receive_descriptor_t {
             endpoint: endpoint_idx as *mut _,
             des_segments: segment as *mut _,
@@ -343,10 +334,6 @@ unsafe extern "C" fn mca_btl_rsm_component_open() -> c_int {
 unsafe extern "C" fn mca_btl_rsm_component_close() -> c_int {
     OPAL_SUCCESS
 }
-
-// const MAX_EAGER_LIMIT: usize = 4 * 1024;
-// const MAX_RNDV_EAGER_LIMIT: usize = 32 * 1024;
-// const MAX_SEND_SIZE: usize = 32 * 1024;
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_register_params() -> c_int {
