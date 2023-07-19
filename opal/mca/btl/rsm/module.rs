@@ -11,7 +11,6 @@ use crate::proc_info;
 use crate::shared::{Descriptor, SharedRegionHandle, BLOCK_SIZE, FIFO_FREE};
 use crate::{Error, Rank, SHARED_MEM_NAME_KEY};
 use log::{error, info};
-use std::cell::RefCell;
 use std::os::raw::{c_int, c_void};
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
@@ -219,7 +218,12 @@ unsafe extern "C" fn mca_btl_rsm_send(
                 region.blocks[block_idx].tag = tag;
                 region.blocks[block_idx].next.store(FIFO_FREE, Ordering::Release);
             });
-        data.pending.push((endpoint_idx, block_id));
+        data.endpoints[endpoint_idx]
+            .as_ref()
+            .unwrap()
+            .fifo
+            .push(proc_info::local_rank(), block_id)
+            .unwrap();
         // The original SM attempts a write into the peer's fifo, here it
         // either writes or fails altogether
         // (*endpoint).fifo.push(proc_info::local_rank(), block_id).unwrap();
@@ -242,11 +246,6 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
     local_data::lock(btl, |data| {
-        // Check pending, return early if there are some
-        if data.pending.len() > 0 {
-            return OPAL_ERR_OUT_OF_RESOURCE;
-        }
-
         // Alloc block and set output descriptor
         let block_id = match data.block_store.alloc() {
             Some(id) => id,

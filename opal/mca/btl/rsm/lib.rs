@@ -140,18 +140,6 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
     // TODO: Use of below pointer could very well be UB
     let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
-    local_data::lock(btl, |data| {
-        // Progress pending outgoing blocks
-        while let Some((endpoint_idx, block_id)) = data.pending.pop() {
-            info!("pushing ({}, {})", proc_info::local_rank(), block_id);
-            data.endpoints[endpoint_idx]
-                .as_ref()
-                .unwrap()
-                .fifo
-                .push(proc_info::local_rank(), block_id)
-                .unwrap();
-        }
-    });
 
     // Poll my local fifo
     let mut count = 0;
@@ -312,9 +300,7 @@ unsafe fn handle_incoming<'a>(
         // Prepare the callback descriptor
         let idx: usize = block.tag.try_into().unwrap();
         assert!(idx < MCA_BTL_TAG_MAX.try_into().unwrap());
-        let reg: mca_btl_active_message_callback_t = unsafe {
-            mca_btl_base_active_message_trigger[idx]
-        };
+        let reg: mca_btl_active_message_callback_t = mca_btl_base_active_message_trigger[idx];
         // Segment to be passed to callback (initialized here to avoid drop within block)
         segment.seg_addr.pval = block.data.as_mut_ptr() as *mut _;
         segment.seg_len = block.len.try_into().unwrap();

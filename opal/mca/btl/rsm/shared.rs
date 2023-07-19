@@ -14,7 +14,6 @@ use crate::opal::{
 };
 use crate::{Error, Rank, Result};
 use shared_memory::{Shmem, ShmemConf};
-use std::cell::RefCell;
 use std::mem::MaybeUninit;
 use std::os::raw::{c_int, c_void};
 use std::path::{Path, PathBuf};
@@ -93,7 +92,7 @@ impl SharedRegionMap {
                 // SAFETY: This parameter does not seem to be getting initialized by
                 // any of the other BTLs so here we just leave it uninitilized, but this
                 // is UB.
-                let super_ = unsafe { MaybeUninit::<opal_free_list_item_t>::uninit().assume_init() };
+                let super_ = MaybeUninit::<opal_free_list_item_t>::uninit().assume_init();
                 Descriptor {
                     base: mca_btl_base_descriptor_t {
                         super_,
@@ -309,5 +308,3 @@ pub struct FIFOHeader {
 
 /// Indicates a free FIFO entry
 pub const FIFO_FREE: i64 = -1;
-/// Indicates a locked FIFO entry
-pub const FIFO_LOCK: i64 = -2;

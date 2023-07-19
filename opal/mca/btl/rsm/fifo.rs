@@ -1,4 +1,4 @@
-use crate::shared::{BlockID, Block, SharedRegionMap, FIFO_FREE, FIFO_LOCK};
+use crate::shared::{BlockID, Block, SharedRegionMap, FIFO_FREE};
 use crate::{Error, Rank, Result};
 use log::info;
 use std::cell::RefCell;
@@ -50,49 +50,6 @@ impl FIFO {
             }
 
             Some((rank, block_id))
-/*
-            loop {
-                let old_head = region.fifo.head;
-                let old_tail = region.fifo.tail.load(Ordering::SeqCst);
-                if old_head == FIFO_FREE {
-                    return None;
-                }
-
-                if old_tail == FIFO_LOCK {
-                    continue;
-                }
-
-                // We lock the tail always
-                if region
-                    .fifo
-                    .tail
-                    .compare_exchange(old_tail, FIFO_LOCK, Ordering::SeqCst, Ordering::SeqCst)
-                    .is_err()
-                {
-                    continue;
-                }
-
-                let (rank, block_id) = extract_rank_block_id(old_head);
-                let block_idx: usize = block_id.try_into().unwrap();
-
-                let new_head = if rank == self.rank {
-                    region.blocks[block_idx].next
-                } else {
-                    map.region_mut(rank, |other_region| other_region.blocks[block_idx].next)
-                };
-                region.fifo.head = new_head;
-                let new_tail = if new_head == FIFO_FREE {
-                    FIFO_FREE
-                } else {
-                    old_tail
-                };
-
-                // Unlock
-                region.fifo.tail.store(new_tail, Ordering::SeqCst);
-
-                return Some((rank, block_id));
-            }
-*/
         })
     }
 
@@ -129,55 +86,6 @@ impl FIFO {
             }
 
             Ok(())
-/*
-            loop {
-                let new_tail = encode_rank_block_id(rank, block_id);
-                let old_tail = region.fifo.tail.load(Ordering::SeqCst);
-
-                if old_tail == FIFO_LOCK {
-                    continue;
-                }
-
-                // Lock
-                if region
-                    .fifo
-                    .tail
-                    .compare_exchange(old_tail, FIFO_LOCK, Ordering::SeqCst, Ordering::SeqCst)
-                    .is_err()
-                {
-                    continue;
-                }
-
-                if old_tail == FIFO_FREE {
-                    region.fifo.head = new_tail;
-                } else {
-                    let (old_rank, old_block_id) = extract_rank_block_id(old_tail);
-                    let old_block_idx: usize = old_block_id.try_into().unwrap();
-                    if old_rank == self.rank {
-                        region.blocks[old_block_idx].next = new_tail;
-                    } else {
-                        map.region_mut(old_rank, |other_region| {
-                            other_region.blocks[old_block_idx].next = new_tail;
-                        });
-                    }
-                }
-
-                // Ensure next is FIFO_FREE
-                let block_idx: usize = block_id.try_into().unwrap();
-                if rank == self.rank {
-                    region.blocks[block_idx].next = FIFO_FREE;
-                } else {
-                    map.region_mut(rank, |other_region| {
-                        other_region.blocks[block_idx].next = FIFO_FREE;
-                    });
-                }
-
-                // Unlock
-                region.fifo.tail.store(new_tail, Ordering::SeqCst);
-
-                return Ok(());
-            }
-*/
         })
     }
 }

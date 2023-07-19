@@ -6,7 +6,6 @@ use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_
 use crate::shared::{BlockID, Descriptor, SharedRegionMap};
 use crate::Rank;
 use std::cell::RefCell;
-use std::ops::DerefMut;
 use std::rc::Rc;
 use rustc_hash::FxHashMap;
 
@@ -18,10 +17,6 @@ pub(crate) struct LocalData {
     pub(crate) fifo: FIFO,
     /// Local block store
     pub(crate) block_store: BlockStore,
-    /// Pending blocks (endpoint, block_id)
-    ///
-    /// TODO: What if the endpoint get's freed before the pending entry is cleared?
-    pub(crate) pending: Vec<(usize, BlockID)>,
     /// Error handler
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory
@@ -82,7 +77,6 @@ pub(crate) unsafe fn init(
         map,
         fifo,
         block_store,
-        pending: vec![],
         error_cb: None,
         endpoints: vec![],
         descriptors: FxHashMap::default(),
