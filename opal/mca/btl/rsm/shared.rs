@@ -8,13 +8,9 @@ use crate::opal::{
     opal_convertor_need_buffers_rs,
     opal_convertor_pack,
     opal_convertor_t,
-    opal_free_list_item_t,
-    // memcpy,
-    opal_ptr_t,
 };
 use crate::{Error, Rank, Result};
 use shared_memory::{Shmem, ShmemConf};
-use std::mem::MaybeUninit;
 use std::os::raw::{c_int, c_void};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI64, Ordering};
@@ -75,56 +71,38 @@ impl SharedRegionMap {
     }
 
     /// Return a descriptor for a block.
-    #[inline]
-    pub fn descriptor(&self, rank: Rank, block_id: BlockID) -> Descriptor {
+    pub fn init_descriptor(&self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
         unsafe {
             self.region_mut(rank, |region| {
                 let block_idx: usize = block_id.try_into().unwrap();
                 let block: &mut Block = &mut region.blocks[block_idx];
-                let segment = Box::new(mca_btl_base_segment_t {
-                    seg_addr: opal_ptr_t {
-                        pval: block.data.as_ptr() as *mut _,
-                    },
-                    seg_len: block.len.try_into().unwrap(),
-                });
-                let des_segments = Box::into_raw(segment);
 
-                // SAFETY: This parameter does not seem to be getting initialized by
-                // any of the other BTLs so here we just leave it uninitilized, but this
-                // is UB.
-                let super_ = MaybeUninit::<opal_free_list_item_t>::uninit().assume_init();
-                Descriptor {
-                    base: mca_btl_base_descriptor_t {
-                        super_,
-                        des_segments,
-                        des_segment_count: 1,
-                        des_cbfunc: None,
-                        des_cbdata: std::ptr::null_mut(),
-                        des_context: std::ptr::null_mut(),
-                        des_flags: 0,
-                        order: 0,
-                    },
-                    rank: rank.try_into().unwrap(),
-                    block_id,
-                }
+                // NOTE: We ignore the list super member here
+                // Reset the descriptor data
+                block.des.base.des_segment_count = 1;
+                block.des.base.des_cbfunc = None;
+                block.des.base.des_cbdata = std::ptr::null_mut();
+                block.des.base.des_context = std::ptr::null_mut();
+                block.des.base.des_flags = 0;
+                block.des.base.order = 0;
+                block.des.rank = rank;
+                block.des.block_id = block_id;
+                // Set the segment pointers
+                block.des.segment.seg_addr.pval = block.data.as_ptr() as *mut _;
+                block.des.segment.seg_len = block.len.try_into().unwrap();
+                block.des.base.des_segments = &mut block.des.segment as *mut _;
+                &mut block.des as *mut _
             })
         }
     }
-}
 
-/// Descriptor to return to calling code with block identification info.
-#[repr(C)]
-pub struct Descriptor {
-    pub base: mca_btl_base_descriptor_t,
-    pub rank: Rank,
-    pub block_id: BlockID,
-}
-
-impl Drop for Descriptor {
-    fn drop(&mut self) {
-        unsafe {
-            let _ = Box::from_raw(self.base.des_segments);
-        }
+    /// Reset the descriptor data.
+    pub unsafe fn reset_descriptor(&self, des: *mut Descriptor) {
+        (*des).base.des_cbfunc = None;
+        (*des).base.des_cbdata = std::ptr::null_mut();
+        (*des).base.des_context = std::ptr::null_mut();
+        (*des).base.des_flags = 0;
+        (*des).base.order = 0;
     }
 }
 
@@ -221,10 +199,21 @@ pub const BLOCK_SIZE: usize = 32 * 1024;
 /// Max blocks
 pub const MAX_BLOCKS: usize = 256;
 
+/// Descriptor to return to calling code with block identification info.
+#[repr(C)]
+pub struct Descriptor {
+    pub base: mca_btl_base_descriptor_t,
+    pub rank: Rank,
+    pub block_id: BlockID,
+    /// Internal segment pointer
+    segment: mca_btl_base_segment_t,
+}
+
 /// Block in shared memory.
-#[derive(Debug)]
 #[repr(C)]
 pub struct Block {
+    /// Internal descriptor data
+    des: Descriptor,
     /// Next block in singly linked list
     pub next: AtomicI64,
     /// Tag in block (used for indexing into message callback table)
@@ -238,8 +227,11 @@ pub struct Block {
 }
 
 impl Block {
+    pub fn descriptor(&mut self) -> *mut Descriptor {
+        &mut self.des
+    }
+
     /// Fill the memory location with the given convertor and header data.
-    #[inline]
     pub unsafe fn fill(
         &mut self,
         convertor: *mut opal_convertor_t,
@@ -264,7 +256,6 @@ impl Block {
 
     /// Fill the block with the given data, with reserve space, and returning
     /// the amount of data used in size.
-    #[inline]
     pub unsafe fn prepare_fill(
         &mut self,
         convertor: *mut opal_convertor_t,

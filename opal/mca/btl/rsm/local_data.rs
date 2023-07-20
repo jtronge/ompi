@@ -3,12 +3,10 @@ use crate::block_store::BlockStore;
 use crate::endpoint::Endpoint;
 use crate::fifo::FIFO;
 use crate::opal::{mca_btl_base_module_error_cb_fn_t, mca_btl_base_module_t, mca_btl_rsm_t};
-use crate::shared::{BlockID, Descriptor, SharedRegionMap};
-use crate::Rank;
+use crate::shared::SharedRegionMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Mutex;
-use rustc_hash::FxHashMap;
 use log::info;
 
 /// Data internal to the module.
@@ -23,38 +21,9 @@ pub(crate) struct LocalData {
     pub(crate) error_cb: mca_btl_base_module_error_cb_fn_t,
     /// Endpoints that have access to the shared memory
     pub(crate) endpoints: Vec<Option<Endpoint>>,
-    /// Descriptor list
-    descriptors: FxHashMap<(Rank, BlockID), *mut Descriptor>,
 }
 
 impl LocalData {
-    /// Create a new descriptor for the rank and block ID and return the pointer.
-    #[inline]
-    pub(crate) fn new_descriptor(&mut self, rank: Rank, block_id: BlockID) -> *mut Descriptor {
-        let des = self.map.borrow_mut().descriptor(rank, block_id);
-        let des = Box::new(des);
-        let des_ptr = Box::into_raw(des);
-        self.descriptors.insert((rank, block_id), des_ptr);
-        des_ptr
-    }
-
-    /// Find the descriptor with the rank and block ID (used on return of a
-    /// descriptor from another process).
-    pub(crate) fn find_descriptor(&self, rank: Rank, block_id: BlockID) -> Option<*mut Descriptor> {
-        self.descriptors
-            .get(&(rank, block_id))
-            .map(|des| *des)
-    }
-
-    /// Free a descriptor allocated above.
-    #[inline]
-    pub(crate) unsafe fn free_descriptor(&mut self, des: *mut Descriptor) {
-        let rank = (*des).rank;
-        let block_id = (*des).block_id;
-        let _ = self.descriptors.remove(&(rank, block_id));
-        let _ = Box::from_raw(des);
-    }
-
     /// Add an endpoint
     pub(crate) fn add_endpoint(&mut self, endpoint: Endpoint) -> usize {
         self.endpoints.push(Some(endpoint));
@@ -81,7 +50,6 @@ pub(crate) unsafe fn init(
         block_store,
         error_cb: None,
         endpoints: vec![],
-        descriptors: FxHashMap::default(),
     });
     (*btl).internal = Box::into_raw(Box::new(data)) as *mut _;
 }

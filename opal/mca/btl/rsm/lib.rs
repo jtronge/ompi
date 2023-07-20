@@ -196,7 +196,7 @@ unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
 }
 
 enum HandlerKind {
-    CompleteCallback(Option<(*mut Descriptor, usize)>),
+    CompleteCallback(*mut Descriptor, usize),
     ReceiveCallback(
         mca_btl_base_module_recv_cb_fn_t,
         mca_btl_base_receive_descriptor_t,
@@ -220,7 +220,7 @@ impl<'a> Handler<'a> {
     unsafe fn run(&mut self, btl: *mut mca_btl_base_module_t) -> bool {
         let complete = if let Some(kind) = self.kind.take() {
             match kind {
-                HandlerKind::CompleteCallback(Some((desc, endpoint_idx))) => {
+                HandlerKind::CompleteCallback(desc, endpoint_idx) => {
                     if let Some(cbfunc) = (*desc).base.des_cbfunc {
                         cbfunc(
                             // (&mut mca_btl_rsm as *mut _) as *mut _,
@@ -230,13 +230,12 @@ impl<'a> Handler<'a> {
                             OPAL_SUCCESS,
                         );
                     }
-                    // Now destroy the callback
+                    // Now reset the callback
                     local_data::lock(btl, |data| {
-                        data.free_descriptor(desc);
+                        data.map.borrow_mut().reset_descriptor(desc);
                     });
                     false
                 }
-                HandlerKind::CompleteCallback(None) => false,
                 HandlerKind::ReceiveCallback(cbfunc, mut recv_de) => {
                     if let Some(cbfunc) = cbfunc {
                         cbfunc(
@@ -289,12 +288,7 @@ unsafe fn handle_incoming<'a>(
 
         // Free returned blocks
         if block.complete {
-            // Find the descriptor
-            return if let Some(des) = data.find_descriptor(rank, block_id) {
-                Some(HandlerKind::CompleteCallback(Some((des, endpoint_idx))))
-            } else {
-                Some(HandlerKind::CompleteCallback(None))
-            };
+            return Some(HandlerKind::CompleteCallback(block.descriptor(), endpoint_idx));
         }
 
         // Prepare the callback descriptor

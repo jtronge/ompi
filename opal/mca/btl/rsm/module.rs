@@ -147,13 +147,12 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
             None => return std::ptr::null_mut(),
         };
         // Set the length
-        data.map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                let block_idx: usize = block_id.try_into().unwrap();
-                region.blocks[block_idx].len = size;
-            });
-        let desc = data.new_descriptor(proc_info::local_rank(), block_id);
+        let map = data.map.borrow_mut();
+        map.region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].len = size;
+        });
+        let desc = map.init_descriptor(proc_info::local_rank(), block_id);
         desc as *mut _
     })
 }
@@ -168,9 +167,9 @@ unsafe extern "C" fn mca_btl_rsm_free(
     let des = des as *mut Descriptor;
     local_data::lock(btl, |data| {
         assert_eq!((*des).rank, proc_info::local_rank());
-        data.free_descriptor(des);
-        // TODO: In what case would this block come from a different node's
-        // shared memory?
+        data.map
+            .borrow_mut()
+            .reset_descriptor(des);
         OPAL_SUCCESS
     })
 }
@@ -192,18 +191,16 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
             Some(id) => id,
             None => return std::ptr::null_mut(),
         };
-        let rc = data
-            .map
-            .borrow_mut()
-            .region_mut(proc_info::local_rank(), |region| {
-                let block_idx: usize = block_id.try_into().unwrap();
-                region.blocks[block_idx].prepare_fill(convertor, reserve, size)
-            });
+        let map = data.map.borrow_mut();
+        let rc = map.region_mut(proc_info::local_rank(), |region| {
+            let block_idx: usize = block_id.try_into().unwrap();
+            region.blocks[block_idx].prepare_fill(convertor, reserve, size)
+        });
         if rc < 0 {
             return std::ptr::null_mut();
         }
         // TODO: Set order and flags
-        data.new_descriptor(proc_info::local_rank(), block_id) as *mut _
+        map.init_descriptor(proc_info::local_rank(), block_id) as *mut _
     })
 }
 
@@ -286,7 +283,9 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
 
         if !descriptor.is_null() {
             // Set output descriptor
-            *descriptor = data.new_descriptor(proc_info::local_rank(), block_id) as *mut _;
+            *descriptor = data.map
+                .borrow_mut()
+                .init_descriptor(proc_info::local_rank(), block_id) as *mut _;
         }
 
         OPAL_SUCCESS
