@@ -67,6 +67,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
     _enable_progress_threads: bool,
     _enable_mpi_threads: bool,
 ) -> *mut *mut mca_btl_base_module_t {
+    info!("init()");
     *num_btls = 0;
 
     // Initialize logging (this would be better with a special ompi or opal implementation)
@@ -138,6 +139,7 @@ unsafe extern "C" fn mca_btl_rsm_component_init(
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_progress() -> c_int {
+    info!("progress()");
     // TODO: Use of below pointer could very well be UB
     let btl = (&mut mca_btl_rsm as *mut _) as *mut mca_btl_base_module_t;
 
@@ -337,6 +339,7 @@ unsafe extern "C" fn mca_btl_rsm_component_close() -> c_int {
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_component_register_params() -> c_int {
+    info!("register_params()");
     // TODO: I'm not sure how these eager/rndv variables will affect usage of
     // this BTL. I see the original sm module has RDMA code, but I think this
     // is out of scope for this implementation.

@@ -7,7 +7,9 @@ use crate::shared::{BlockID, Descriptor, SharedRegionMap};
 use crate::Rank;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Mutex;
 use rustc_hash::FxHashMap;
+use log::info;
 
 /// Data internal to the module.
 pub(crate) struct LocalData {
@@ -73,21 +75,21 @@ pub(crate) unsafe fn init(
     block_store: BlockStore,
 ) {
     let btl = btl as *mut mca_btl_rsm_t;
-    let data = LocalData {
+    let data = Mutex::new(LocalData {
         map,
         fifo,
         block_store,
         error_cb: None,
         endpoints: vec![],
         descriptors: FxHashMap::default(),
-    };
+    });
     (*btl).internal = Box::into_raw(Box::new(data)) as *mut _;
 }
 
 /// Free the private module data for the BTL module.
 pub(crate) unsafe fn free(btl: *mut mca_btl_base_module_t) {
     let btl = btl as *mut mca_btl_rsm_t;
-    let _ = Box::from_raw((*btl).internal as *mut LocalData);
+    let _ = Box::from_raw((*btl).internal as *mut Mutex<LocalData>);
 }
 
 /// Use the module data for the given BTL pointer. The BTL pointer must be
@@ -97,6 +99,9 @@ where
     F: FnOnce(&mut LocalData) -> R,
 {
     let btl = btl as *mut mca_btl_rsm_t;
-    let data = (*btl).internal as *mut LocalData;
-    f(data.as_mut().unwrap())
+    info!("Before mutex...");
+    let data = (*btl).internal as *mut Mutex<LocalData>;
+    let mut data = (*data).lock().unwrap();
+    info!("After lock");
+    f(&mut data)
 }

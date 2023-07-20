@@ -23,6 +23,7 @@ unsafe extern "C" fn mca_btl_rsm_add_procs(
     peers: *mut *mut mca_btl_base_endpoint_t,
     reachability: *mut opal_bitmap_t,
 ) -> c_int {
+    info!("add_procs()");
     if reachability.is_null() {
         return 0;
     }
@@ -103,12 +104,15 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
     _procs: *mut *mut opal_proc_t,
     peers: *mut *mut mca_btl_base_endpoint_t,
 ) -> c_int {
+    info!("del_procs()");
     local_data::lock(btl, |data| {
         let nprocs: isize = nprocs.try_into().unwrap();
         for proc in 0..nprocs {
             let peer = peers.offset(proc);
             if !peer.is_null() {
                 let endpoint_idx = *(peer as *mut usize);
+                info!("peer: {:x}", peer as usize);
+                info!("endpoint_idx: {}", endpoint_idx);
                 let rank = data.endpoints[endpoint_idx].as_ref().unwrap().rank;
                 data.del_endpoint(endpoint_idx);
                 data.map.borrow_mut().remove(rank);
@@ -121,6 +125,7 @@ unsafe extern "C" fn mca_btl_rsm_del_procs(
 
 #[no_mangle]
 unsafe extern "C" fn mca_btl_rsm_finalize(btl: *mut mca_btl_base_module_t) -> c_int {
+    info!("finalize()");
     local_data::free(btl);
     OPAL_SUCCESS
 }
@@ -134,6 +139,7 @@ unsafe extern "C" fn mca_btl_rsm_alloc(
     size: usize,
     _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
+    info!("alloc()");
     assert!(size < BLOCK_SIZE);
     local_data::lock(btl, |data| {
         let block_id = match data.block_store.alloc() {
@@ -158,6 +164,7 @@ unsafe extern "C" fn mca_btl_rsm_free(
     btl: *mut mca_btl_base_module_t,
     des: *mut mca_btl_base_descriptor_t,
 ) -> c_int {
+    info!("free()");
     let des = des as *mut Descriptor;
     local_data::lock(btl, |data| {
         assert_eq!((*des).rank, proc_info::local_rank());
@@ -179,6 +186,7 @@ unsafe extern "C" fn mca_btl_rsm_prepare_src(
     size: *mut usize,
     _flags: u32,
 ) -> *mut mca_btl_base_descriptor_t {
+    info!("prepare_src()");
     local_data::lock(btl, |data| {
         let block_id = match data.block_store.alloc() {
             Some(id) => id,
@@ -207,6 +215,7 @@ unsafe extern "C" fn mca_btl_rsm_send(
     descriptor: *mut mca_btl_base_descriptor_t,
     tag: mca_btl_base_tag_t,
 ) -> c_int {
+    info!("send()");
     local_data::lock(btl, |data| {
         let endpoint_idx = endpoint as usize;
         let desc = descriptor as *mut Descriptor;
@@ -245,6 +254,7 @@ unsafe extern "C" fn mca_btl_rsm_sendi(
     tag: mca_btl_base_tag_t,
     descriptor: *mut *mut mca_btl_base_descriptor_t,
 ) -> c_int {
+    info!("sendi()");
     local_data::lock(btl, |data| {
         // Alloc block and set output descriptor
         let block_id = match data.block_store.alloc() {
@@ -289,6 +299,7 @@ unsafe extern "C" fn mca_btl_rsm_register_error(
     btl: *mut mca_btl_base_module_t,
     cbfunc: mca_btl_base_module_error_cb_fn_t,
 ) -> c_int {
+    info!("register_error()");
     local_data::lock(btl, |data| {
         data.error_cb = cbfunc;
         OPAL_SUCCESS
