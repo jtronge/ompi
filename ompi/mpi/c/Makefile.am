@@ -45,6 +45,8 @@ headers = bindings.h
 # profiling implications, and so are always built.
 libmpi_c_la_SOURCES = \
         attr_fn.c
+# The MPI_Abi_* functions do not require profiling implementations.
+libmpi_c_la_SOURCES += abi.c
 libmpi_c_la_LIBADD = libmpi_c_profile.la
 if BUILD_MPI_BINDINGS_LAYER
 libmpi_c_la_LIBADD += libmpi_c_noprofile.la
