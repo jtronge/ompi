@@ -127,7 +127,7 @@ DIST_SUBDIRS = \
         $(MCA_ompi_FRAMEWORK_COMPONENT_ALL_SUBDIRS)
 
 noinst_LTLIBRARIES = libopen-mpi.la
-lib_LTLIBRARIES = lib@OMPI_LIBMPI_NAME@.la
+lib_LTLIBRARIES = lib@OMPI_LIBMPI_NAME@.la libmpi_abi.la
 
 # Build the Open MPI internal library
 libopen_mpi_la_SOURCES =
@@ -153,6 +153,12 @@ lib@OMPI_LIBMPI_NAME@_la_LIBADD = \
 lib@OMPI_LIBMPI_NAME@_la_LDFLAGS = \
        -version-info $(libmpi_so_version) \
         $(OMPI_LIBMPI_EXTRA_LDFLAGS)
+
+# Build the MPI Standard ABI library
+libmpi_abi_la_SOURCES =
+libmpi_abi_la_LIBADD = \
+        libopen-mpi.la \
+	mpi/c/libmpi_c_abi.la
 
 # included subdirectory Makefile.am's and appended-to variables
 headers =

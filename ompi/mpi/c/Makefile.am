@@ -34,7 +34,7 @@
 # layer, if weak symbols can't be used to alias the MPI_ namespace
 # into the PMPI_ namespace.
 
-noinst_LTLIBRARIES = libmpi_c.la libmpi_c_profile.la
+noinst_LTLIBRARIES = libmpi_c.la libmpi_c_profile.la libmpi_c_abi.la
 if BUILD_MPI_BINDINGS_LAYER
 noinst_LTLIBRARIES += libmpi_c_noprofile.la
 endif
@@ -51,6 +51,9 @@ libmpi_c_la_LIBADD = libmpi_c_profile.la
 if BUILD_MPI_BINDINGS_LAYER
 libmpi_c_la_LIBADD += libmpi_c_noprofile.la
 endif
+
+libmpi_c_abi_la_SOURCES = \
+        abi.c
 
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS
