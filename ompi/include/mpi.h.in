@@ -444,6 +444,7 @@ extern "C" {
 typedef OMPI_MPI_AINT_TYPE MPI_Aint;
 typedef OMPI_MPI_OFFSET_TYPE MPI_Offset;
 typedef OMPI_MPI_COUNT_TYPE MPI_Count;
+#ifndef OMPI_STANDARD_ABI
 typedef struct ompi_communicator_t *MPI_Comm;
 typedef struct ompi_datatype_t *MPI_Datatype;
 typedef struct ompi_errhandler_t *MPI_Errhandler;
@@ -461,6 +462,25 @@ typedef struct ompi_mpit_cvar_handle_t *MPI_T_cvar_handle;
 typedef struct mca_base_pvar_handle_t *MPI_T_pvar_handle;
 typedef struct mca_base_pvar_session_t *MPI_T_pvar_session;
 typedef struct ompi_instance_t *MPI_Session;
+#else
+typedef struct MPI_ABI_Comm *MPI_Comm;
+typedef struct MPI_ABI_Datatype *MPI_Datatype;
+typedef struct MPI_ABI_Errhandler *MPI_Errhandler;
+typedef struct MPI_ABI_File *MPI_File;
+typedef struct MPI_ABI_Group *MPI_Group;
+typedef struct MPI_ABI_Info *MPI_Info;
+typedef struct MPI_ABI_Op *MPI_Op;
+typedef struct MPI_ABI_Request *MPI_Request;
+typedef struct MPI_ABI_Message *MPI_Message;
+typedef struct MPI_ABI_Status MPI_Status;
+typedef struct MPI_ABI_F08_status MPI_F08_status;
+typedef struct MPI_ABI_Win *MPI_Win;
+typedef struct MPI_ABI_T_enum *MPI_T_enum;
+typedef struct MPI_ABI_T_cvar_handle *MPI_T_cvar_handle;
+typedef struct MPI_ABI_T_pvar_handle *MPI_T_pvar_handle;
+typedef struct MPI_ABI_T_pvar_session *MPI_T_pvar_session;
+typedef struct MPI_ABI_Session *MPI_Session;
+#endif
 
 /*
  * MPI_Status
@@ -479,6 +499,16 @@ struct ompi_status_public_t {
     size_t _ucount;
 };
 typedef struct ompi_status_public_t ompi_status_public_t;
+
+/*
+ * Standard ABI MPI_Status
+ */
+struct MPI_ABI_Status {
+    int MPI_SOURCE;
+    int MPI_TAG;
+    int MPI_ERROR;
+    int mpi_abi_private[5];
+};
 
 /*
  * MPI_F08_status
@@ -588,7 +618,11 @@ typedef MPI_Win_errhandler_function MPI_Win_errhandler_fn
  * smaller than their Fortran equivalents in mpif-values.pl (because C
  * is 0-indexed and Fortran is 1-indexed).
  */
+#ifndef OMPI_STANDARD_ABI
 #define MPI_F_STATUS_SIZE OMPI_FORTRAN_STATUS_SIZE    /* Size of Fortran MPI status array */
+#else
+#define MPI_F_STATUS_SIZE 8                           /* Size of Fortran MPI status array */
+#endif
 #define MPI_F_SOURCE      0                           /* Index for MPI_SOURCE */
 #define MPI_F_TAG         1                           /* Index for MPI_TAG */
 #define MPI_F_ERROR       2                           /* Index for MPI_ERROR */
@@ -1217,6 +1251,8 @@ OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_ub;
 /*
  * MPI predefined handles
  */
+#ifndef MPI_STANDARD_ABI
+
 #define MPI_COMM_WORLD OMPI_PREDEFINED_GLOBAL( MPI_Comm, ompi_mpi_comm_world)
 #define MPI_COMM_SELF OMPI_PREDEFINED_GLOBAL(MPI_Comm, ompi_mpi_comm_self)
 
@@ -1368,6 +1404,74 @@ OMPI_DECLSPEC extern struct ompi_predefined_datatype_t ompi_mpi_ub;
 #define MPI_ERRORS_ARE_FATAL OMPI_PREDEFINED_GLOBAL(MPI_Errhandler, ompi_mpi_errors_are_fatal)
 #define MPI_ERRORS_ABORT OMPI_PREDEFINED_GLOBAL(MPI_Errhandler, ompi_mpi_errors_abort)
 #define MPI_ERRORS_RETURN OMPI_PREDEFINED_GLOBAL(MPI_Errhandler, ompi_mpi_errors_return)
+
+#else
+
+#if defined(c_plusplus) || defined(__cplusplus)
+#define OMPI_HANDLE_CONSTANT(type, value) (static_cast<type> (static_cast<void *> (value)))
+#else
+#define OMPI_HANDLE_CONSTANT(type, value) ((type) ((void *) value))
+#endif
+
+#define MPI_COMM_WORLD OMPI_HANDLE_CONSTANT(MPI_Comm, 1)
+#define MPI_COMM_SELF OMPI_HANDLE_CONSTANT(MPI_Comm, 2)
+#define MPI_COMM_NULL OMPI_HANDLE_CONSTANT(MPI_Comm, 3)
+
+/* C datatypes */
+#define MPI_DATATYPE_NULL OMPI_HANDLE_CONSTANT(MPI_Datatype, 1)
+#define MPI_BYTE OMPI_HANDLE_CONSTANT(MPI_Datatype, 2)
+#define MPI_PACKED OMPI_HANDLE_CONSTANT(MPI_Datatype, 3)
+#define MPI_CHAR OMPI_HANDLE_CONSTANT(MPI_Datatype, 4)
+#define MPI_SHORT OMPI_HANDLE_CONSTANT(MPI_Datatype, 5)
+#define MPI_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 6)
+#define MPI_LONG OMPI_HANDLE_CONSTANT(MPI_Datatype, 7)
+#define MPI_FLOAT OMPI_HANDLE_CONSTANT(MPI_Datatype, 8)
+#define MPI_DOUBLE OMPI_HANDLE_CONSTANT(MPI_Datatype, 9)
+#define MPI_LONG_DOUBLE OMPI_HANDLE_CONSTANT(MPI_Datatype, 10)
+#define MPI_UNSIGNED_CHAR OMPI_HANDLE_CONSTANT(MPI_Datatype, 11)
+#define MPI_SIGNED_CHAR OMPI_HANDLE_CONSTANT(MPI_Datatype, 12)
+#define MPI_UNSIGNED_SHORT OMPI_HANDLE_CONSTANT(MPI_Datatype, 13)
+#define MPI_UNSIGNED_LONG OMPI_HANDLE_CONSTANT(MPI_Datatype, 14)
+#define MPI_UNSIGNED OMPI_HANDLE_CONSTANT(MPI_Datatype, 15)
+#define MPI_FLOAT_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 16)
+#define MPI_DOUBLE_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 17)
+#define MPI_LONG_DOUBLE_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 18)
+#define MPI_LONG_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 19)
+#define MPI_SHORT_INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 20)
+#define MPI_2INT OMPI_HANDLE_CONSTANT(MPI_Datatype, 21)
+
+/* New datatypes from the MPI 2.2 standard */
+#define MPI_INT8_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 22)
+#define MPI_UINT8_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 23)
+#define MPI_INT16_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 24)
+#define MPI_UINT16_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 25)
+#define MPI_INT32_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 26)
+#define MPI_UINT32_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 27)
+#define MPI_INT64_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 28)
+#define MPI_UINT64_T OMPI_HANDLE_CONSTANT(MPI_Datatype, 29)
+#define MPI_AINT OMPI_HANDLE_CONSTANT(MPI_Datatype, 30)
+#define MPI_OFFSET OMPI_HANDLE_CONSTANT(MPI_Datatype, 31)
+#define MPI_C_BOOL OMPI_HANDLE_CONSTANT(MPI_Datatype, 32)
+#if HAVE_FLOAT__COMPLEX
+#define MPI_C_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 33)
+#define MPI_C_FLOAT_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 34)
+#endif
+#if HAVE_DOUBLE__COMPLEX
+#define MPI_C_DOUBLE_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 35)
+#endif
+#if HAVE_LONG_DOUBLE__COMPLEX
+#define MPI_C_LONG_DOUBLE_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 36)
+#endif
+#define MPI_CXX_BOOL OMPI_HANDLE_CONSTANT(MPI_Datatype, 37)
+#define MPI_CXX_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 38)
+#define MPI_CXX_FLOAT_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 39)
+#define MPI_CXX_DOUBLE_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 40)
+#define MPI_CXX_LONG_DOUBLE_COMPLEX OMPI_HANDLE_CONSTANT(MPI_Datatype, 41)
+
+/* New datatypes from the 3.0 standard */
+#define MPI_COUNT OMPI_HANDLE_CONSTANT(MPI_Datatype, 42)
+
+#endif /* OMPI_STANDARD_ABI */
 
 /* Typeclass definition for MPI_Type_match_size */
 #define MPI_TYPECLASS_INTEGER    1

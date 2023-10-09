@@ -39,7 +39,7 @@ if BUILD_MPI_BINDINGS_LAYER
 noinst_LTLIBRARIES += libmpi_c_noprofile.la
 endif
 
-headers = bindings.h
+headers = bindings.h abi.h
 
 # attr_fn.c contains attribute manipulation functions which do not
 # profiling implications, and so are always built.
@@ -53,7 +53,11 @@ libmpi_c_la_LIBADD += libmpi_c_noprofile.la
 endif
 
 libmpi_c_abi_la_SOURCES = \
-        abi.c
+        abi.c \
+        abi_comm_rank.c \
+        abi_comm_size.c \
+        abi_send.c
+libmpi_c_abi_la_CPPFLAGS = -DOMPI_STANDARD_ABI
 
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS

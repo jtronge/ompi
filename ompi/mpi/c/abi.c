@@ -36,7 +36,7 @@ static const char ABI_DETAILS[] = "Open MPI Standard ABI 0.1";
 
 int MPI_Abi_details(int *buflen, char *details, MPI_Info *info)
 {
-    if (*buflen >= sizeof(ABI_DETAILS)) {
+    if (*buflen >= (int) sizeof(ABI_DETAILS)) {
         strcpy(details, ABI_DETAILS);
         *buflen = sizeof(ABI_DETAILS);
         return MPI_SUCCESS;

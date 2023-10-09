@@ -443,14 +443,14 @@ OMPI_DECLSPEC int ompi_datatype_pack_external_size( const char datarep[], int in
  * overhead of making a new datatype.
  */
 typedef struct {
-    MPI_Datatype dt;
+    ompi_datatype_t *dt;
     MPI_Count count;
     int new_type_was_created;
 } ompi_datatype_consolidate_t;
 
 static inline int
 ompi_datatype_consolidate_create(
-    MPI_Count count, MPI_Datatype dtype, ompi_datatype_consolidate_t *dtmod,
+    MPI_Count count, ompi_datatype_t *dtype, ompi_datatype_consolidate_t *dtmod,
     int threshold)
 {
     int rc;
