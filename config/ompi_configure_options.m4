@@ -248,8 +248,8 @@ AM_CONDITIONAL(OMPI_OMPIO_SUPPORT, test "$ompi_want_ompio" = "1")
 AM_PATH_PYTHON([3.6],,[:])
 abi_file="${srcdir}/ompi/mpi/c/ompi_send.c"
 AS_IF([! test -e "$abi_file" && test "$PYTHON" = ":"],
-      [AC_MSG_ERROR([Open MPI requires Python >=3.6 for generating the C ABI files. Aborting])])
-AM_CONDITIONAL(OMPI_GENERATE_C_INTERFACE_FILES,[test "$PYTHON" != ":"])
+      [AC_MSG_ERROR([Open MPI requires Python >=3.6 for generating the bindings. Aborting])])
+AM_CONDITIONAL(OMPI_GENERATE_BINDINGS,[test "$PYTHON" != ":"])
 
 AC_MSG_CHECKING([if want to enable standard ABI library])
 AC_ARG_ENABLE([standard-abi],
