@@ -519,6 +519,7 @@ lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES = \
         mpi-f08.F90
 
 lib@OMPI_LIBMPI_NAME@_usempif08_la_FCFLAGS = \
+        $(AM_FCFLAGS) \
         -DOMPI_BUILD_MPI_PROFILING=0
 
 # These are generated; do not ship them
@@ -961,7 +962,9 @@ noinst_LTLIBRARIES = libmpi_usempif08_pmpi.la
 nodist_libmpi_usempif08_pmpi_la_SOURCES = \
         $(pmpi_api_files)
 
-nodist_libmpi_usempif08_pmpi_la_FCFLAGS = -DOMPI_BUILD_MPI_PROFILING=1
+nodist_libmpi_usempif08_pmpi_la_FCFLAGS = \
+        $(AM_FCFLAGS) \
+        -DOMPI_BUILD_MPI_PROFILING=1
 #
 # Sym link in the real sources
 #
