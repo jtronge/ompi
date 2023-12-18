@@ -31,6 +31,14 @@ if OMPI_BUILD_FORTRAN_USEMPIF08_BINDINGS
 noinst_LTLIBRARIES = libusempif08_ccode.la
 
 libusempif08_ccode_la_SOURCES = \
-        buffer_detach.c
+        buffer_detach.c \
+        send_f08_generated.c
+
+if OMPI_GENERATE_BINDINGS
+%_generated.c: ../%.in $(srcdir)/../generate_bindings.py
+	$(PYTHON) $(srcdir)/../generate_bindings.py c $< > $@
+
+MAINTAINERCLEANFILES = send_f08_generated.c
+endif
 
 endif

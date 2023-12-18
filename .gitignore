@@ -541,3 +541,7 @@ ompi/mpi/c/ompi_*.c
 ompi/mpi/c/standard_*.c
 ompi/mpi/c/abi.h
 ompi/mpi/c/standard_abi
+
+# Generated Fortran Bindings
+ompi/mpi/fortran/use-mpi-f08/*_generated.F90
+ompi/mpi/fortran/use-mpi-f08/base/*_generated.c
