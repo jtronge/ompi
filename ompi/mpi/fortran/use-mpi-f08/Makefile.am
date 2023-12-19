@@ -23,7 +23,7 @@
 # $HEADER$
 #
 
-SUBDIRS = profile
+SUBDIRS = generated profile
 
 include $(top_srcdir)/Makefile.ompi-rules
 
