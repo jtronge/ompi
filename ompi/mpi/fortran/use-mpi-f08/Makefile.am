@@ -50,6 +50,7 @@ MOSTLYCLEANFILES = *.mod
 CLEANFILES += *.i90
 
 lib_LTLIBRARIES = lib@OMPI_LIBMPI_NAME@_usempif08.la
+noinst_LTLIBRARIES = lib@OMPI_LIBMPI_NAME@_usempif08_pmpi.la
 
 module_sentinel_files = \
         mod/libforce_usempif08_internal_modules_to_be_built.la \
@@ -94,9 +95,9 @@ sizeof_f08.f90:
 	    --complex4=$(OMPI_HAVE_FORTRAN_COMPLEX4) \
 	    --complex32=$(OMPI_HAVE_FORTRAN_COMPLEX32)
 
-profile/psizeof_f08.f90: $(top_builddir)/config.status
-profile/psizeof_f08.f90: $(sizeof_pl)
-profile/psizeof_f08.f90:
+psizeof_f08.f90: $(top_builddir)/config.status
+psizeof_f08.f90: $(sizeof_pl)
+psizeof_f08.f90:
 	$(OMPI_V_GEN) $(sizeof_pl) \
 	    --impl=$@ --ierror=optional --pmpi \
 	    --maxrank=$(OMPI_FORTRAN_MAX_ARRAY_RANK) \
@@ -107,7 +108,7 @@ profile/psizeof_f08.f90:
 	    --complex4=$(OMPI_HAVE_FORTRAN_COMPLEX4) \
 	    --complex32=$(OMPI_HAVE_FORTRAN_COMPLEX32)
 
-CLEANFILES += sizeof_f08.h sizeof_f08.f90 profile/psizeof_f08.f90
+CLEANFILES += sizeof_f08.h sizeof_f08.f90 psizeof_f08.f90
 
 mpi_api_generated_files = \
         send_f08_generated.F90
@@ -512,26 +513,26 @@ mpi_api_files = \
 # JMS Somehow this variable substitution isn't quite working, and I
 # don't have time to figure it out.  So just wholesale copy the file
 # list.  :-(
-#pmpi_api_files = $(mpi_api_files:%=profile/p%)
+#pmpi_api_files = $(mpi_api_files:%=p%)
 
 lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES = \
         $(mpi_api_files) \
         mpi-f08.F90
 
-lib@OMPI_LIBMPI_NAME@_usempif08_la_FCFLAGS = \
-        $(AM_FCFLAGS) \
-        -DOMPI_BUILD_MPI_PROFILING=0
-
 # These are generated; do not ship them
-nodist_lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES =
+# nodist_lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES =
 
 if BUILD_FORTRAN_SIZEOF
 SIZEOF_H = sizeof_f08.h
-nodist_lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES += \
+lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES += \
         sizeof_f08.h \
         sizeof_f08.f90 \
-        profile/psizeof_f08.f90
+        psizeof_f08.f90
 endif
+
+lib@OMPI_LIBMPI_NAME@_usempif08_la_FCFLAGS = \
+        $(AM_FCFLAGS) \
+        -DOMPI_BUILD_MPI_PROFILING=0
 
 #
 # Include the mpi_f08-based MPI extensions in libmpi_usempif08, too.
@@ -542,7 +543,7 @@ endif
 #
 
 lib@OMPI_LIBMPI_NAME@_usempif08_la_LIBADD = \
-        profile/libmpi_usempif08_pmpi.la \
+        lib@OMPI_LIBMPI_NAME@_usempif08_pmpi.la \
         $(OMPI_MPIEXT_USEMPIF08_LIBS) \
         $(top_builddir)/ompi/mpi/fortran/mpif-h/lib@OMPI_LIBMPI_NAME@_mpifh.la \
         $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la \
@@ -561,6 +562,7 @@ mpi_api_lo_files = $(mpi_api_files:.F90=.lo)
 $(mpi_api_lo_files): bindings/libforce_usempif08_internal_bindings_to_be_built.la
 
 mpi-f08.lo: $(module_sentinel_files) $(SIZEOF_H)
+mpi-f08.F90: $(SIZEOF_H)
 
 #
 # Profiling interface
@@ -957,18 +959,16 @@ pmpi_api_lo_files = $(pmpi_api_files:.F90=.lo)
 
 $(pmpi_api_lo_files): bindings/libforce_usempif08_internal_bindings_to_be_built.la
 
-noinst_LTLIBRARIES = libmpi_usempif08_pmpi.la
-
-nodist_libmpi_usempif08_pmpi_la_SOURCES = \
+lib@OMPI_LIBMPI_NAME@_usempif08_pmpi_la_SOURCES = \
         $(pmpi_api_files)
 
-nodist_libmpi_usempif08_pmpi_la_FCFLAGS = \
+lib@OMPI_LIBMPI_NAME@_usempif08_pmpi_la_FCFLAGS = \
         $(AM_FCFLAGS) \
         -DOMPI_BUILD_MPI_PROFILING=1
 #
 # Sym link in the real sources
 #
-$(nodist_libmpi_usempif08_pmpi_la_SOURCES):
+$(lib@OMPI_LIBMPI_NAME@_usempif08_pmpi_la_SOURCES):
 	$(OMPI_V_LN_S) if test ! -r $@ ; then \
 		pname=`echo $@ | cut -b '2-'` ; \
 		$(LN_S) $(top_srcdir)/ompi/mpi/fortran/use-mpi-f08/$$pname $@ ; \
@@ -976,7 +976,7 @@ $(nodist_libmpi_usempif08_pmpi_la_SOURCES):
 
 # These files were created by targets above
 
-MAINTAINERCLEANFILES = $(nodist_libmpi_usempif08_pmpi_la_SOURCES)
+MAINTAINERCLEANFILES = $(lib@OMPI_LIBMPI_NAME@_usempif08_pmpi_la_SOURCES)
 
 #
 # Automake doesn't do Fortran dependency analysis, so must list them
