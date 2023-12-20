@@ -9,6 +9,7 @@
 ! Copyright (c) 2021      Bull S.A.S. All rights reserved.
 ! $COPYRIGHT$
 
+#include "mpi-f08-rename.h"
 #include "ompi/mpi/fortran/configure-fortran-output.h"
 
 subroutine MPI_Psend_init_f08(buf,partitions,count,datatype,dest,tag,comm,info,request,ierror)
