@@ -16,9 +16,9 @@ PROTOTYPE_RE = re.compile(r'^\w+\((\s*\w+\s+\w+\s*,?)+\)$')
 
 class FortranType(ABC):
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, bigcount=False, **kwargs):
         self.name = name
-        self.bigcount = False
+        self.bigcount = bigcount
 
     TYPES = {}
 
@@ -92,6 +92,9 @@ class CountType(FortranType):
             return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(IN) :: {self.name}'
         else:
             return f'INTEGER, INTENT(IN) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_COUNT_KIND')]
 
     def c_parameter(self):
         type_ = 'MPI_Count' if self.bigcount else 'MPI_Fint'
@@ -209,20 +212,6 @@ class PrototypeParseError(Exception):
     """Thrown when a parsing error is encountered."""
 
 
-def fortran_f08_name(base_name):
-    """Produce the final f08 name from base_name."""
-    return f'MPI_{base_name.capitalize()}_f08'
-
-
-def c_func_name(base_name):
-    """Produce the final C func name from base_name."""
-    return f'ompi_{base_name}_wrapper_f08'
-
-
-def c_api_func_name(base_name):
-    """Produce the actual MPI API function name to call into."""
-    return f'PMPI_{base_name.capitalize()}'
-
 
 def print_header():
     """Print the fortran f08 file header."""
@@ -232,7 +221,8 @@ def print_header():
 
 class FortranBinding:
 
-    def __init__(self, fname):
+    def __init__(self, fname, bigcount=False):
+        self.bigcount = bigcount
         with open(fname) as fp:
             data = []
             for line in fp:
@@ -251,7 +241,26 @@ class FortranBinding:
                 type_, name = param.split()
                 type_ = FortranType.get(type_)
                 indent = '    '
-                self.parameters.append(type_(name))
+                self.parameters.append(type_(name, bigcount=bigcount))
+
+    def _fn_name_suffix(self):
+        """Return a suffix for function names."""
+        return '_c' if self.bigcount else ''
+
+    @property
+    def fortran_f08_name(self):
+        """Produce the final f08 name from base_name."""
+        return f'MPI_{self.fn_name.capitalize()}_f08{self._fn_name_suffix()}'
+
+    @property
+    def c_func_name(self):
+        """Produce the final C func name from base_name."""
+        return f'ompi_{self.fn_name}_wrapper_f08{self._fn_name_suffix()}'
+
+    @property
+    def c_api_func_name(self):
+        """Produce the actual MPI API function name to call into."""
+        return f'PMPI_{self.fn_name.capitalize()}{self._fn_name_suffix()}'
 
     def _param_list(self):
         return ','.join(type_.name for type_ in self.parameters)
@@ -277,7 +286,7 @@ class FortranBinding:
 
     def _print_fortran_interface(self):
         """Output the C subroutine binding for the Fortran code."""
-        name = c_func_name(self.fn_name)
+        name = self.c_func_name
         print('    interface')
         print(f'        subroutine {name}({self._param_list()},ierror) &')
         print(f'            BIND(C, name="{name}")')
@@ -297,8 +306,8 @@ class FortranBinding:
 
         print_header()
 
-        sub_name = fortran_f08_name(self.fn_name)
-        c_func = c_func_name(self.fn_name)
+        sub_name = self.fortran_f08_name
+        c_func = self.c_func_name
         print('subroutine', f'{sub_name}({self._param_list()},ierror)')
         # Use statements
         use_stmts = self._use_stmts()
@@ -335,7 +344,7 @@ class FortranBinding:
         print('#include "ompi/mpi/fortran/mpif-h/status-conversion.h"')
         print('#include "ompi/mpi/fortran/base/constants.h"')
         print('#include "ompi/mpi/fortran/base/fint_2_int.h"')
-        c_func = c_func_name(self.fn_name)
+        c_func = self.c_func_name
         parameters = [param.c_parameter() for param in self.parameters]
         # Always append the integer error
         parameters.append('MPI_Fint *ierr')
@@ -348,15 +357,14 @@ class FortranBinding:
         for param in self.parameters:
             for line in param.c_prepare():
                 print(f'    {line}')
-        c_api_func = c_api_func_name(self.fn_name)
+        c_api_func = self.c_api_func_name
         arguments = [param.c_argument() for param in self.parameters]
         arguments = ', '.join(arguments)
         print(f'    {C_ERROR_TEMP_NAME} = {c_api_func}({arguments});')
+        print(f'    *ierr = OMPI_INT_2_FINT({C_ERROR_TEMP_NAME});')
         for param in self.parameters:
             for line in param.c_post():
                 print(f'    {line}')
-        # TODO: Is this NULL check necessary for mpi_f08?
-        print(f'    if (NULL != ierr) *ierr = OMPI_INT_2_FINT({C_ERROR_TEMP_NAME});')
         print('}')
 
 
@@ -364,9 +372,10 @@ def main():
     parser = argparse.ArgumentParser(description='generate fortran binding files')
     parser.add_argument('lang', choices=('fortran', 'c'), help='generate dependent files in C or Fortran')
     parser.add_argument('template', help='template file to use')
+    parser.add_argument('--bigcount', action='store_true', help='generate bigcount interface for function')
     args = parser.parse_args()
 
-    binding = FortranBinding(args.template)
+    binding = FortranBinding(args.template, bigcount=args.bigcount)
     if args.lang == 'fortran':
         binding.print_f_source()
     else:
