@@ -1,6 +1,17 @@
+"""Fortran binding generation code.
+
+This takes as input a *.in file containing the prototype of a Fortran function
+with generic types. Both the Fortran subroutine and a wrapping C function can
+generated from this file.
+"""
 from abc import ABC, abstractmethod
 import argparse
 import re
+
+
+C_ERROR_TEMP_NAME = 'c_ierr'
+GENERATED_MESSAGE = 'THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT BY HAND.'
+PROTOTYPE_RE = re.compile(r'^\w+\((\s*\w+\s+\w+\s*,?)+\)$')
 
 
 class FortranType(ABC):
@@ -56,6 +67,12 @@ class FortranType(ABC):
         return []
 
 
+#
+# Definitions of generic types in Fortran and how these can be converted
+# to and from C.
+#
+
+
 @FortranType.add('BUFFER')
 class BufferType(FortranType):
     def declare(self):
@@ -84,9 +101,14 @@ class CountType(FortranType):
         return f'*{self.name}' if self.bigcount else f'OMPI_FINT_2_INT(*{self.name})'
 
 
-def tmp_c_type(name):
+def tmp_c_name(name):
     """Return a temporary name for use in C."""
     return f'c_{name}'
+
+
+def tmp_c_name2(name):
+    """Return a secondary temporary name for use in C."""
+    return f'c_{name}2'
 
 
 @FortranType.add('DATATYPE')
@@ -107,10 +129,10 @@ class DatatypeType(FortranType):
         return f'MPI_Fint *{self.name}'
 
     def c_prepare(self):
-        return [f'MPI_Datatype {tmp_c_type(self.name)} = PMPI_Type_f2c(*{self.name});']
+        return [f'MPI_Datatype {tmp_c_name(self.name)} = PMPI_Type_f2c(*{self.name});']
 
     def c_argument(self):
-        return tmp_c_type(self.name)
+        return tmp_c_name(self.name)
 
 
 class IntType(FortranType):
@@ -152,13 +174,35 @@ class CommType(FortranType):
         return f'MPI_Fint *{self.name}'
 
     def c_prepare(self):
-        return [f'MPI_Comm {tmp_c_type(self.name)} = PMPI_Comm_f2c(*{self.name});']
+        return [f'MPI_Comm {tmp_c_name(self.name)} = PMPI_Comm_f2c(*{self.name});']
 
     def c_argument(self):
-        return tmp_c_type(self.name)
+        return tmp_c_name(self.name)
 
 
-PROTOTYPE_RE = re.compile(r'^\w+\((\s*\w+\s+\w+\s*,?)+\)$')
+@FortranType.add('STATUS')
+class StatusType(FortranType):
+    def declare(self):
+        return f'TYPE(MPI_Status), INTENT(OUT) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_Status')]
+
+    def c_parameter(self):
+        # TODO: Is this correct? (I've listed it as TYPE(MPI_Status) in the binding)
+        return f'MPI_Fint *{self.name}'
+
+    def c_prepare(self):
+        return [
+            f'OMPI_FORTRAN_STATUS_DECLARATION({tmp_c_name(self.name)}, {tmp_c_name2(self.name)});',
+            f'OMPI_FORTRAN_STATUS_SET_POINTER({tmp_c_name(self.name)}, {tmp_c_name2(self.name)}, {self.name});'
+        ]
+
+    def c_argument(self):
+        return tmp_c_name(self.name)
+
+    def c_post(self):
+        return [f'OMPI_FORTRAN_STATUS_RETURN({tmp_c_name(self.name)}, {tmp_c_name2(self.name)}, {self.name}, {C_ERROR_TEMP_NAME});']
 
 
 class PrototypeParseError(Exception):
@@ -184,10 +228,6 @@ def print_header():
     """Print the fortran f08 file header."""
     print('#include "ompi/mpi/fortran/configure-fortran-output.h"')
     print('#include "mpi-f08-rename.h"')
-
-
-
-GENERATED_MESSAGE = 'THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT BY HAND.'
 
 
 class FortranBinding:
@@ -272,7 +312,7 @@ class FortranBinding:
         # Add the integer error manually
         print('    INTEGER, OPTIONAL, INTENT(OUT) :: ierror')
         # Temporaries
-        print('    INTEGER :: c_ierror')
+        print(f'    INTEGER :: {C_ERROR_TEMP_NAME}')
 
         # Interface for call to C function
         print()
@@ -281,9 +321,9 @@ class FortranBinding:
 
         # Call into the C function
         args = ','.join(param.argument() for param in self.parameters)
-        print(f'    call {c_func}({args},c_ierror)')
+        print(f'    call {c_func}({args},{C_ERROR_TEMP_NAME})')
         # Convert error type
-        print('    if (present(ierror)) ierror = c_ierror')
+        print(f'    if (present(ierror)) ierror = {C_ERROR_TEMP_NAME}')
 
         print(f'end subroutine {sub_name}')
 
@@ -292,6 +332,7 @@ class FortranBinding:
         print(f'/* {GENERATED_MESSAGE} */')
         print('#include "ompi_config.h"')
         print('#include "mpi.h"')
+        print('#include "ompi/mpi/fortran/mpif-h/status-conversion.h"')
         print('#include "ompi/mpi/fortran/base/constants.h"')
         print('#include "ompi/mpi/fortran/base/fint_2_int.h"')
         c_func = c_func_name(self.fn_name)
@@ -303,19 +344,19 @@ class FortranBinding:
         print(f'void {c_func}({parameters});')
         print(f'void {c_func}({parameters})')
         print('{')
-        print('    int c_ierr; ')
+        print(f'    int {C_ERROR_TEMP_NAME}; ')
         for param in self.parameters:
             for line in param.c_prepare():
                 print(f'    {line}')
         c_api_func = c_api_func_name(self.fn_name)
         arguments = [param.c_argument() for param in self.parameters]
         arguments = ', '.join(arguments)
-        print(f'    c_ierr = {c_api_func}({arguments});')
+        print(f'    {C_ERROR_TEMP_NAME} = {c_api_func}({arguments});')
         for param in self.parameters:
             for line in param.c_post():
                 print(f'    {line}')
         # TODO: Is this NULL check necessary for mpi_f08?
-        print('    if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);')
+        print(f'    if (NULL != ierr) *ierr = OMPI_INT_2_FINT({C_ERROR_TEMP_NAME});')
         print('}')
 
 

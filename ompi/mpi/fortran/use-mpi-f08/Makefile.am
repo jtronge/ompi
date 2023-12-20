@@ -111,7 +111,8 @@ psizeof_f08.f90:
 CLEANFILES += sizeof_f08.h sizeof_f08.f90 psizeof_f08.f90
 
 mpi_api_generated_files = \
-        send_f08_generated.F90
+        send_f08_generated.F90 \
+        recv_f08_generated.F90
 mpi_api_files = \
         abort_f08.F90 \
         accumulate_f08.F90 \
@@ -380,7 +381,6 @@ mpi_api_files = \
         put_f08.F90 \
         query_thread_f08.F90 \
         raccumulate_f08.F90 \
-        recv_f08.F90 \
         recv_init_f08.F90 \
         reduce_f08.F90 \
         reduce_init_f08.F90 \
