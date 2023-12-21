@@ -114,7 +114,8 @@ mpi_api_generated_files = \
         send_f08_generated.F90 \
         send_f08_c_generated.F90 \
         recv_f08_generated.F90 \
-        recv_f08_c_generated.F90
+        recv_f08_c_generated.F90 \
+        waitall_f08_generated.F90
 mpi_api_files = \
         abort_f08.F90 \
         accumulate_f08.F90 \
@@ -469,7 +470,6 @@ mpi_api_files = \
         unpack_external_f08.F90 \
         unpack_f08.F90 \
         unpublish_name_f08.F90 \
-        waitall_f08.F90 \
         waitany_f08.F90 \
         wait_f08.F90 \
         waitsome_f08.F90 \
