@@ -585,6 +585,14 @@ lib@OMPI_LIBMPI_NAME@_usempif08_profile_la_FCFLAGS = \
 
 MAINTAINERCLEANFILES =
 
+# Include script and template files for ABI generation from a distribution
+# tarball
+EXTRA_DIST = \
+        generate_bindings.py \
+        recv_f08.in \
+        send_f08.in \
+        waitall_f08.in
+
 #
 # Generate the Fortran bindings and C wrapper functions for bindings with a
 # *.in template.
