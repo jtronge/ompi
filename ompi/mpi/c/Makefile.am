@@ -72,7 +72,7 @@ prototype_sources = \
 
 # Include script and template files in case someone wants to update the
 # ABI files
-EXTRA_DIST = abi.py $(prototype_sources)
+EXTRA_DIST = generate_bindings.py $(prototype_sources)
 
 # attr_fn.c contains attribute manipulation functions which do not
 # profiling implications, and so are always built.
@@ -595,16 +595,16 @@ libmpi_c_noprofile_la_CPPFLAGS = -DOMPI_BUILD_MPI_PROFILING=0
 nobase_include_HEADERS = standard_abi/mpi.h
 
 # ABI generation rules
-if OMPI_GENERATE_C_INTERFACE_FILES
-ompi_%.c: %.c.in abi.py abi.h
-	$(PYTHON) $(srcdir)/abi.py source ompi $< > $@
-standard_%.c: %.c.in abi.py abi.h
-	$(PYTHON) $(srcdir)/abi.py source standard $< > $@
-abi.h: abi.py $(prototype_sources)
-	$(PYTHON) $(srcdir)/abi.py header --srcdir=$(srcdir) $(prototype_sources) > $@
-standard_abi/mpi.h: abi.py $(prototype_sources)
+if OMPI_GENERATE_BINDINGS
+ompi_%.c: %.c.in generate_bindings.py abi.h
+	$(PYTHON) $(srcdir)/generate_bindings.py source ompi $< > $@
+standard_%.c: %.c.in generate_bindings.py abi.h
+	$(PYTHON) $(srcdir)/generate_bindings.py source standard $< > $@
+abi.h: generate_bindings.py $(prototype_sources)
+	$(PYTHON) $(srcdir)/generate_bindings.py header --srcdir=$(srcdir) $(prototype_sources) > $@
+standard_abi/mpi.h: generate_bindings.py $(prototype_sources)
 	mkdir -p standard_abi
-	$(PYTHON) $(srcdir)/abi.py header --srcdir=$(srcdir) --external $(prototype_sources) > $@
+	$(PYTHON) $(srcdir)/generate_bindings.py header --srcdir=$(srcdir) --external $(prototype_sources) > $@
 
 distclean-local:
 	-rm -rf ompi_*.c standard_*.c abi.h standard_abi/

@@ -1,0 +1,1 @@
+waitall(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests:count, STATUS_ARRAY array_of_statuses:count)

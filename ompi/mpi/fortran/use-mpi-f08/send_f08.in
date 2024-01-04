@@ -1,0 +1,1 @@
+send(BUFFER buf, COUNT count, DATATYPE datatype, RANK dest, TAG tag, COMM comm)
