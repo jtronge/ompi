@@ -1,8 +1,18 @@
+# Copyright (c) 2023      Triad National Security, LLC. All rights
+#                         reserved.
+#
+# $COPYRIGHT$
+#
+# Additional copyrights may follow
+#
+# $HEADER$
+#
 """Fortran binding generation code.
 
-This takes as input a *.in file containing the prototype of a Fortran function
-with generic types. Both the Fortran subroutine and a wrapping C function can
-generated from this file.
+This takes as input a *.in file containing a list of prototypes for Fortran
+subroutines with generic types. Using this file, it can generate the Fortran
+subroutines in one file and the C wraping code in another for all prototypes
+listed.
 """
 from abc import ABC, abstractmethod
 import argparse
@@ -520,6 +530,9 @@ def load_prototypes(fname):
         prototypes = []
         for i, line in enumerate(fp):
             lno = i + 1
+            line = line.strip()
+            if line and line[0] == '#':
+                continue
             if PROTOTYPE_RE.match(line) is None:
                 raise PrototypeParseError(f'Invalid function prototype for Fortran interface on line {lno}')
             start = line.index('(')
