@@ -34,11 +34,24 @@ libusempif08_ccode_la_SOURCES = \
         buffer_detach.c \
         api_f08_generated.c
 
-if OMPI_GENERATE_BINDINGS
-api_f08_generated.c: ../interface.in $(srcdir)/../generate_bindings.py
-	$(PYTHON) $(srcdir)/../generate_bindings.py c $< > $@
+if OMPI_FORTRAN_HAVE_TS
+libusempif08_ccode_la_SOURCES += \
+        ts.h \
+        ts.c
+endif
 
-MAINTAINERCLEANFILES = api_f08_generated.c
+DISTCLEANFILES = api_f08_generated.c
+
+if OMPI_GENERATE_BINDINGS
+api_f08_generated.c: ../interface.in
+	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
+	    --builddir $(abs_top_builddir) \
+	    --srcdir $(abs_top_srcdir) \
+	    --output $(abs_builddir)/$@ \
+	    fortran \
+	    --template $(abs_srcdir)/$< \
+	    code \
+	    c
 endif
 
 endif

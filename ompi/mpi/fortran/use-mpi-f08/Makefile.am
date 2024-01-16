@@ -126,9 +126,7 @@ mpi_api_files = \
         allreduce_f08.F90 \
         allreduce_init_f08.F90 \
         alltoall_init_f08.F90 \
-        alltoallv_f08.F90 \
         alltoallv_init_f08.F90 \
-        alltoallw_f08.F90 \
         alltoallw_init_f08.F90 \
         barrier_f08.F90 \
         barrier_init_f08.F90 \
@@ -588,8 +586,15 @@ EXTRA_DIST = \
 DISTCLEANFILES = api_f08_generated.F90
 
 if OMPI_GENERATE_BINDINGS
-api_f08_generated.F90: interface.in generate_bindings.py
-	$(PYTHON) $(srcdir)/generate_bindings.py fortran $< > $@
+api_f08_generated.F90: interface.in
+	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
+	    --builddir $(abs_top_builddir) \
+	    --srcdir $(abs_top_srcdir) \
+	    --output $(abs_builddir)/$@ \
+	    fortran \
+	    --template $(abs_srcdir)/$< \
+	    code \
+	    fortran
 endif
 
 ###########################################################################
