@@ -11,10 +11,13 @@
 # to generate Fortran subroutines and internal C functions that wrap the C MPI
 # interface versions of each function.
 #
-recv(BUFFER_OUT buf, COUNT count, DATATYPE datatype, RANK source, TAG tag, COMM comm, STATUS status)
-irecv(BUFFER_ASYNC_OUT buf, COUNT count, DATATYPE datatype, RANK source, TAG tag, COMM comm, REQUEST request)
-send(BUFFER buf, COUNT count, DATATYPE datatype, RANK dest, TAG tag, COMM comm)
-isend(BUFFER_ASYNC buf, COUNT count, DATATYPE data, RANK dest, TAG tag, COMM comm, REQUEST request)
-waitall(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests:count, STATUS_ARRAY array_of_statuses:count)
-testany(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests:count, INDEX_OUT index, LOGICAL_OUT flag, STATUS status)
-alltoall(BUFFER sendbuf, INT sendcount, DATATYPE sendtype, BUFFER recvbuf, INT recvcount, DATATYPE recvtype, COMM comm)
+# Parameters of the form 'TYPE param_name[key=other_param_name]' allow for
+# dependencies between different parameters (this is useful for buffer
+# parameters).
+recv(BUFFER_OUT buf[count=count;type=datatype], COUNT count, DATATYPE datatype, RANK source, TAG tag, COMM comm, STATUS status)
+irecv(BUFFER_ASYNC_OUT buf[count=count;type=datatype], COUNT count, DATATYPE datatype, RANK source, TAG tag, COMM comm, REQUEST request)
+send(BUFFER buf[count=count;type=datatype], COUNT count, DATATYPE datatype, RANK dest, TAG tag, COMM comm)
+isend(BUFFER_ASYNC buf[count=count;type=datatype], COUNT count, DATATYPE datatype, RANK dest, TAG tag, COMM comm, REQUEST request)
+waitall(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests[count=count], STATUS_ARRAY array_of_statuses[count=count])
+testany(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests[count=count], INDEX_OUT index, LOGICAL_OUT flag, STATUS status)
+alltoall(BUFFER sendbuf[count=sendcount;type=sendtype], INT sendcount, DATATYPE sendtype, BUFFER recvbuf[count=recvcount;type=recvtype], INT recvcount, DATATYPE recvtype, COMM comm)
