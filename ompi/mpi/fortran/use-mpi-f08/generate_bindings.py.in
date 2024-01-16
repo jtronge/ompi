@@ -25,6 +25,8 @@ C_ERROR_NAME = 'ierr'
 C_ERROR_TMP_NAME = 'c_ierr'
 GENERATED_MESSAGE = 'THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT BY HAND.'
 PROTOTYPE_RE = re.compile(r'^\w+\((\s*\w+\s+\w+\s*(\[\s*\w+\s*=\s*\w+\s*(;\s*\w+\s*=\s*\w+\s*)?\])?\s*,?)+\)$')
+# Check if we have support for TS 29113 (templated at configure time)
+HAVE_TS = '@OMPI_FORTRAN_HAVE_TS@' == '1'
 
 
 class FortranType(ABC):

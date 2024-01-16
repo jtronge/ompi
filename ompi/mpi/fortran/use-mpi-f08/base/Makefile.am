@@ -34,6 +34,12 @@ libusempif08_ccode_la_SOURCES = \
         buffer_detach.c \
         api_f08_generated.c
 
+if OMPI_FORTRAN_HAVE_TS
+libusempif08_ccode_la_SOURCES += \
+        ts.h \
+        ts.c
+endif
+
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.c: ../interface.in $(srcdir)/../generate_bindings.py
 	$(PYTHON) $(srcdir)/../generate_bindings.py c $< > $@
