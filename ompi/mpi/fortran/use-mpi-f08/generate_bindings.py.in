@@ -85,65 +85,33 @@ class FortranType(ABC):
     def declare(self):
         """Return a declaration for the type."""
 
-    def declare_ts(self):
-        """Return a declaration for the type (TS 29113)."""
-        return self.declare()
-
     def declare_tmp(self):
         """Declare temporaries on in the subroutine."""
         return []
-
-    def declare_tmp_ts(self):
-        """Declare temporaries on in the subroutine (TS 29113)."""
-        return self.declare_tmp()
 
     def declare_cbinding_fortran(self):
         """Return the C binding declaration as seen from Fortran."""
         return self.declare()
 
-    def declare_cbinding_fortran_ts(self):
-        """Return the C binding declaration as seen from Fortran (TS 29113)."""
-        return self.declare_cbinding_fortran()
-
     def argument(self):
         """Return the value to pass as an argument."""
         return self.name
-
-    def argument_ts(self):
-        """Return the value to pass as an argument (TS 29113)."""
-        return self.argument()
 
     def use(self):
         """Return list of (module, name) for a Fortran use-statement."""
         return []
 
-    def use_ts(self):
-        """Return list of (module, name) for a Fortran use-statement (TS 29113)."""
-        return self.use()
-
     def post(self):
         """Return post-processing code to be run after the call."""
         return []
-
-    def post_ts(self):
-        """Return post-processing code to be run after the call (TS 29113)."""
-        return self.post()
 
     @abstractmethod
     def c_parameter(self):
         """Return the parameter expression to be used in the C function."""
 
-    def c_parameter_ts(self):
-        """Return the parameter expression to be used in the C function (TS 29113)."""
-        return self.c_parameter()
-
     def c_declare_tmp(self):
         """Code to declare temporary variables for conversions, etc.."""
         return []
-
-    def c_declare_tmp_ts(self):
-        """Code to declare temporary variables for conversions, etc. (TS 29113)."""
-        return self.c_delcare_tmp()
 
     def c_shortcut_condition(self):
         """Shortcut conditional code.
@@ -162,25 +130,13 @@ class FortranType(ABC):
         """Code to be called before being passed to underlying C function."""
         return []
 
-    def c_prepare_ts(self):
-        """Code to be called before being passed to underlying C function (TS 29113)."""
-        return self.c_prepare_ts()
-
     def c_argument(self):
         """Return the value to pass as an argument in the C code."""
         return self.name
 
-    def c_argument_ts(self):
-        """Return the value to pass as an argument in the C code (TS 29113)."""
-        return self.c_argument()
-
     def c_post(self):
         """Code to be run after a call to the underlying C function."""
         return []
-
-    def c_post_ts(self):
-        """Code to be run after a call to the underlying C function (TS 29113)."""
-        return self.c_post()
 
 
 class FortranBindingError(Exception):
