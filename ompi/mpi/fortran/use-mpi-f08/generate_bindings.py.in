@@ -218,6 +218,14 @@ class BufferType(FortranType):
 
         def c_argument(self):
             return f'OMPI_F2C_BOTTOM({self.tmp_name})'
+
+        def c_post(self):
+            # TODO: Flip names
+            return [
+                f'if ({self.tmp_datatype1} != {self.tmp_datatype2}) {{',
+                f'    ompi_datatype_destroy(&{self.tmp_datatype1});',
+                '}',
+            ]
     else:
         def c_parameter(self):
             return f'char *{self.name}'
