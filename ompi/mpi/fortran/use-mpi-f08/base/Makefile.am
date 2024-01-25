@@ -42,7 +42,7 @@ endif
 
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.c: ../interface.in $(srcdir)/../generate_bindings.py
-	$(PYTHON) $(srcdir)/../generate_bindings.py c $< > $@
+	$(PYTHON) $(srcdir)/../generate_bindings.py --template $< code c > $@
 
 MAINTAINERCLEANFILES = api_f08_generated.c
 endif

@@ -10,6 +10,8 @@
 # Copyright (c) 2015-2020 Research Organization for Information Science
 #                         and Technology (RIST).  All rights reserved.
 # Copyright (c) 2016      IBM Corporation.  All rights reserved.
+# Copyright (C) 2024      Triad National Security, LLC. All rights
+#                         reserved.
 #
 # $COPYRIGHT$
 #
@@ -62,7 +64,9 @@ libforce_usempif08_internal_modules_to_be_built_la_SOURCES = \
         pmpi-f08-interfaces.F90 \
         mpi-f08-interfaces-callbacks.F90
 
-nodist_noinst_HEADERS = mpi-f08-interfaces.h
+nodist_noinst_HEADERS = \
+        mpi-f08-interfaces.h \
+        mpi-f08-interfaces-generated.h
 
 noinst_HEADERS = mpi-f08-rename.h
 
@@ -71,6 +75,12 @@ libforce_usempi_internal_modules_to_be_built.la: libusempif08_internal_modules.l
 config_h = \
     $(top_builddir)/ompi/mpi/fortran/configure-fortran-output.h \
     $(top_srcdir)/ompi/mpi/fortran/configure-fortran-output-bottom.h
+
+# Generate the Fortran interfaces
+if OMPI_GENERATE_BINDINGS
+mpi-f08-interfaces-generated.h: ../interface.in $(srcdir)/../generate_bindings.py
+	$(PYTHON) $(srcdir)/../generate_bindings.py --template $< interface > $@
+endif
 
 #
 # Automake doesn't do Fortran dependency analysis, so must list them
@@ -94,6 +104,7 @@ pmpi-f08-interfaces.lo: pmpi-f08-interfaces.F90
 pmpi-f08-interfaces.lo: mpi-f08-interfaces-callbacks.lo
 pmpi-f08-interfaces.lo: mpi-f08-interfaces.h
 pmpi-f08-interfaces.lo: mpi-f08-rename.h
+pmpi-f08-interfaces.lo: mpi-f08-interfaces-generated.h
 
 ###########################################################################
 

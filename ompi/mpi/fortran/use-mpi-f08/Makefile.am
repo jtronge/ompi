@@ -589,7 +589,7 @@ DISTCLEANFILES = api_f08_generated.F90
 
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.F90: interface.in generate_bindings.py
-	$(PYTHON) $(srcdir)/generate_bindings.py fortran $< > $@
+	$(PYTHON) $(srcdir)/generate_bindings.py --template $< code fortran > $@
 endif
 
 ###########################################################################

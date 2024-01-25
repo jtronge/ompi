@@ -63,7 +63,7 @@ class FortranType(ABC):
     @property
     def fn_api_name(self):
         """Return the MPI API name to be used in error messages, etc.."""
-        return c_api_func_name(self.fn_name, bigcount=self.bigcount).upper()
+        return ext_api_func_name(self.fn_name, bigcount=self.bigcount).upper()
 
     @property
     def tmp_name(self):
@@ -606,15 +606,15 @@ class StatusArrayType(FortranType):
         ]
 
 
-def c_api_func_name(fn_name, bigcount=False):
-    """Produce the actual MPI API function name to call into."""
+def ext_api_func_name(fn_name, bigcount=False):
+    """Produce the external MPI API function name."""
     suffix = '_c' if bigcount else ''
     return f'MPI_{fn_name.capitalize()}{suffix}'
 
 
-def c_api_func_name_profile(fn_name, bigcount=False):
-    """Produce the actual PMPI API function name to call into."""
-    return f'P{c_api_func_name(fn_name, bigcount)}'
+def ext_api_func_name_profile(fn_name, bigcount=False):
+    """Produce the external PMPI API function name."""
+    return f'P{ext_api_func_name(fn_name, bigcount)}'
 
 
 def fortran_f08_name(fn_name, bigcount=False):
@@ -623,7 +623,7 @@ def fortran_f08_name(fn_name, bigcount=False):
     return f'MPI_{fn_name.capitalize()}_f08{suffix}'
 
 
-FortranParameter = namedtuple('FortranParameter', ['type_', 'name', 'dep_params'])
+FortranParameter = namedtuple('FortranParameter', ['type_name', 'name', 'dep_params'])
 FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'lno', 'parameters'])
 
 
@@ -631,25 +631,31 @@ def load_prototypes(fname):
     """Load the prototypes from a file."""
     with open(fname) as fp:
         prototypes = []
+
         for i, line in enumerate(fp):
             lno = i + 1
             line = line.strip()
             if line and line[0] == '#':
                 continue
             if PROTOTYPE_RE.match(line) is None:
-                raise FortranBindingError(f'Invalid function prototype for Fortran interface on line {lno}')
+                raise FortranBindingError(
+                    f'Invalid function prototype for Fortran interface on line {lno}'
+                )
+
             start = line.index('(')
             end = line.index(')')
             fn_name = line[:start].strip()
             parameters = line[start+1:end].split(',')
+
+            # Attempt to parse each parameter
             parsed_parameters = []
             try:
                 for param in parameters:
                     param = param.strip()
                     param_parts = param.split()
-                    type_ = param_parts[0]
+                    type_name = param_parts[0]
                     name = ''.join(param_parts[1:])
-                    type_ = FortranType.get(type_)
+                    type_ = FortranType.get(type_name)
                     dep_params = None
                     # Check for 'param[name=param(;name=param)]' parameters,
                     # indicating a dependency on that other parameter
@@ -660,12 +666,13 @@ def load_prototypes(fname):
                         name = name[:idx]
                         # Validate the parameter key values
                         type_.validate_dep_param_keys(name, dep_params.keys())
-                    parsed_parameters.append(FortranParameter(type_, name, dep_params))
+                    parsed_parameters.append(FortranParameter(type_name, name, dep_params))
                 prototypes.append(FortranPrototype(fn_name, lno, parsed_parameters))
             except FortranBindingError as err:
                 raise FortranBindingError(
                     f'Failed to parse prototype on line {lno}: {err}'
                 ) from None
+
         return prototypes
 
 
@@ -679,7 +686,8 @@ class FortranBinding:
         param_map = {}
         dep_params = {}
         for param in prototype.parameters:
-            param_type = param.type_(param.name, self.fn_name, bigcount=bigcount)
+            type_ = FortranType.get(param.type_name)
+            param_type = type_(param.name, self.fn_name, bigcount=bigcount)
             self.parameters.append(param_type)
             param_map[param.name] = param_type
             if param.dep_params is not None:
@@ -738,11 +746,11 @@ class FortranBinding:
         print(f'        end subroutine {name}')
         print('    end interface')
 
-    def print_f_source(self):
-        """Output the main MPI Fortran subroutine."""
-        sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
-        c_func = self.c_func_name
-        print('subroutine', f'{sub_name}({self._param_list()},{FORTRAN_ERROR_NAME})')
+    def _print_fortran_header(self):
+        """Print the header, including use stmts, dummy variable decls, etc..
+
+        This does not include the subroutine line.
+        """
         # Use statements
         use_stmts = self._use_stmts()
         for stmt in use_stmts:
@@ -754,6 +762,22 @@ class FortranBinding:
             print(f'    {param.declare()}')
         # Add the integer error manually
         print(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
+
+    def _print_fortran_subroutine(self):
+        """Output the Fortran subroutine line."""
+        sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
+        print('subroutine', f'{sub_name}({self._param_list()},{FORTRAN_ERROR_NAME})')
+
+    def _print_fortran_subroutine_end(self):
+        """Output the Fortran end subroutine line."""
+        sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
+        print(f'end subroutine {sub_name}')
+
+    def print_f_source(self):
+        """Output the main MPI Fortran subroutine."""
+        self._print_fortran_subroutine()
+        self._print_fortran_header()
+
         # Temporaries
         print(f'    INTEGER :: {C_ERROR_TMP_NAME}')
         for param in self.parameters:
@@ -767,7 +791,7 @@ class FortranBinding:
 
         # Call into the C function
         args = ','.join(param.argument() for param in self.parameters)
-        print(f'    call {c_func}({args},{C_ERROR_TMP_NAME})')
+        print(f'    call {self.c_func_name}({args},{C_ERROR_TMP_NAME})')
         # Convert error type
         print(f'    if (present({FORTRAN_ERROR_NAME})) {FORTRAN_ERROR_NAME} = {C_ERROR_TMP_NAME}')
 
@@ -775,7 +799,7 @@ class FortranBinding:
             for line in param.post():
                 print(f'    {line}')
 
-        print(f'end subroutine {sub_name}')
+        self._print_fortran_subroutine_end()
 
     def print_c_source(self):
         """Output the C source and function that the Fortran calls into."""
@@ -814,7 +838,7 @@ class FortranBinding:
                 print(f'    {line}')
 
         # Call into the C API
-        c_api_func = c_api_func_name_profile(self.fn_name, bigcount=self.bigcount)
+        c_api_func = ext_api_func_name_profile(self.fn_name, bigcount=self.bigcount)
         arguments = [param.c_argument() for param in self.parameters]
         arguments = ', '.join(arguments)
         print(f'    {C_ERROR_TMP_NAME} = {c_api_func}({arguments});')
@@ -825,6 +849,12 @@ class FortranBinding:
             for line in param.c_post():
                 print(f'    {line}')
         print('}')
+
+    def print_interface(self):
+        """Output just the Fortran interface for this binding."""
+        self._print_fortran_subroutine()
+        self._print_fortran_header()
+        self._print_fortran_subroutine_end()
 
 
 def print_f_source_header():
@@ -843,7 +873,7 @@ def print_profiling_rename_macros(prototypes):
         name = fortran_f08_name(prototype.fn_name)
         print(f'#define {name} P{name}')
         # Check for bigcount version
-        if any(param.type_ == 'COUNT' for param in prototype.parameters):
+        if prototype_has_bigcount(prototype):
             bigcount_name = fortran_f08_name(prototype.fn_name, bigcount=True)
             print(f'#define {bigcount_name} P{bigcount_name}')
     print('#endif /* OMPI_BUILD_MPI_PROFILING */')
@@ -873,16 +903,13 @@ def print_binding(prototype, lang, bigcount=False):
         binding.print_c_source()
 
 
-def main():
-    parser = argparse.ArgumentParser(description='generate fortran binding files')
-    parser.add_argument('lang', choices=('fortran', 'c'),
-                        help='generate dependent files in C or Fortran')
-    parser.add_argument('template', help='template file to use')
-    parser.add_argument('--bigcount', action='store_true',
-                        help='generate bigcount interface for function')
-    args = parser.parse_args()
+def prototype_has_bigcount(prototype):
+    """Should this prototype have a bigcount version?"""
+    return any(param.type_name == 'COUNT' for param in prototype.parameters)
 
-    prototypes = load_prototypes(args.template)
+
+def generate_code(args, prototypes):
+    """Generate binding code based on arguments."""
     if args.lang == 'fortran':
         print_f_source_header()
         print()
@@ -893,9 +920,46 @@ def main():
     for prototype in prototypes:
         print()
         print_binding(prototype, args.lang)
-        if any(param.type_ == 'COUNT' for param in prototype.parameters):
+        if prototype_has_bigcount(prototype):
             print()
             print_binding(prototype, args.lang, bigcount=True)
+
+
+def generate_interface(args, prototypes):
+    """Generate the Fortran interface files."""
+    print(f'! {GENERATED_MESSAGE}')
+    for prototype in prototypes:
+        ext_name = ext_api_func_name(prototype.fn_name)
+        print(f'interface {ext_name}')
+        binding = FortranBinding(prototype)
+        binding.print_interface()
+        if prototype_has_bigcount(prototype):
+            print()
+            binding_c = FortranBinding(prototype, bigcount=True)
+            binding_c.print_interface()
+        print(f'end interface {ext_name}')
+
+
+def main():
+    parser = argparse.ArgumentParser(description='generate fortran binding files')
+    parser.add_argument('--template', required=True, help='template file to use')
+    subparsers = parser.add_subparsers(required=True)
+
+    # Handler for generating actual code
+    parser_code = subparsers.add_parser('code', help='generate binding code')
+    parser_code.add_argument('lang', choices=('fortran', 'c'),
+                             help='generate dependent files in C or Fortran')
+    parser_code.set_defaults(handler=generate_code)
+
+    # Handler for generating the Fortran interface files
+    parser_interface = subparsers.add_parser('interface',
+                                             help='generate Fortran interface specifcations')
+    parser_interface.set_defaults(handler=generate_interface)
+
+    args = parser.parse_args()
+
+    prototypes = load_prototypes(args.template)
+    args.handler(args, prototypes)
 
 
 if __name__ == '__main__':
