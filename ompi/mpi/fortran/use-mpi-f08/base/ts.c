@@ -94,11 +94,10 @@ fn_exit:
 }
 
 static void copy(CFI_dim_t *dim, int rank, char * base, char **dest, size_t len) {
-    for (size_t i=0; i<dim->extent; i++) {
+    for (CFI_index_t i=0; i<dim->extent; i++) {
         if (rank > 1) {
             copy(dim-1, rank-1, base, dest, len);
         } else {
-            int v;
             memcpy(*dest, base, len);
             *dest += len;
         }
@@ -112,11 +111,10 @@ int ompi_ts_copy(CFI_cdesc_t *cdesc, char *buffer) {
 }
 
 static void copy_back(CFI_dim_t *dim, int rank, char * base, char **source, size_t len) {
-    for (size_t i=0; i<dim->extent; i++) {
+    for (CFI_index_t i=0; i<dim->extent; i++) {
         if (rank > 1) {
             copy_back(dim-1, rank-1, base, source, len);
         } else {
-            int v;
             memcpy(base, *source, len);
             *source += len;
         }
