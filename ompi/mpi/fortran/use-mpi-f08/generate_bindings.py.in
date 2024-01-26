@@ -25,7 +25,7 @@ C_ERROR_NAME = 'ierr'
 C_ERROR_TMP_NAME = 'c_ierr'
 GENERATED_MESSAGE = 'THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT BY HAND.'
 PROTOTYPE_RE = re.compile(
-    r"""^\w+\(                                  # Subroutine name (and opening
+    r"""\.\w+\(                                 # Subroutine name (and opening
                                                 # parenthesis);
             (\s*\w+                             # Type name (corresponding to
                                                 # classes deriving FortranType below);
@@ -704,60 +704,94 @@ FortranParameter = namedtuple('FortranParameter', ['type_name', 'name', 'dep_par
 FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'lno', 'parameters'])
 
 
+def parse_prototype(lno, line):
+    """Parse a prototype for the given line and string."""
+    if PROTOTYPE_RE.match(line) is None:
+        raise FortranBindingError(
+            f'Invalid function prototype for Fortran interface starting on line {lno}'
+        )
+
+    start = line.index('(')
+    end = line.index(')')
+    fn_name = line[1:start].strip()
+    parameters = line[start+1:end].split(',')
+
+    # Attempt to parse each parameter
+    parsed_parameters = []
+    try:
+        for param in parameters:
+            param = param.strip()
+            param_parts = param.split()
+            type_name = param_parts[0]
+            name = ''.join(param_parts[1:])
+            type_ = FortranType.get(type_name)
+            dep_params = None
+
+            # Check for 'param[name=param(;name=param)]' parameters,
+            # indicating a dependency on that other parameter
+            if '[' in name:
+                idx = name.index('[')
+                dep_params = [part.split('=') for part in name[idx+1:-1].split(';')]
+                dep_params = dict(dep_params)
+                name = name[:idx]
+
+            # Validate the parameter key values (or an empty list if not found)
+            type_.validate_dep_param_keys(name, [] if dep_params is None else dep_params.keys())
+
+            parsed_parameters.append(FortranParameter(type_name, name, dep_params))
+        return FortranPrototype(fn_name, lno, parsed_parameters)
+    except FortranBindingError as err:
+        raise FortranBindingError(
+            f'Failed to parse prototype starting on line {lno}: {err}'
+        ) from None
+    except KeyError as err:
+        raise FortranBindingError(
+            f'Found invalid type starting on line {lno}: {err}'
+        ) from None
+
+
 def load_prototypes(fname):
     """Load the prototypes from a file."""
     with open(fname) as fp:
-        prototypes = []
+        tmp_proto_string = []
+        proto_strings = []
+        cur_lno = 0
+        reading_proto = False
 
+        # The loop below is designed to read in each prototype, each delimited
+        # by a '.' preceding the name of the subroutine, allowing for the
+        # prototype to run across multiple lines.
         for i, line in enumerate(fp):
             lno = i + 1
             line = line.strip()
-            if line and line[0] == '#':
+
+            # First strip comments
+            comm_idx = line.find('#')
+            if comm_idx != -1:
+                line = line[:comm_idx]
+            if not line:
                 continue
-            if PROTOTYPE_RE.match(line) is None:
-                raise FortranBindingError(
-                    f'Invalid function prototype for Fortran interface on line {lno}'
-                )
 
-            start = line.index('(')
-            end = line.index(')')
-            fn_name = line[:start].strip()
-            parameters = line[start+1:end].split(',')
+            # Set the current line for the prototype
+            if not tmp_proto_string:
+                cur_lno = lno
 
-            # Attempt to parse each parameter
-            parsed_parameters = []
-            try:
-                for param in parameters:
-                    param = param.strip()
-                    param_parts = param.split()
-                    type_name = param_parts[0]
-                    name = ''.join(param_parts[1:])
-                    type_ = FortranType.get(type_name)
-                    dep_params = None
+            # Check for initial '.' character, indicating the start of a prototype
+            reading_proto = reading_proto or line[0] == '.'
+            if line[0] == '.' and tmp_proto_string:
+                # If the buffer is not empty, then the previous prototype
+                # string is complete and can be saved
+                proto_strings.append((cur_lno, ' '.join(tmp_proto_string)))
+                tmp_proto_string = []
+            # Only add the line to the current buffer if we already encountered
+            # a '.' at the start of this or a previous line
+            if reading_proto:
+                tmp_proto_string.append(line)
 
-                    # Check for 'param[name=param(;name=param)]' parameters,
-                    # indicating a dependency on that other parameter
-                    if '[' in name:
-                        idx = name.index('[')
-                        dep_params = [part.split('=') for part in name[idx+1:-1].split(';')]
-                        dep_params = dict(dep_params)
-                        name = name[:idx]
+        if tmp_proto_string:
+            proto_strings.append((cur_lno, ' '.join(tmp_proto_string)))
 
-                    # Validate the parameter key values (or an empty list if not found)
-                    type_.validate_dep_param_keys(name, [] if dep_params is None else dep_params.keys())
-
-                    parsed_parameters.append(FortranParameter(type_name, name, dep_params))
-                prototypes.append(FortranPrototype(fn_name, lno, parsed_parameters))
-            except FortranBindingError as err:
-                raise FortranBindingError(
-                    f'Failed to parse prototype on line {lno}: {err}'
-                ) from None
-            except KeyError as err:
-                raise FortranBindingError(
-                    f'Found invalid type on line {lno}: {err}'
-                ) from None
-
-        return prototypes
+        return [parse_prototype(lno, proto_string) for lno, proto_string in proto_strings]
 
 
 class FortranBinding:
