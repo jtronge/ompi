@@ -78,8 +78,8 @@ config_h = \
 
 # Generate the Fortran interfaces
 if OMPI_GENERATE_BINDINGS
-mpi-f08-interfaces-generated.h: ../interface.in $(srcdir)/../generate_bindings.py
-	$(PYTHON) $(srcdir)/../generate_bindings.py --template $< interface > $@
+mpi-f08-interfaces-generated.h: ../interface.in $(builddir)/../generate_bindings.py
+	$(PYTHON) $(builddir)/../generate_bindings.py --template $< interface > $@
 endif
 
 #

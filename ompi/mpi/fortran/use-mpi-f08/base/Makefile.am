@@ -41,8 +41,8 @@ libusempif08_ccode_la_SOURCES += \
 endif
 
 if OMPI_GENERATE_BINDINGS
-api_f08_generated.c: ../interface.in $(srcdir)/../generate_bindings.py
-	$(PYTHON) $(srcdir)/../generate_bindings.py --template $< code c > $@
+api_f08_generated.c: ../interface.in $(builddir)/../generate_bindings.py
+	$(PYTHON) $(builddir)/../generate_bindings.py --template $< code c > $@
 
 MAINTAINERCLEANFILES = api_f08_generated.c
 endif
