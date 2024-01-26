@@ -30,8 +30,8 @@
           INT sendcount, DATATYPE sendtype,
           BUFFER recvbuf[count=recvcount;type=recvtype;comm=comm],
           INT recvcount, DATATYPE recvtype, COMM comm)
-.alltoallv(VBUFFER sendbuf[count=sendcounts;displs=sdispls;type=sendtype;comm=comm],
+.alltoallv(VBUFFER sendbuf[counts=sendcounts;displs=sdispls;type=sendtype;comm=comm],
            INT_ARRAY sendcounts[comm=comm], INT_ARRAY sdispls[comm=comm],
-           DATATYPE sendtype, VBUFFER_OUT recvbuf,
+           DATATYPE sendtype, VBUFFER_OUT recvbuf[comm=comm;type=recvtype],
            INT_ARRAY recvcounts[comm=comm], INT_ARRAY rdispls[comm=comm],
            DATATYPE recvtype, COMM comm)
