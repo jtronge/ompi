@@ -250,6 +250,39 @@ class BufferAsyncOutType(BufferType):
         return f'@OMPI_F08_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: {self.name}'
 
 
+@FortranType.add('VBUFFER')
+class VBuferType(FortranType):
+    """Variable buffer type, as used by MPI_*v() functions."""
+    @staticmethod
+    def validate_dep_param_keys(param_name, keys):
+        validate_allowed_keys(keys, ['count', 'displs', 'type', 'comm'], 'VBUFFER', param_name)
+
+    # TODO: TS 29113 impl...
+
+    def declare(self):
+        return f'@OMPI_F08_IGNORE_TKR_TYPE@, INTENT(IN) :: {self.name}'
+
+    def c_parameter(self):
+        return f'char *{self.name}'
+
+    def c_argument(self):
+        return f'OMPI_F2C_BOTTOM(OMPI_F2C_IN_PLACE({self.name}))'
+
+
+@FortranType.add('VBUFFER_OUT')
+class VBuferType(FortranType):
+    """Variable buffer receive type, as used by MPI_*v() functions."""
+
+    def declare(self):
+        return f'@OMPI_F08_IGNORE_TKR_TYPE@ :: {self.name}'
+
+    def c_parameter(self):
+        return f'char *{self.name}'
+
+    def c_argument(self):
+        return f'OMPI_F2C_BOTTOM({self.name})'
+
+
 @FortranType.add('COUNT')
 class CountType(FortranType):
     def declare(self):
@@ -600,6 +633,40 @@ class StatusArrayType(FortranType):
         ]
 
 
+@FortranType.add('INT_ARRAY')
+class IntArray(FortranType):
+    """Integer array as used for MPI_*v() variable length functions."""
+
+    @staticmethod
+    def validate_dep_param_keys(param_name, keys):
+        validate_allowed_keys(keys, ['comm'], 'INT_ARRAY', param_name)
+
+    def declare(self):
+        return f'INTEGER, INTENT(IN) :: {self.name}(*)'
+
+    def c_parameter(self):
+        return f'MPI_Fint *{self.name}'
+
+    def c_declare_tmp(self):
+        return [
+            f'int {self.tmp_name};',
+            f'OMPI_ARRAY_NAME_DECL({self.name});'
+        ]
+
+    def c_prepare(self):
+        comm_name = self.dep_params['comm'].tmp_name
+        return [
+            f'PMPI_Comm_size({comm_name}, &{self.tmp_name});',
+            f'OMPI_ARRAY_FINT_2_INT({self.name}, {self.tmp_name});',
+        ]
+
+    def c_argument(self):
+        return f'OMPI_ARRAY_NAME_CONVERT({self.name})'
+
+    def c_post(self):
+        return [f'OMPI_ARRAY_FINT_2_INT_CLEANUP({self.name});']
+
+
 def ext_api_func_name(fn_name, bigcount=False):
     """Produce the external MPI API function name."""
     suffix = '_c' if bigcount else ''
@@ -651,6 +718,7 @@ def load_prototypes(fname):
                     name = ''.join(param_parts[1:])
                     type_ = FortranType.get(type_name)
                     dep_params = None
+
                     # Check for 'param[name=param(;name=param)]' parameters,
                     # indicating a dependency on that other parameter
                     if '[' in name:
@@ -658,13 +726,19 @@ def load_prototypes(fname):
                         dep_params = [part.split('=') for part in name[idx+1:-1].split(';')]
                         dep_params = dict(dep_params)
                         name = name[:idx]
-                        # Validate the parameter key values
-                        type_.validate_dep_param_keys(name, dep_params.keys())
+
+                    # Validate the parameter key values (or an empty list if not found)
+                    type_.validate_dep_param_keys(name, [] if dep_params is None else dep_params.keys())
+
                     parsed_parameters.append(FortranParameter(type_name, name, dep_params))
                 prototypes.append(FortranPrototype(fn_name, lno, parsed_parameters))
             except FortranBindingError as err:
                 raise FortranBindingError(
                     f'Failed to parse prototype on line {lno}: {err}'
+                ) from None
+            except KeyError as err:
+                raise FortranBindingError(
+                    f'Found invalid type on line {lno}: {err}'
                 ) from None
 
         return prototypes
@@ -784,8 +858,21 @@ class FortranBinding:
         print()
 
         # Call into the C function
-        args = ','.join(param.argument() for param in self.parameters)
-        print(f'    call {self.c_func_name}({args},{C_ERROR_TMP_NAME})')
+        call_start = f'    call {self.c_func_name}('
+        indent = len(call_start) * ' '
+        # Have to make sure this doesn't go over the max line length of 132
+        # characters, so just break each argument onto a single line.
+        lines = [f'{call_start}{self.parameters[0].argument()},']
+        for param in self.parameters[1:]:
+            lines.append(f'{indent}{param.argument()},')
+        last_line = f'{indent}{C_ERROR_TMP_NAME})'
+        max_len = max(len(line) for line in lines)
+        max_len = max(max_len, len(last_line))
+        for line in lines:
+            spaces = (max_len - len(line) + 1) * ' '
+            print(f'{line}{spaces}&')
+        print(last_line)
+
         # Convert error type
         print(f'    if (present({FORTRAN_ERROR_NAME})) {FORTRAN_ERROR_NAME} = {C_ERROR_TMP_NAME}')
 
@@ -938,7 +1025,7 @@ def generate_interface(args, prototypes):
 def main():
     parser = argparse.ArgumentParser(description='generate fortran binding files')
     parser.add_argument('--template', required=True, help='template file to use')
-    subparsers = parser.add_subparsers(required=True)
+    subparsers = parser.add_subparsers()
 
     # Handler for generating actual code
     parser_code = subparsers.add_parser('code', help='generate binding code')

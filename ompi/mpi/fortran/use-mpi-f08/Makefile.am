@@ -126,7 +126,6 @@ mpi_api_files = \
         allreduce_f08.F90 \
         allreduce_init_f08.F90 \
         alltoall_init_f08.F90 \
-        alltoallv_f08.F90 \
         alltoallv_init_f08.F90 \
         alltoallw_f08.F90 \
         alltoallw_init_f08.F90 \
