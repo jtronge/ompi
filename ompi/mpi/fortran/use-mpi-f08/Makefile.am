@@ -587,8 +587,13 @@ EXTRA_DIST = \
 DISTCLEANFILES = api_f08_generated.F90
 
 if OMPI_GENERATE_BINDINGS
-api_f08_generated.F90: interface.in $(builddir)/generate_bindings.py
-	$(PYTHON) $(builddir)/generate_bindings.py --template $< code fortran > $@
+api_f08_generated.F90: interface.in
+	$(PYTHON) $(top_builddir)/ompi/mpi/bindings/bindings.py \
+	    --template $(abs_srcdir)/$< \
+	    --output $(abs_builddir)/$@ \
+	    --builddir $(abs_builddir) \
+	    code \
+	    fortran
 endif
 
 ###########################################################################

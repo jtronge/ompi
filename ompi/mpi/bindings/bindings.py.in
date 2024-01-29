@@ -863,9 +863,10 @@ def load_prototypes(fname):
 class FortranBinding:
     """Class for generating the binding for a single function."""
 
-    def __init__(self, prototype, bigcount=False):
+    def __init__(self, prototype, out, bigcount=False):
         self.bigcount = bigcount
         self.fn_name = prototype.fn_name
+        self.out = out
         self.parameters = []
         param_map = {}
         dep_params = {}
@@ -882,6 +883,10 @@ class FortranBinding:
                 param_map[name].dep_params = {key: param_map[dep_name] for key, dep_name in deps.items()}
         except KeyError as err:
             raise FortranBindingError(f'Invalid dependent type listed on line {prototype.lno}: {err}')
+
+    def dump(self, *pargs, **kwargs):
+        """Write to the output file."""
+        self.out.dump(*pargs, **kwargs)
 
     def _fn_name_suffix(self):
         """Return a suffix for function names."""
@@ -917,18 +922,18 @@ class FortranBinding:
     def _print_fortran_interface(self):
         """Output the C subroutine binding for the Fortran code."""
         name = self.c_func_name
-        print('    interface')
-        print(f'        subroutine {name}({self._param_list()},{FORTRAN_ERROR_NAME}) &')
-        print(f'            BIND(C, name="{name}")')
+        self.dump('    interface')
+        self.dump(f'        subroutine {name}({self._param_list()},{FORTRAN_ERROR_NAME}) &')
+        self.dump(f'            BIND(C, name="{name}")')
         use_stmts = self._use_stmts()
         for stmt in use_stmts:
-            print(f'            {stmt}')
-        print('            implicit none')
+            self.dump(f'            {stmt}')
+        self.dump('            implicit none')
         for param in self.parameters:
-            print(f'            {param.declare_cbinding_fortran()}')
-        print(f'            INTEGER, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
-        print(f'        end subroutine {name}')
-        print('    end interface')
+            self.dump(f'            {param.declare_cbinding_fortran()}')
+        self.dump(f'            INTEGER, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
+        self.dump(f'        end subroutine {name}')
+        self.dump('    end interface')
 
     def _print_fortran_header(self):
         """Print the header, including use stmts, dummy variable decls, etc..
@@ -938,24 +943,24 @@ class FortranBinding:
         # Use statements
         use_stmts = self._use_stmts()
         for stmt in use_stmts:
-            print(f'    {stmt}')
-        print('    implicit none')
+            self.dump(f'    {stmt}')
+        self.dump('    implicit none')
         # Parameters/dummy variable declarations
         types = []
         for param in self.parameters:
-            print(f'    {param.declare()}')
+            self.dump(f'    {param.declare()}')
         # Add the integer error manually
-        print(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
+        self.dump(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
 
     def _print_fortran_subroutine(self):
         """Output the Fortran subroutine line."""
         sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
-        print('subroutine', f'{sub_name}({self._param_list()},{FORTRAN_ERROR_NAME})')
+        self.dump('subroutine', f'{sub_name}({self._param_list()},{FORTRAN_ERROR_NAME})')
 
     def _print_fortran_subroutine_end(self):
         """Output the Fortran end subroutine line."""
         sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
-        print(f'end subroutine {sub_name}')
+        self.dump(f'end subroutine {sub_name}')
 
     def print_f_source(self):
         """Output the main MPI Fortran subroutine."""
@@ -963,15 +968,15 @@ class FortranBinding:
         self._print_fortran_header()
 
         # Temporaries
-        print(f'    INTEGER :: {C_ERROR_TMP_NAME}')
+        self.dump(f'    INTEGER :: {C_ERROR_TMP_NAME}')
         for param in self.parameters:
             for line in param.declare_tmp().split('\n'):
-                print(f'    {line}')
+                self.dump(f'    {line}')
 
         # Interface for call to C function
-        print()
+        self.dump()
         self._print_fortran_interface()
-        print()
+        self.dump()
 
         # Call into the C function
         call_start = f'    call {self.c_func_name}('
@@ -986,15 +991,15 @@ class FortranBinding:
         max_len = max(max_len, len(last_line))
         for line in lines:
             spaces = (max_len - len(line) + 1) * ' '
-            print(f'{line}{spaces}&')
-        print(last_line)
+            self.dump(f'{line}{spaces}&')
+        self.dump(last_line)
 
         # Convert error type
-        print(f'    if (present({FORTRAN_ERROR_NAME})) {FORTRAN_ERROR_NAME} = {C_ERROR_TMP_NAME}')
+        self.dump(f'    if (present({FORTRAN_ERROR_NAME})) {FORTRAN_ERROR_NAME} = {C_ERROR_TMP_NAME}')
 
         for param in self.parameters:
             for line in param.post().split('\n'):
-                print(f'    {line}')
+                self.dump(f'    {line}')
 
         self._print_fortran_subroutine_end()
 
@@ -1006,46 +1011,46 @@ class FortranBinding:
         parameters = ', '.join(parameters)
         # Just put the signature here to silence `-Wmissing-prototypes`
         c_func = self.c_func_name
-        print(f'void {c_func}({parameters});')
-        print(f'void {c_func}({parameters})')
-        print('{')
-        print(f'    int {C_ERROR_TMP_NAME}; ')
+        self.dump(f'void {c_func}({parameters});')
+        self.dump(f'void {c_func}({parameters})')
+        self.dump('{')
+        self.dump(f'    int {C_ERROR_TMP_NAME}; ')
 
         # First the temporary declarations
         for param in self.parameters:
             for line in param.c_declare_tmp().split('\n'):
-                print(f'    {line}')
+                self.dump(f'    {line}')
 
         # Shortcut conditions, if any
         for param in self.parameters:
             condition = param.c_shortcut_condition()
             if condition is None:
                 continue
-            print(f'    if ({condition}) {{')
-            print(f'        *{C_ERROR_NAME} = OMPI_INT_2_FINT(MPI_SUCCESS);')
+            self.dump(f'    if ({condition}) {{')
+            self.dump(f'        *{C_ERROR_NAME} = OMPI_INT_2_FINT(MPI_SUCCESS);')
             for other_param in self.parameters:
                 for line in other_param.c_shortcut_code().split('\n'):
-                    print(f'        {line}')
-            print('        return;')
-            print('    }')
+                    self.dump(f'        {line}')
+            self.dump('        return;')
+            self.dump('    }')
 
         # Prepare code for temporaries, etc.
         for param in self.parameters:
             for line in param.c_prepare().split('\n'):
-                print(f'    {line}')
+                self.dump(f'    {line}')
 
         # Call into the C API
         c_api_func = ext_api_func_name_profile(self.fn_name, bigcount=self.bigcount)
         arguments = [param.c_argument() for param in self.parameters]
         arguments = ', '.join(arguments)
-        print(f'    {C_ERROR_TMP_NAME} = {c_api_func}({arguments});')
+        self.dump(f'    {C_ERROR_TMP_NAME} = {c_api_func}({arguments});')
 
         # Post-processing code
-        print(f'    *{C_ERROR_NAME} = OMPI_INT_2_FINT({C_ERROR_TMP_NAME});')
+        self.dump(f'    *{C_ERROR_NAME} = OMPI_INT_2_FINT({C_ERROR_TMP_NAME});')
         for param in self.parameters:
             for line in param.c_post().split('\n'):
-                print(f'    {line}')
-        print('}')
+                self.dump(f'    {line}')
+        self.dump('}')
 
     def print_interface(self):
         """Output just the Fortran interface for this binding."""
@@ -1054,48 +1059,48 @@ class FortranBinding:
         self._print_fortran_subroutine_end()
 
 
-def print_f_source_header():
+def print_f_source_header(out):
     """Print the fortran f08 file header."""
-    print(f'! {GENERATED_MESSAGE}')
-    print('#include "ompi/mpi/fortran/configure-fortran-output.h"')
+    out.dump(f'! {GENERATED_MESSAGE}')
+    out.dump('#include "ompi/mpi/fortran/configure-fortran-output.h"')
 
 
-def print_profiling_rename_macros(prototypes):
+def print_profiling_rename_macros(prototypes, out):
     """Print macros for renaming functions for the profiling interface.
 
     Previously hardcoded in mpi-f08-rename.h.
     """
-    print('#if OMPI_BUILD_MPI_PROFILING')
+    out.dump('#if OMPI_BUILD_MPI_PROFILING')
     for prototype in prototypes:
         name = fortran_f08_name(prototype.fn_name)
-        print(f'#define {name} P{name}')
+        out.dump(f'#define {name} P{name}')
         # Check for bigcount version
         if prototype_has_bigcount(prototype):
             bigcount_name = fortran_f08_name(prototype.fn_name, bigcount=True)
-            print(f'#define {bigcount_name} P{bigcount_name}')
-    print('#endif /* OMPI_BUILD_MPI_PROFILING */')
+            out.dump(f'#define {bigcount_name} P{bigcount_name}')
+    out.dump('#endif /* OMPI_BUILD_MPI_PROFILING */')
 
 
-def print_c_source_header():
+def print_c_source_header(out):
     """Print the header of the C source file."""
-    print(f'/* {GENERATED_MESSAGE} */')
+    out.dump(f'/* {GENERATED_MESSAGE} */')
     if HAVE_TS:
-        print('#include <ISO_Fortran_binding.h>')
-        print('#include "ts.h"')
-    print('#include "generate_bindings.h"')
-    print('#include "ompi_config.h"')
-    print('#include "mpi.h"')
-    print('#include "ompi/errhandler/errhandler.h"')
-    print('#include "ompi/mpi/fortran/mpif-h/status-conversion.h"')
-    print('#include "ompi/mpi/fortran/base/constants.h"')
-    print('#include "ompi/mpi/fortran/base/fint_2_int.h"')
-    print('#include "ompi/request/request.h"')
-    print('#include "ompi/communicator/communicator.h"')
+        out.dump('#include <ISO_Fortran_binding.h>')
+        out.dump('#include "ts.h"')
+    out.dump('#include "generate_bindings.h"')
+    out.dump('#include "ompi_config.h"')
+    out.dump('#include "mpi.h"')
+    out.dump('#include "ompi/errhandler/errhandler.h"')
+    out.dump('#include "ompi/mpi/fortran/mpif-h/status-conversion.h"')
+    out.dump('#include "ompi/mpi/fortran/base/constants.h"')
+    out.dump('#include "ompi/mpi/fortran/base/fint_2_int.h"')
+    out.dump('#include "ompi/request/request.h"')
+    out.dump('#include "ompi/communicator/communicator.h"')
 
 
-def print_binding(prototype, lang, bigcount=False):
+def print_binding(prototype, lang, out, bigcount=False):
     """Print the binding with or without bigcount."""
-    binding = FortranBinding(prototype, bigcount=bigcount)
+    binding = FortranBinding(prototype, out=out, bigcount=bigcount)
     if lang == 'fortran':
         binding.print_f_source()
     else:
@@ -1107,41 +1112,53 @@ def prototype_has_bigcount(prototype):
     return any(param.type_name == 'COUNT' for param in prototype.parameters)
 
 
-def generate_code(args, prototypes):
+def generate_code(args, prototypes, out):
     """Generate binding code based on arguments."""
     if args.lang == 'fortran':
-        print_f_source_header()
-        print()
-        print_profiling_rename_macros(prototypes)
-        print()
+        print_f_source_header(out)
+        out.dump()
+        print_profiling_rename_macros(prototypes, out)
+        out.dump()
     else:
-        print_c_source_header()
+        print_c_source_header(out)
     for prototype in prototypes:
-        print()
-        print_binding(prototype, args.lang)
+        out.dump()
+        print_binding(prototype, args.lang, out)
         if prototype_has_bigcount(prototype):
-            print()
-            print_binding(prototype, args.lang, bigcount=True)
+            out.dump()
+            print_binding(prototype, args.lang, bigcount=True, out=out)
 
 
-def generate_interface(args, prototypes):
+def generate_interface(args, prototypes, out):
     """Generate the Fortran interface files."""
-    print(f'! {GENERATED_MESSAGE}')
+    out.dump(f'! {GENERATED_MESSAGE}')
     for prototype in prototypes:
         ext_name = ext_api_func_name(prototype.fn_name)
-        print(f'interface {ext_name}')
-        binding = FortranBinding(prototype)
+        out.dump(f'interface {ext_name}')
+        binding = FortranBinding(prototype, out=out)
         binding.print_interface()
         if prototype_has_bigcount(prototype):
-            print()
-            binding_c = FortranBinding(prototype, bigcount=True)
+            out.dump()
+            binding_c = FortranBinding(prototype, out=out, bigcount=True)
             binding_c.print_interface()
-        print(f'end interface {ext_name}')
+        out.dump(f'end interface {ext_name}')
+
+
+class OutputFile:
+    """Output file of script."""
+
+    def __init__(self, fp):
+        self.fp = fp
+
+    def dump(self, *pargs, **kwargs):
+        print(*pargs, **kwargs, file=self.fp)
 
 
 def main():
     parser = argparse.ArgumentParser(description='generate fortran binding files')
     parser.add_argument('--template', required=True, help='template file to use')
+    parser.add_argument('--output', required=True, help='output file to use')
+    parser.add_argument('--builddir', required=True, help='absolute path to automake build dir')
     subparsers = parser.add_subparsers()
 
     # Handler for generating actual code
@@ -1158,7 +1175,8 @@ def main():
     args = parser.parse_args()
 
     prototypes = load_prototypes(args.template)
-    args.handler(args, prototypes)
+    with open(args.output, 'w') as f:
+        args.handler(args, prototypes, OutputFile(f))
 
 
 if __name__ == '__main__':

@@ -76,10 +76,16 @@ config_h = \
     $(top_builddir)/ompi/mpi/fortran/configure-fortran-output.h \
     $(top_srcdir)/ompi/mpi/fortran/configure-fortran-output-bottom.h
 
+DISTCLEANFILES = mpi-f08-interfaces-generated.h
+
 # Generate the Fortran interfaces
 if OMPI_GENERATE_BINDINGS
-mpi-f08-interfaces-generated.h: ../interface.in $(builddir)/../generate_bindings.py
-	$(PYTHON) $(builddir)/../generate_bindings.py --template $< interface > $@
+mpi-f08-interfaces-generated.h: ../interface.in
+	$(PYTHON) $(top_builddir)/ompi/mpi/bindings/bindings.py \
+	    --template $(abs_srcdir)/$< \
+	    --output $(abs_builddir)/$@ \
+	    --builddir $(abs_builddir) \
+	    interface
 endif
 
 #
