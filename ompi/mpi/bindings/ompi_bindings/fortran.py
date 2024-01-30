@@ -1,4 +1,4 @@
-# Copyright (c) 2023      Triad National Security, LLC. All rights
+# Copyright (c) 2024      Triad National Security, LLC. All rights
 #                         reserved.
 #
 # $COPYRIGHT$
@@ -15,11 +15,11 @@ subroutines in one file and the C wraping code in another for all prototypes
 listed.
 """
 from abc import ABC, abstractmethod
-import argparse
 from collections import namedtuple
 import re
 import sys
 import textwrap
+from ompi_bindings import compiler
 
 FORTRAN_ERROR_NAME = 'ierror'
 C_ERROR_NAME = 'ierr'
@@ -42,8 +42,6 @@ PROTOTYPE_RE = re.compile(
     """,
     re.X | re.MULTILINE,
 )
-# Check if we have support for TS 29113 (templated at configure time)
-HAVE_TS = '@OMPI_FORTRAN_HAVE_TS@' == '1'
 
 
 class FortranType(ABC):
@@ -185,9 +183,9 @@ class BufferType(FortranType):
         validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
 
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@, INTENT(IN) :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
 
-    if HAVE_TS:
+    if compiler.HAVE_TS:
         def c_parameter(self):
             return f'CFI_cdesc_t *{self.name}'
 
@@ -249,19 +247,19 @@ class BufferType(FortranType):
 @FortranType.add('BUFFER_ASYNC')
 class BufferAsyncType(BufferType):
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 @FortranType.add('BUFFER_OUT')
 class BufferOutType(BufferType):
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@ :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
 
 
 @FortranType.add('BUFFER_ASYNC_OUT')
 class BufferAsyncOutType(BufferType):
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 class Macros:
@@ -286,9 +284,9 @@ class VBuferType(FortranType):
     # TODO: TS 29113 impl...
 
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@, INTENT(IN) :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
 
-    if HAVE_TS:
+    if compiler.HAVE_TS:
         def c_parameter(self):
             return f'CFI_cdesc_t *{self.name}'
 
@@ -332,9 +330,9 @@ class VBuferType(FortranType):
         validate_allowed_keys(keys, ['type', 'comm'], 'VBUFFER_OUT', param_name)
 
     def declare(self):
-        return f'@OMPI_F08_IGNORE_TKR_TYPE@ :: {self.name}'
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
 
-    if HAVE_TS:
+    if compiler.HAVE_TS:
         def c_parameter(self):
             return f'CFI_cdesc_t *{self.name}'
 
@@ -355,7 +353,7 @@ class VBuferType(FortranType):
             return f'char *{self.name}'
 
     def c_argument(self):
-        name = self.tmp_name if HAVE_TS else self.name
+        name = self.tmp_name if compiler.HAVE_TS else self.name
         return f'OMPI_F2C_BOTTOM({name})'
 
 
@@ -375,7 +373,7 @@ class CountType(FortranType):
         return f'{type_} *{self.name}'
 
     def c_argument(self):
-        arg = self.tmp_name if HAVE_TS else f'*{self.name}'
+        arg = self.tmp_name if compiler.HAVE_TS else f'*{self.name}'
         return arg if self.bigcount else f'OMPI_FINT_2_INT({arg})'
 
 
@@ -396,7 +394,7 @@ class DatatypeType(FortranType):
     def c_parameter(self):
         return f'MPI_Fint *{self.name}'
 
-    if HAVE_TS:
+    if compiler.HAVE_TS:
         def c_prepare(self):
             # Preparation code is done by the BUFFER type
             return ''
@@ -736,7 +734,7 @@ class IntArray(FortranType):
         return f'OMPI_ARRAY_NAME_DECL({self.name});'
 
     # TODO: Maybe this should be done in the buffer code?
-    if not HAVE_TS:
+    if not compiler.HAVE_TS:
         def c_prepare(self):
             comm = self.dep_params['comm']
             return f'OMPI_ARRAY_FINT_2_INT({self.name}, {comm.size});'
@@ -1084,7 +1082,7 @@ def print_profiling_rename_macros(prototypes, out):
 def print_c_source_header(out):
     """Print the header of the C source file."""
     out.dump(f'/* {GENERATED_MESSAGE} */')
-    if HAVE_TS:
+    if compiler.HAVE_TS:
         out.dump('#include <ISO_Fortran_binding.h>')
         out.dump('#include "ts.h"')
     out.dump('#include "generate_bindings.h"')
@@ -1142,42 +1140,3 @@ def generate_interface(args, prototypes, out):
             binding_c = FortranBinding(prototype, out=out, bigcount=True)
             binding_c.print_interface()
         out.dump(f'end interface {ext_name}')
-
-
-class OutputFile:
-    """Output file of script."""
-
-    def __init__(self, fp):
-        self.fp = fp
-
-    def dump(self, *pargs, **kwargs):
-        print(*pargs, **kwargs, file=self.fp)
-
-
-def main():
-    parser = argparse.ArgumentParser(description='generate fortran binding files')
-    parser.add_argument('--template', required=True, help='template file to use')
-    parser.add_argument('--output', required=True, help='output file to use')
-    parser.add_argument('--builddir', required=True, help='absolute path to automake build dir')
-    subparsers = parser.add_subparsers()
-
-    # Handler for generating actual code
-    parser_code = subparsers.add_parser('code', help='generate binding code')
-    parser_code.add_argument('lang', choices=('fortran', 'c'),
-                             help='generate dependent files in C or Fortran')
-    parser_code.set_defaults(handler=generate_code)
-
-    # Handler for generating the Fortran interface files
-    parser_interface = subparsers.add_parser('interface',
-                                             help='generate Fortran interface specifcations')
-    parser_interface.set_defaults(handler=generate_interface)
-
-    args = parser.parse_args()
-
-    prototypes = load_prototypes(args.template)
-    with open(args.output, 'w') as f:
-        args.handler(args, prototypes, OutputFile(f))
-
-
-if __name__ == '__main__':
-    main()
