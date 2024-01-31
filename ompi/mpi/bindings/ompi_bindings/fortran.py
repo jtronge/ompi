@@ -14,753 +14,10 @@ subroutines with generic types. Using this file, it can generate the Fortran
 subroutines in one file and the C wraping code in another for all prototypes
 listed.
 """
-from abc import ABC, abstractmethod
 from collections import namedtuple
 import re
-import sys
-import textwrap
-from ompi_bindings import compiler
-
-FORTRAN_ERROR_NAME = 'ierror'
-C_ERROR_NAME = 'ierr'
-C_ERROR_TMP_NAME = 'c_ierr'
-GENERATED_MESSAGE = 'THIS FILE WAS AUTOMATICALLY GENERATED. DO NOT EDIT BY HAND.'
-PROTOTYPE_RE = re.compile(
-    r"""\.\w+\(                                 # Subroutine name (and opening
-                                                # parenthesis);
-            (\s*\w+                             # Type name (corresponding to
-                                                # classes deriving FortranType below);
-             \s+\w+\s*                          # Parameter name;
-                (\[\s*\w+\s*=\s*\w+\s*          # Bracket key-value pairs to
-                   (;\s*\w+\s*=\s*\w+\s*)*\])?  # type ('[key0=value1;key1=value2...]');
-             \s*,?)+                            # Extra whitespace and comma;
-                                                # after parameter;
-        \)                                      # Closing parenthesis;
-        (\s*:\s*(\w+=\w+\s*(;\s*\w+=\w+\s*)*))? # Trailing key-value pairs, to be
-                                                # passed to the prototype and type
-                                                # handling code;
-    """,
-    re.X | re.MULTILINE,
-)
-
-
-class FortranType(ABC):
-
-    def __init__(self, name, fn_name, bigcount=False, **kwargs):
-        self.name = name
-        self.fn_name = fn_name
-        self.bigcount = bigcount
-        # List of dependent type/parameters, such as for counts
-        self.dep_params = None
-        self.used_counters = 0
-
-    TYPES = {}
-
-    @classmethod
-    def add(cls, type_name):
-        """Decorator for adding types."""
-        def wrapper(class_):
-            cls.TYPES[type_name] = class_
-            return class_
-        return wrapper
-
-    @classmethod
-    def get(cls, type_name):
-        return cls.TYPES[type_name]
-
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        """Validate the keys that are allowed to be used for a dependent param."""
-        # No dependent parameters allowed by default
-        if keys:
-            raise FortranBindingError(f'Invalid keys found for parameter {param_name}: {list(keys)}')
-
-    @property
-    def fn_api_name(self):
-        """Return the MPI API name to be used in error messages, etc.."""
-        return ext_api_func_name(self.fn_name, bigcount=self.bigcount).upper()
-
-    @property
-    def tmp_name(self):
-        """Return a temporary name for use in C."""
-        return f'c_{self.name}'
-
-    @property
-    def tmp_name2(self):
-        """Return a secondary temporary name for use in C."""
-        return f'c_{self.name}2'
-
-    def tmp_counter(self):
-        """Get a temporary counter variable to be used in a loop."""
-        name = f'{self.name}_i_{self.used_counters}'
-        self.used_counters += 1
-        return name
-
-    @abstractmethod
-    def declare(self):
-        """Return a declaration for the type."""
-
-    def declare_tmp(self):
-        """Declare temporaries on in the subroutine."""
-        return ''
-
-    def declare_cbinding_fortran(self):
-        """Return the C binding declaration as seen from Fortran."""
-        return self.declare()
-
-    def argument(self):
-        """Return the value to pass as an argument."""
-        return self.name
-
-    def use(self):
-        """Return list of (module, name) for a Fortran use-statement."""
-        return []
-
-    def post(self):
-        """Return post-processing code to be run after the call."""
-        return ''
-
-    @abstractmethod
-    def c_parameter(self):
-        """Return the parameter expression to be used in the C function."""
-
-    def c_declare_tmp(self):
-        """Code to declare temporary variables for conversions, etc.."""
-        return ''
-
-    def c_shortcut_condition(self):
-        """Shortcut conditional code.
-
-        If the conditional evaluates to true in C, then code defined in
-        c_shortcut_code() for all other parameters will be run and the
-        underlying C function will not be called.
-        """
-        return None
-
-    def c_shortcut_code(self):
-        """Shortcut code to run if a parameter defines a shortcut condition."""
-        return ''
-
-    def c_prepare(self):
-        """Code to be called before being passed to underlying C function."""
-        return ''
-
-    def c_argument(self):
-        """Return the value to pass as an argument in the C code."""
-        return self.name
-
-    def c_post(self):
-        """Code to be run after a call to the underlying C function."""
-        return ''
-
-
-class FortranBindingError(Exception):
-    """Thrown when a binding error is encountered."""
-
-
-def validate_allowed_keys(keys, req_keys, type_name, param_name):
-    """Validate allowed keys for a type, raising an error on failure."""
-    missing_keys = [key for key in req_keys if key not in keys]
-    invalid_keys = [key for key in keys if key not in req_keys]
-    init_message = f'Param {param_name} with type {type_name}'
-    if missing_keys and invalid_keys:
-        raise FortranBindingError(f'{init_message} has missing keys ({missing_keys}) and invalid keys ({invalid_keys})')
-    elif missing_keys:
-        raise FortranBindingError(f'{init_message} has missing keys: {missing_keys}')
-    elif invalid_keys:
-        raise FortranBindingError(f'{init_message} has invalid keys: {invalid_keys}')
-
-
-#
-# Definitions of generic types in Fortran and how these can be converted
-# to and from C.
-#
-
-@FortranType.add('BUFFER')
-class BufferType(FortranType):
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
-
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
-
-    if compiler.HAVE_TS:
-        def c_parameter(self):
-            return f'CFI_cdesc_t *{self.name}'
-
-        @property
-        def tmp_datatype1(self):
-            return self.dep_params['type'].tmp_name
-
-        @property
-        def tmp_datatype2(self):
-            return self.dep_params['type'].tmp_name2
-
-        @property
-        def tmp_count(self):
-            return self.dep_params['count'].tmp_name
-
-        @property
-        def tmp_comm(self):
-            return self.dep_params['comm'].tmp_name
-
-        def c_declare_tmp(self):
-            type_name = self.dep_params['type'].name
-            count_name = self.dep_params['count'].name
-            if self.bigcount:
-                count_init = f'MPI_Count {self.tmp_count} = *{count_name};'
-            else:
-                count_init = f'int {self.tmp_count} = OMPI_FINT_2_INT(*{count_name});'
-            return textwrap.dedent(f"""
-            void *{self.tmp_name} = {self.name}->base_addr;
-            {count_init}
-            MPI_Datatype {self.tmp_datatype1} = PMPI_Type_f2c(*{type_name}), {self.tmp_datatype2};
-            """)
-
-        def c_prepare(self):
-            type_name = self.dep_params['type'].name
-            return textwrap.dedent(f"""
-            OMPI_CFI_2_C({self.name}, {self.tmp_count}, {self.tmp_datatype1}, {self.tmp_datatype2}, {C_ERROR_TMP_NAME});
-            if (MPI_SUCCESS != {C_ERROR_TMP_NAME}) {{
-                if (NULL != {C_ERROR_NAME}) *{C_ERROR_NAME} = OMPI_INT_2_FINT({C_ERROR_TMP_NAME});
-                OMPI_ERRHANDLER_INVOKE({self.tmp_comm}, {C_ERROR_TMP_NAME}, "{self.fn_api_name}");
-                return;
-            }}""")
-
-        def c_argument(self):
-            return f'OMPI_F2C_BOTTOM({self.tmp_name})'
-
-        def c_post(self):
-            return textwrap.dedent(f"""
-            if ({self.tmp_datatype2} != {self.tmp_datatype1}) {{
-                ompi_datatype_destroy(&{self.tmp_datatype2});
-            }}""")
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
-
-        def c_argument(self):
-            return f'OMPI_F2C_BOTTOM({self.name})'
-
-
-@FortranType.add('BUFFER_ASYNC')
-class BufferAsyncType(BufferType):
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
-
-
-@FortranType.add('BUFFER_OUT')
-class BufferOutType(BufferType):
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
-
-
-@FortranType.add('BUFFER_ASYNC_OUT')
-class BufferAsyncOutType(BufferType):
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}'
-
-
-class Macros:
-    @staticmethod
-    def vbuffer_prepare(name, tmp_name, datatype, tmp_datatype, comm, counts, displs, fn_name):
-        return (f'OMPI_VBUFFER_PREPARE({name}, {tmp_name}, {datatype}, {tmp_datatype}, '
-                f'{comm}, {counts}, {displs}, {C_ERROR_NAME}, {C_ERROR_TMP_NAME}, "{fn_name}");')
-
-    @staticmethod
-    def vbuffer_out_prepare(name, tmp_name, comm, fn_name):
-        return (f'OMPI_VBUFFER_OUT_PREPARE({name}, {tmp_name}, {comm}, {C_ERROR_NAME}, '
-                f'{C_ERROR_TMP_NAME}, "{fn_name}");')
-
-
-@FortranType.add('VBUFFER')
-class VBuferType(FortranType):
-    """Variable buffer type, as used by MPI_*v() functions."""
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['counts', 'displs', 'type', 'comm'], 'VBUFFER', param_name)
-
-    # TODO: TS 29113 impl...
-
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
-
-    if compiler.HAVE_TS:
-        def c_parameter(self):
-            return f'CFI_cdesc_t *{self.name}'
-
-        def c_declare_tmp(self):
-            datatype = self.dep_params['type']
-            # NOTE: Using tmp_name2 here for the datatype, since the datatype
-            #       class assumes it will be used when TS support is enabled
-            return textwrap.dedent(f"""
-            MPI_Datatype {datatype.tmp_name2} = NULL;
-            char *{self.tmp_name} = {self.name}->base_addr;""")
-
-        def c_prepare(self):
-            return Macros.vbuffer_prepare(name=self.name, tmp_name=self.tmp_name,
-                                          comm=self.dep_params['comm'].tmp_name,
-                                          datatype=self.dep_params['type'].name,
-                                          tmp_datatype=self.dep_params['type'].tmp_name2,
-                                          counts=self.dep_params['counts'].name,
-                                          displs=self.dep_params['displs'].name,
-                                          fn_name=self.fn_name)
-
-        def c_argument(self):
-            return self.tmp_name
-
-        # def c_post(self):
-        #     return [Macros.vbuffer_cleanup(tmp_name=self.tmp_name,
-        #                                    counts=self.dep_params['counts'].name,
-        #                                    displs=self.dep_params['displs'].name)]
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
-
-    def c_argument(self):
-        return f'OMPI_F2C_BOTTOM(OMPI_F2C_IN_PLACE({self.name}))'
-
-
-@FortranType.add('VBUFFER_OUT')
-class VBuferType(FortranType):
-    """Variable buffer receive type, as used by MPI_*v() functions."""
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['type', 'comm'], 'VBUFFER_OUT', param_name)
-
-    def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
-
-    if compiler.HAVE_TS:
-        def c_parameter(self):
-            return f'CFI_cdesc_t *{self.name}'
-
-        def c_declare_tmp(self):
-            datatype = self.dep_params['type']
-            return textwrap.dedent(f"""
-            MPI_Datatype {datatype.tmp_name2} = PMPI_Type_f2c(*{datatype.name});
-            char *{self.tmp_name} = {self.name}->base_addr;
-            """)
-
-        def c_prepare(self):
-            return Macros.vbuffer_out_prepare(name=self.name, tmp_name=self.tmp_name,
-                                              comm=self.dep_params['comm'].tmp_name,
-                                              fn_name=self.fn_name)
-
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
-
-    def c_argument(self):
-        name = self.tmp_name if compiler.HAVE_TS else self.name
-        return f'OMPI_F2C_BOTTOM({name})'
-
-
-@FortranType.add('COUNT')
-class CountType(FortranType):
-    def declare(self):
-        if self.bigcount:
-            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(IN) :: {self.name}'
-        else:
-            return f'INTEGER, INTENT(IN) :: {self.name}'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_COUNT_KIND')]
-
-    def c_parameter(self):
-        type_ = 'MPI_Count' if self.bigcount else 'MPI_Fint'
-        return f'{type_} *{self.name}'
-
-    def c_argument(self):
-        arg = self.tmp_name if compiler.HAVE_TS else f'*{self.name}'
-        return arg if self.bigcount else f'OMPI_FINT_2_INT({arg})'
-
-
-@FortranType.add('DATATYPE')
-class DatatypeType(FortranType):
-    def declare(self):
-        return f'TYPE(MPI_Datatype), INTENT(IN) :: {self.name}'
-
-    def declare_cbinding_fortran(self):
-        return f'INTEGER, INTENT(IN) :: {self.name}'
-
-    def argument(self):
-        return f'{self.name}%MPI_VAL'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Datatype')]
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    if compiler.HAVE_TS:
-        def c_prepare(self):
-            # Preparation code is done by the BUFFER type
-            return ''
-
-        def c_argument(self):
-            return self.tmp_name2
-    else:
-        def c_prepare(self):
-            return f'MPI_Datatype {self.tmp_name} = PMPI_Type_f2c(*{self.name});'
-
-        def c_argument(self):
-            return self.tmp_name
-
-
-@FortranType.add('INT')
-class IntType(FortranType):
-    def declare(self):
-        return f'INTEGER, INTENT(IN) :: {self.name}'
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_argument(self):
-        return f'OMPI_FINT_2_INT(*{self.name})'
-
-
-@FortranType.add('RANK')
-class RankType(IntType):
-    pass
-
-
-@FortranType.add('TAG')
-class TagType(IntType):
-    pass
-
-
-@FortranType.add('INDEX_OUT')
-class IndexOutType(IntType):
-    def declare(self):
-        return f'INTEGER, INTENT(OUT) :: {self.name}'
-
-    def c_declare_tmp(self):
-        return f'int {self.tmp_name};'
-
-    def c_shortcut_code(self):
-        return f'*{self.name} = OMPI_INT_2_FINT(MPI_UNDEFINED);'
-
-    def c_argument(self):
-        return f'&{self.tmp_name}'
-
-    def c_post(self):
-        return textwrap.dedent(f"""
-        if (MPI_SUCCESS == {C_ERROR_TMP_NAME} && MPI_UNDEFINED != {self.tmp_name}) {{
-            {self.tmp_name} += 1;
-            *{self.name} = OMPI_INT_2_FINT({self.tmp_name});
-        }}""")
-
-
-@FortranType.add('LOGICAL_OUT')
-class LogicalOutType(IntType):
-    """Logical type.
-
-    NOTE: Since the logical type causes difficulties when passed to C code,
-    this code uses a temporary integer in Fortran to pass to the C code. On
-    completion the logical type is set based on C's true/false rules.
-    """
-
-    def declare(self):
-        return f'LOGICAL, INTENT(OUT) :: {self.name}'
-
-    def declare_tmp(self):
-        return f'INTEGER :: {self.tmp_name} = 0'
-
-    def declare_cbinding_fortran(self):
-        return f'INTEGER, INTENT(OUT) :: {self.name}'
-
-    def argument(self):
-        return self.tmp_name
-
-    def post(self):
-        return f'{self.name} = {self.tmp_name} /= 0'
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        return f'int {self.tmp_name};'
-
-    def c_shortcut_code(self):
-        return f'*{self.name} = OMPI_INT_2_FINT(1);'
-
-    def c_argument(self):
-        return f'&{self.tmp_name}'
-
-    def c_post(self):
-        return f'*{self.name} = OMPI_INT_2_FINT({self.tmp_name});'
-
-
-# List of functions that need a communicator 'size' temporary
-FUNCTIONS_NEEDING_COMM_SIZE_TEMP = [
-    'alltoallv',
-]
-
-
-@FortranType.add('COMM')
-class CommType(FortranType):
-    def declare(self):
-        return f'TYPE(MPI_Comm), INTENT(IN) :: {self.name}'
-
-    def declare_cbinding_fortran(self):
-        return f'INTEGER, INTENT(IN) :: {self.name}'
-
-    def argument(self):
-        return f'{self.name}%MPI_VAL'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Comm')]
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        code = [f'MPI_Comm {self.tmp_name} = PMPI_Comm_f2c(*{self.name});']
-        if self.fn_name in FUNCTIONS_NEEDING_COMM_SIZE_TEMP:
-            code.append(f'int {self.size} = OMPI_COMM_IS_INTER({self.tmp_name}) ? '
-                        f'ompi_comm_remote_size({self.tmp_name}) : ompi_comm_size({self.tmp_name});')
-        return '\n'.join(code)
-
-    def c_argument(self):
-        return self.tmp_name
-
-    @property
-    def size(self):
-        """Size property accessible by all dependent types."""
-        return 'size'
-
-
-@FortranType.add('STATUS')
-class StatusType(FortranType):
-    def declare(self):
-        return f'TYPE(MPI_Status), INTENT(OUT) :: {self.name}'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Status')]
-
-    def c_parameter(self):
-        # TODO: Is this correct? (I've listed it as TYPE(MPI_Status) in the binding)
-        return f'MPI_Fint *{self.name}'
-
-    def c_shortcut_code(self):
-        return f'PMPI_Status_c2f(&ompi_status_empty, {self.name});'
-
-    def c_declare_tmp(self):
-        return textwrap.dedent(f"""
-        OMPI_FORTRAN_STATUS_DECLARATION({self.tmp_name}, {self.tmp_name2});
-        OMPI_FORTRAN_STATUS_SET_POINTER({self.tmp_name}, {self.tmp_name2}, {self.name});
-        """)
-
-    def c_argument(self):
-        return self.tmp_name
-
-    def c_post(self):
-        return f'OMPI_FORTRAN_STATUS_RETURN({self.tmp_name}, {self.tmp_name2}, {self.name}, {C_ERROR_TMP_NAME});'
-
-
-@FortranType.add('SHORTCUT_COUNT')
-class ShortcutCountType(FortranType):
-    """Shortcut count type.
-
-    This type is an integer that, when 0, can be used to shortcut a call to the
-    underyling C binding. Other types may implement a `c_shortcut` method that
-    will return code to execute upon a shortcut operation.
-
-    The shortcut conditional is placed right after c temporary declarations but
-    before the c prepare code.
-    """
-
-    def declare(self):
-        return f'INTEGER, INTENT(IN) :: {self.name}'
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_shortcut_condition(self):
-        return f'OPAL_UNLIKELY(0 == OMPI_FINT_2_INT(*{self.name}))'
-
-    def c_argument(self):
-        return f'OMPI_FINT_2_INT(*{self.name})'
-
-
-@FortranType.add('REQUEST')
-class RequestType(FortranType):
-    def declare(self):
-        return f'TYPE(MPI_Request), INTENT(OUT) :: {self.name}'
-
-    def declare_cbinding_fortran(self):
-        return f'INTEGER, INTENT(OUT) :: {self.name}'
-
-    def argument(self):
-        return f'{self.name}%MPI_VAL'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Request')]
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        return f'MPI_Request {self.tmp_name};'
-
-    def c_argument(self):
-        return f'&{self.tmp_name}'
-
-    def c_post(self):
-        return textwrap.dedent(f"""
-        if (MPI_SUCCESS == {C_ERROR_TMP_NAME}) {{
-            *{self.name} = PMPI_Request_c2f({self.tmp_name});
-        }}""")
-
-
-def allocate_array(name, malloc_expr, fn_api_name):
-    """Generate code for allocating an array and checking the result."""
-    return textwrap.dedent(f"""
-    {name} = malloc({malloc_expr});
-    if (NULL == {name}) {{
-        {C_ERROR_TMP_NAME} = OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_NO_MEM, "{fn_api_name}");
-        *{C_ERROR_NAME} = OMPI_INT_2_FINT({C_ERROR_TMP_NAME});
-        return;
-    }}""")
-
-
-@FortranType.add('REQUEST_ARRAY')
-class RequestArrayType(FortranType):
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['count'], 'REQUEST_ARRAY', param_name)
-
-    def declare(self):
-        return f'TYPE(MPI_Request), INTENT(INOUT) :: {self.name}({self.dep_params["count"].name})'
-
-    def declare_cbinding_fortran(self):
-        return f'INTEGER, INTENT(INOUT) :: {self.name}({self.dep_params["count"].name})'
-
-    def argument(self):
-        return f'{self.name}(:)%MPI_VAL'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Request')]
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        return f'MPI_Request *{self.tmp_name};'
-
-    def c_prepare(self):
-        tmp_name = self.tmp_name
-        code = [allocate_array(tmp_name,
-                              f'{self.dep_params["count"].c_argument()} * sizeof(MPI_Request)',
-                              self.fn_api_name)]
-        i = self.tmp_counter()
-        code.append(textwrap.dedent(f"""
-        for (int {i} = 0; {i} < {self.dep_params["count"].c_argument()}; ++{i}) {{
-            {tmp_name}[{i}] = PMPI_Request_f2c({self.name}[{i}]);
-        }}"""))
-        return '\n'.join(code)
-
-    def c_argument(self):
-        return self.tmp_name
-
-    def c_post(self):
-        i = self.tmp_counter()
-        return textwrap.dedent(f"""
-        if (MPI_SUCCESS == {C_ERROR_TMP_NAME}) {{
-            for (int {i} = 0; {i} < {self.dep_params["count"].c_argument()}; ++{i}) {{
-                {self.name}[{i}] = {self.tmp_name}[{i}]->req_f_to_c_index;
-            }}
-        }}
-        free({self.tmp_name});""")
-
-
-@FortranType.add('STATUS_ARRAY')
-class StatusArrayType(FortranType):
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['count'], 'STATUS_ARRAY', param_name)
-
-    def declare(self):
-        return f'TYPE(MPI_Status), INTENT(OUT) :: {self.name}(*)'
-
-    def use(self):
-        return [('mpi_f08_types', 'MPI_Status')]
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        return f'MPI_Status *{self.tmp_name};'
-
-    def c_prepare(self):
-        return allocate_array(self.tmp_name,
-                              f'{self.dep_params["count"].c_argument()} * sizeof(MPI_Status)',
-                              self.fn_api_name)
-
-    def c_argument(self):
-        return self.tmp_name
-
-    def c_post(self):
-        i = self.tmp_counter()
-        return textwrap.dedent(f"""
-        if (MPI_SUCCESS == {C_ERROR_TMP_NAME}) {{
-            for (int {i} = 0; {i} < {self.dep_params["count"].c_argument()}; ++{i}) {{
-                if (!OMPI_IS_FORTRAN_STATUSES_IGNORE({self.name}) &&
-                    !OMPI_IS_FORTRAN_STATUS_IGNORE(&{self.name}[{i}])) {{
-                    PMPI_Status_c2f(&{self.tmp_name}[{i}], &{self.name}[{i} * (sizeof(MPI_Status) / sizeof(int))]);
-                }}
-            }}
-        }}
-        free({self.tmp_name});""")
-
-
-@FortranType.add('INT_ARRAY')
-class IntArray(FortranType):
-    """Integer array as used for MPI_*v() variable length functions."""
-
-    @staticmethod
-    def validate_dep_param_keys(param_name, keys):
-        validate_allowed_keys(keys, ['comm'], 'INT_ARRAY', param_name)
-
-    def declare(self):
-        return f'INTEGER, INTENT(IN) :: {self.name}(*)'
-
-    def c_parameter(self):
-        return f'MPI_Fint *{self.name}'
-
-    def c_declare_tmp(self):
-        return f'OMPI_ARRAY_NAME_DECL({self.name});'
-
-    # TODO: Maybe this should be done in the buffer code?
-    if not compiler.HAVE_TS:
-        def c_prepare(self):
-            comm = self.dep_params['comm']
-            return f'OMPI_ARRAY_FINT_2_INT({self.name}, {comm.size});'
-
-    def c_argument(self):
-        return f'OMPI_ARRAY_NAME_CONVERT({self.name})'
-
-    def c_post(self):
-        return f'OMPI_ARRAY_FINT_2_INT_CLEANUP({self.name});'
-
-
-def ext_api_func_name(fn_name, bigcount=False):
-    """Produce the external MPI API function name."""
-    suffix = '_c' if bigcount else ''
-    return f'MPI_{fn_name.capitalize()}{suffix}'
-
-
-def ext_api_func_name_profile(fn_name, bigcount=False):
-    """Produce the external PMPI API function name."""
-    return f'P{ext_api_func_name(fn_name, bigcount)}'
-
-
-def fortran_f08_name(fn_name, bigcount=False):
-    """Produce the final f08 name from base_name."""
-    suffix = '_c' if bigcount else ''
-    return f'MPI_{fn_name.capitalize()}_f08{suffix}'
+from ompi_bindings import compiler, consts, util
+from ompi_bindings.fortran_type import FortranType
 
 
 FortranParameter = namedtuple('FortranParameter', ['type_name', 'name', 'dep_params'])
@@ -769,8 +26,8 @@ FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'lno', 'parameters
 
 def parse_prototype(lno, line):
     """Parse a prototype for the given line and string."""
-    if PROTOTYPE_RE.match(line) is None:
-        raise FortranBindingError(
+    if consts.PROTOTYPE_RE.match(line) is None:
+        raise util.FortranBindingError(
             f'Invalid function prototype for Fortran interface starting on line {lno}'
         )
 
@@ -803,12 +60,12 @@ def parse_prototype(lno, line):
 
             parsed_parameters.append(FortranParameter(type_name, name, dep_params))
         return FortranPrototype(fn_name, lno, parsed_parameters)
-    except FortranBindingError as err:
-        raise FortranBindingError(
+    except util.FortranBindingError as err:
+        raise util.FortranBindingError(
             f'Failed to parse prototype starting on line {lno}: {err}'
         ) from None
     except KeyError as err:
-        raise FortranBindingError(
+        raise util.FortranBindingError(
             f'Found invalid type starting on line {lno}: {err}'
         ) from None
 
@@ -880,7 +137,9 @@ class FortranBinding:
             for name, deps in dep_params.items():
                 param_map[name].dep_params = {key: param_map[dep_name] for key, dep_name in deps.items()}
         except KeyError as err:
-            raise FortranBindingError(f'Invalid dependent type listed on line {prototype.lno}: {err}')
+            raise util.FortranBindingError(
+                f'Invalid dependent type in prototype starting on line {prototype.lno}: {err}'
+            )
 
     def dump(self, *pargs, **kwargs):
         """Write to the output file."""
@@ -894,9 +153,6 @@ class FortranBinding:
     def c_func_name(self):
         """Produce the final C func name from base_name."""
         return f'ompi_{self.fn_name}_wrapper_f08{self._fn_name_suffix()}'
-
-    def _param_list(self):
-        return ','.join(type_.name for type_ in self.parameters)
 
     def _use(self):
         """Determine the Fortran use-statements needed."""
@@ -921,15 +177,23 @@ class FortranBinding:
         """Output the C subroutine binding for the Fortran code."""
         name = self.c_func_name
         self.dump('    interface')
-        self.dump(f'        subroutine {name}({self._param_list()},{FORTRAN_ERROR_NAME}) &')
+
+        # Print the subroutine and parameter list, breaking parameters across lines
+        subroutine_start = f'        subroutine {name}('
+        params = [param.name for param in self.parameters]
+        params.append(consts.FORTRAN_ERROR_NAME)
+        lines = util.break_param_lines_fortran(start=subroutine_start, params=params, end=') &')
+        for line in lines:
+            self.dump(line)
         self.dump(f'            BIND(C, name="{name}")')
+
         use_stmts = self._use_stmts()
         for stmt in use_stmts:
             self.dump(f'            {stmt}')
         self.dump('            implicit none')
         for param in self.parameters:
             self.dump(f'            {param.declare_cbinding_fortran()}')
-        self.dump(f'            INTEGER, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
+        self.dump(f'            INTEGER, INTENT(OUT) :: {consts.FORTRAN_ERROR_NAME}')
         self.dump(f'        end subroutine {name}')
         self.dump('    end interface')
 
@@ -948,17 +212,27 @@ class FortranBinding:
         for param in self.parameters:
             self.dump(f'    {param.declare()}')
         # Add the integer error manually
-        self.dump(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {FORTRAN_ERROR_NAME}')
+        self.dump(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {consts.FORTRAN_ERROR_NAME}')
 
     def _print_fortran_subroutine(self):
         """Output the Fortran subroutine line."""
-        sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
-        self.dump('subroutine', f'{sub_name}({self._param_list()},{FORTRAN_ERROR_NAME})')
+        sub_name = util.fortran_f08_name(self.fn_name, bigcount=self.bigcount)
+        params = [param.name for param in self.parameters]
+        params.append(consts.FORTRAN_ERROR_NAME)
+        lines = util.break_param_lines_fortran(f'subroutine {sub_name}(', params, ')')
+        for line in lines:
+            self.dump(line)
 
     def _print_fortran_subroutine_end(self):
         """Output the Fortran end subroutine line."""
-        sub_name = fortran_f08_name(self.fn_name, bigcount=self.bigcount)
+        sub_name = util.fortran_f08_name(self.fn_name, bigcount=self.bigcount)
         self.dump(f'end subroutine {sub_name}')
+
+    def dump_lines(self, line_text):
+        for line in line_text.split('\n'):
+            line = line.rstrip()
+            if line:
+                self.dump(f'    {line}')
 
     def print_f_source(self):
         """Output the main MPI Fortran subroutine."""
@@ -966,10 +240,9 @@ class FortranBinding:
         self._print_fortran_header()
 
         # Temporaries
-        self.dump(f'    INTEGER :: {C_ERROR_TMP_NAME}')
+        self.dump(f'    INTEGER :: {consts.C_ERROR_TMP_NAME}')
         for param in self.parameters:
-            for line in param.declare_tmp().split('\n'):
-                self.dump(f'    {line}')
+            self.dump_lines(param.declare_tmp())
 
         # Interface for call to C function
         self.dump()
@@ -978,26 +251,17 @@ class FortranBinding:
 
         # Call into the C function
         call_start = f'    call {self.c_func_name}('
-        indent = len(call_start) * ' '
-        # Have to make sure this doesn't go over the max line length of 132
-        # characters, so just break each argument onto a single line.
-        lines = [f'{call_start}{self.parameters[0].argument()},']
-        for param in self.parameters[1:]:
-            lines.append(f'{indent}{param.argument()},')
-        last_line = f'{indent}{C_ERROR_TMP_NAME})'
-        max_len = max(len(line) for line in lines)
-        max_len = max(max_len, len(last_line))
+        params = [param.argument() for param in self.parameters]
+        params.append(consts.C_ERROR_TMP_NAME)
+        lines = util.break_param_lines_fortran(start=call_start, params=params, end=')')
         for line in lines:
-            spaces = (max_len - len(line) + 1) * ' '
-            self.dump(f'{line}{spaces}&')
-        self.dump(last_line)
+            self.dump(line)
 
         # Convert error type
-        self.dump(f'    if (present({FORTRAN_ERROR_NAME})) {FORTRAN_ERROR_NAME} = {C_ERROR_TMP_NAME}')
+        self.dump(f'    if (present({consts.FORTRAN_ERROR_NAME})) {consts.FORTRAN_ERROR_NAME} = {consts.C_ERROR_TMP_NAME}')
 
         for param in self.parameters:
-            for line in param.post().split('\n'):
-                self.dump(f'    {line}')
+            self.dump_lines(param.post())
 
         self._print_fortran_subroutine_end()
 
@@ -1005,19 +269,18 @@ class FortranBinding:
         """Output the C source and function that the Fortran calls into."""
         parameters = [param.c_parameter() for param in self.parameters]
         # Always append the integer error
-        parameters.append(f'MPI_Fint *{C_ERROR_NAME}')
+        parameters.append(f'MPI_Fint *{consts.C_ERROR_NAME}')
         parameters = ', '.join(parameters)
         # Just put the signature here to silence `-Wmissing-prototypes`
         c_func = self.c_func_name
         self.dump(f'void {c_func}({parameters});')
         self.dump(f'void {c_func}({parameters})')
         self.dump('{')
-        self.dump(f'    int {C_ERROR_TMP_NAME}; ')
+        self.dump(f'    int {consts.C_ERROR_TMP_NAME}; ')
 
         # First the temporary declarations
         for param in self.parameters:
-            for line in param.c_declare_tmp().split('\n'):
-                self.dump(f'    {line}')
+            self.dump_lines(param.c_declare_tmp())
 
         # Shortcut conditions, if any
         for param in self.parameters:
@@ -1025,29 +288,26 @@ class FortranBinding:
             if condition is None:
                 continue
             self.dump(f'    if ({condition}) {{')
-            self.dump(f'        *{C_ERROR_NAME} = OMPI_INT_2_FINT(MPI_SUCCESS);')
+            self.dump(f'        *{consts.C_ERROR_NAME} = OMPI_INT_2_FINT(MPI_SUCCESS);')
             for other_param in self.parameters:
-                for line in other_param.c_shortcut_code().split('\n'):
-                    self.dump(f'        {line}')
+                self.dump_lines(other_param.c_shortcut_code())
             self.dump('        return;')
             self.dump('    }')
 
         # Prepare code for temporaries, etc.
         for param in self.parameters:
-            for line in param.c_prepare().split('\n'):
-                self.dump(f'    {line}')
+            self.dump_lines(param.c_prepare())
 
         # Call into the C API
-        c_api_func = ext_api_func_name_profile(self.fn_name, bigcount=self.bigcount)
+        c_api_func = util.ext_api_func_name_profile(self.fn_name, bigcount=self.bigcount)
         arguments = [param.c_argument() for param in self.parameters]
         arguments = ', '.join(arguments)
-        self.dump(f'    {C_ERROR_TMP_NAME} = {c_api_func}({arguments});')
+        self.dump(f'    {consts.C_ERROR_TMP_NAME} = {c_api_func}({arguments});')
 
         # Post-processing code
-        self.dump(f'    *{C_ERROR_NAME} = OMPI_INT_2_FINT({C_ERROR_TMP_NAME});')
+        self.dump(f'    *{consts.C_ERROR_NAME} = OMPI_INT_2_FINT({consts.C_ERROR_TMP_NAME});')
         for param in self.parameters:
-            for line in param.c_post().split('\n'):
-                self.dump(f'    {line}')
+            self.dump_lines(param.c_post())
         self.dump('}')
 
     def print_interface(self):
@@ -1059,7 +319,7 @@ class FortranBinding:
 
 def print_f_source_header(out):
     """Print the fortran f08 file header."""
-    out.dump(f'! {GENERATED_MESSAGE}')
+    out.dump(f'! {consts.GENERATED_MESSAGE}')
     out.dump('#include "ompi/mpi/fortran/configure-fortran-output.h"')
 
 
@@ -1070,22 +330,21 @@ def print_profiling_rename_macros(prototypes, out):
     """
     out.dump('#if OMPI_BUILD_MPI_PROFILING')
     for prototype in prototypes:
-        name = fortran_f08_name(prototype.fn_name)
+        name = util.fortran_f08_name(prototype.fn_name)
         out.dump(f'#define {name} P{name}')
         # Check for bigcount version
         if prototype_has_bigcount(prototype):
-            bigcount_name = fortran_f08_name(prototype.fn_name, bigcount=True)
+            bigcount_name = util.fortran_f08_name(prototype.fn_name, bigcount=True)
             out.dump(f'#define {bigcount_name} P{bigcount_name}')
     out.dump('#endif /* OMPI_BUILD_MPI_PROFILING */')
 
 
 def print_c_source_header(out):
     """Print the header of the C source file."""
-    out.dump(f'/* {GENERATED_MESSAGE} */')
+    out.dump(f'/* {consts.GENERATED_MESSAGE} */')
     if compiler.HAVE_TS:
         out.dump('#include <ISO_Fortran_binding.h>')
         out.dump('#include "ts.h"')
-    out.dump('#include "generate_bindings.h"')
     out.dump('#include "ompi_config.h"')
     out.dump('#include "mpi.h"')
     out.dump('#include "ompi/errhandler/errhandler.h"')
@@ -1129,9 +388,9 @@ def generate_code(args, prototypes, out):
 
 def generate_interface(args, prototypes, out):
     """Generate the Fortran interface files."""
-    out.dump(f'! {GENERATED_MESSAGE}')
+    out.dump(f'! {consts.GENERATED_MESSAGE}')
     for prototype in prototypes:
-        ext_name = ext_api_func_name(prototype.fn_name)
+        ext_name = util.ext_api_func_name(prototype.fn_name)
         out.dump(f'interface {ext_name}')
         binding = FortranBinding(prototype, out=out)
         binding.print_interface()

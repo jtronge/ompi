@@ -35,3 +35,9 @@
            DATATYPE sendtype, VBUFFER_OUT recvbuf[comm=comm;type=recvtype],
            INT_ARRAY recvcounts[comm=comm], INT_ARRAY rdispls[comm=comm],
            DATATYPE recvtype, COMM comm)
+.alltoallw(WBUFFER sendbuf[counts=sendcounts;displs=sdispls;types=sendtypes;comm=comm],
+           INT_ARRAY sendcounts[comm=comm], INT_ARRAY sdispls[comm=comm],
+           DATATYPE_ARRAY sendtypes,
+           WBUFFER_OUT recvbuf[counts=recvcounts;displs=rdispls;types=recvtypes;comm=comm],
+           INT_ARRAY recvcounts[comm=comm], INT_ARRAY rdispls[comm=comm],
+           DATATYPE_ARRAY recvtypes, COMM comm)

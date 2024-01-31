@@ -100,6 +100,7 @@ mpi-f08-interfaces.lo: $(config_h)
 mpi-f08-interfaces.lo: mpi-f08-interfaces.F90
 mpi-f08-interfaces.lo: mpi-f08-interfaces-callbacks.lo
 mpi-f08-interfaces.lo: mpi-f08-interfaces.h
+mpi-f08-interfaces.lo: mpi-f08-interfaces-generated.h
 mpi-f08-interfaces-callbacks.lo: $(config_h)
 mpi-f08-interfaces-callbacks.lo: mpi-f08-interfaces-callbacks.F90
 mpi-f08-interfaces-callbacks.lo: mpi-f08-types.lo

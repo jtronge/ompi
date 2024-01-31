@@ -6,7 +6,6 @@
 # Additional copyrights may follow
 #
 # $HEADER$
-
-# Check if we have support for TS 29113 (templated at configure time)
-HAVE_TS = '0' == '1'
-OMPI_F08_IGNORE_TKR_TYPE = 'type(*), dimension(*)'
+#
+"""Code generation functions."""
+from ompi_bindings import util

@@ -531,9 +531,10 @@ docs/_static
 docs/_static/css/custom.css
 docs/_templates
 
-# Common Python virtual environment directory names
+# Common Python virtual environment and cache directory names
 venv
 py??
+__pycache__/
 
 # Copies of PRRTE RST files (i.e., not source controlled in this tree)
 docs/prrte-rst-content
