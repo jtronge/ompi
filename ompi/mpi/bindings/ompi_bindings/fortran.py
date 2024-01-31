@@ -210,7 +210,7 @@ class FortranBinding:
         # Parameters/dummy variable declarations
         types = []
         for param in self.parameters:
-            self.dump(f'    {param.declare()}')
+            self.dump_lines(param.declare())
         # Add the integer error manually
         self.dump(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {consts.FORTRAN_ERROR_NAME}')
 

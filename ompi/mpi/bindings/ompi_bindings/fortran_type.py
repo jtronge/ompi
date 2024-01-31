@@ -135,7 +135,9 @@ class BufferType(FortranType):
         util.validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
+        return util.prepare_text(f"""
+        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
+        {compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}""")
 
     if compiler.HAVE_TS:
         def c_parameter(self):
@@ -199,19 +201,25 @@ class BufferType(FortranType):
 @FortranType.add('BUFFER_ASYNC')
 class BufferAsyncType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
+        return util.prepare_text(f"""
+        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
+        {compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}""")
 
 
 @FortranType.add('BUFFER_OUT')
 class BufferOutType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
+        return util.prepare_text(f"""
+        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
+        {compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}""")
 
 
 @FortranType.add('BUFFER_ASYNC_OUT')
 class BufferAsyncOutType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}'
+        return util.prepare_text(f"""
+        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
+        {compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}""")
 
 
 @FortranType.add('VBUFFER')
