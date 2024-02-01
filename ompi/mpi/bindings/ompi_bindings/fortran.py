@@ -197,7 +197,7 @@ class FortranBinding:
         self.dump(f'        end subroutine {name}')
         self.dump('    end interface')
 
-    def _print_fortran_header(self):
+    def _print_fortran_header(self, is_interface=False):
         """Print the header, including use stmts, dummy variable decls, etc..
 
         This does not include the subroutine line.
@@ -208,8 +208,9 @@ class FortranBinding:
             self.dump(f'    {stmt}')
         self.dump('    implicit none')
         # Parameters/dummy variable declarations
-        types = []
         for param in self.parameters:
+            if is_interface:
+                self.dump_lines(param.interface_predeclare())
             self.dump_lines(param.declare())
         # Add the integer error manually
         self.dump(f'    INTEGER, OPTIONAL, INTENT(OUT) :: {consts.FORTRAN_ERROR_NAME}')
@@ -313,7 +314,7 @@ class FortranBinding:
     def print_interface(self):
         """Output just the Fortran interface for this binding."""
         self._print_fortran_subroutine()
-        self._print_fortran_header()
+        self._print_fortran_header(is_interface=True)
         self._print_fortran_subroutine_end()
 
 
@@ -369,8 +370,9 @@ def prototype_has_bigcount(prototype):
     return any(param.type_name == 'COUNT' for param in prototype.parameters)
 
 
-def generate_code(args, prototypes, out):
+def generate_code(args, out):
     """Generate binding code based on arguments."""
+    prototypes = load_prototypes(args.template)
     if args.lang == 'fortran':
         print_f_source_header(out)
         out.dump()
@@ -386,8 +388,9 @@ def generate_code(args, prototypes, out):
             print_binding(prototype, args.lang, bigcount=True, out=out)
 
 
-def generate_interface(args, prototypes, out):
+def generate_interface(args, out):
     """Generate the Fortran interface files."""
+    prototypes = load_prototypes(args.template)
     out.dump(f'! {consts.GENERATED_MESSAGE}')
     for prototype in prototypes:
         ext_name = util.ext_api_func_name(prototype.fn_name)

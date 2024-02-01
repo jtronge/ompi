@@ -67,9 +67,8 @@ prototype_sources = \
         get_processor_name.c.in \
         barrier.c.in
 
-# Include script and template files in case someone wants to update the
-# template files
-EXTRA_DIST = generate_bindings.py $(prototype_sources)
+# Include template files in case someone wants to update them
+EXTRA_DIST = $(prototype_sources)
 
 # attr_fn.c contains attribute manipulation functions which do not
 # profiling implications, and so are always built.
@@ -542,8 +541,15 @@ libmpi_c_noprofile_la_CPPFLAGS = -DOMPI_BUILD_MPI_PROFILING=0
 
 # ABI generation rules
 if OMPI_GENERATE_BINDINGS
-ompi_%.c: %.c.in generate_bindings.py
-	$(PYTHON) $(srcdir)/generate_bindings.py source ompi $< > $@
+ompi_%.c: %.c.in
+	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
+	    --builddir $(abs_top_builddir) \
+	    --srcdir $(abs_top_srcdir) \
+	    --output $@ \
+	    c \
+	    source \
+	    ompi \
+	    $<
 
 distclean-local:
 	-rm -rf ompi_*.c

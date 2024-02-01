@@ -66,6 +66,10 @@ class FortranType(ABC):
         self.used_counters += 1
         return name
 
+    def interface_predeclare(self):
+        """Return predeclaration code, if required for the interface."""
+        return ''
+
     @abstractmethod
     def declare(self):
         """Return a declaration for the type."""
@@ -134,10 +138,11 @@ class BufferType(FortranType):
     def validate_dep_param_keys(param_name, keys):
         util.validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
 
+    def interface_predeclare(self):
+        return f'{compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}'
+
     def declare(self):
-        return util.prepare_text(f"""
-        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
-        {compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}""")
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
 
     if compiler.HAVE_TS:
         def c_parameter(self):
@@ -201,25 +206,19 @@ class BufferType(FortranType):
 @FortranType.add('BUFFER_ASYNC')
 class BufferAsyncType(BufferType):
     def declare(self):
-        return util.prepare_text(f"""
-        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
-        {compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}""")
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 @FortranType.add('BUFFER_OUT')
 class BufferOutType(BufferType):
     def declare(self):
-        return util.prepare_text(f"""
-        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
-        {compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}""")
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
 
 
 @FortranType.add('BUFFER_ASYNC_OUT')
 class BufferAsyncOutType(BufferType):
     def declare(self):
-        return util.prepare_text(f"""
-        {compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}
-        {compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}""")
+        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 @FortranType.add('VBUFFER')

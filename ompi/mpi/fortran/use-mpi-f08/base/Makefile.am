@@ -45,10 +45,11 @@ DISTCLEANFILES = api_f08_generated.c
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.c: ../interface.in
 	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
-	    --template $(abs_srcdir)/$< \
-	    --output $(abs_builddir)/$@ \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
+	    --output $(abs_builddir)/$@ \
+	    fortran \
+	    --template $(abs_srcdir)/$< \
 	    code \
 	    c
 endif

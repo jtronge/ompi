@@ -82,10 +82,11 @@ DISTCLEANFILES = mpi-f08-interfaces-generated.h
 if OMPI_GENERATE_BINDINGS
 mpi-f08-interfaces-generated.h: ../interface.in
 	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
-	    --template $(abs_srcdir)/$< \
-	    --output $(abs_builddir)/$@ \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
+	    --output $(abs_builddir)/$@ \
+	    fortran \
+	    --template $(abs_srcdir)/$< \
 	    interface
 endif
 

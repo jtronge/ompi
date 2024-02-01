@@ -545,11 +545,13 @@ docs/schizo-ompi-rst-content
 docs/html
 docs/man
 
+# Generated binding scripts
+ompi/mpi/bindings/ompi_bindings/compiler.py
+
 # Generated C Bindings
 ompi/mpi/c/ompi_*.c
 
 # Generated Fortran Bindings
 ompi/mpi/fortran/use-mpi-f08/*_generated.F90
 ompi/mpi/fortran/use-mpi-f08/base/*_generated.c
-ompi/mpi/fortran/use-mpi-f08/generate_bindings.py
 ompi/mpi/fortran/use-mpi-f08/mod/mpi-f08-interfaces-generated.h

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Copyright (c) 2023      Triad National Security, LLC. All rights reserved.
+# Copyright (c) 2024      Triad National Security, LLC. All rights reserved.
 # Copyright (c) 2023      Research Organization for Information Science
 #                         and Technology (RIST).  All rights reserved.
 # $COPYRIGHT$
@@ -26,6 +25,7 @@ import argparse
 import re
 import sys
 import os
+from ompi_bindings import consts
 
 # C type: const int
 ERROR_CLASSES = [
@@ -279,8 +279,8 @@ def abi_internal_name(extname):
 class ABIHeaderBuilder:
     """ABI header builder code."""
 
-    def __init__(self, prototypes, external=False, file=sys.stdout):
-        self.file = file
+    def __init__(self, prototypes, out, external=False):
+        self.out = out
         self.external = external
 
         if external:
@@ -314,7 +314,7 @@ class ABIHeaderBuilder:
         return abi_internal_name(extname)
 
     def dump(self, *pargs, **kwargs):
-        print(*pargs, **kwargs, file=self.file)
+        self.out.dump(*pargs, **kwargs)
 
     def dump_lines(self, lines):
         lines = indent_lines(lines, 4 * ' ', start=1)
@@ -420,7 +420,7 @@ class ABIHeaderBuilder:
         self.dump('    out->MPI_SOURCE = inp->MPI_SOURCE;')
         self.dump('    out->MPI_TAG = inp->MPI_TAG;')
         self.dump(f'    out->MPI_ERROR = {ConvertFuncs.ERROR_CLASS}(inp->MPI_ERROR);')
-        # TODO: What to do with the private fields?
+        # Ignoring the private fields for now
         self.dump('}')
 
     def define(self, type_, name, value):
@@ -1122,41 +1122,41 @@ class SourceTemplate:
             validate_body(body)
             return SourceTemplate(prototype, header, body)
 
-    def print_header(self, file=sys.stdout):
+    def print_header(self, out):
         """Print the source header."""
         for line in self.header:
-            print(line, file=file)
+            out.dump(line)
 
-    def print_body(self, func_name, file=sys.stdout):
+    def print_body(self, func_name, out):
         """Print the body."""
         for line in self.body:
             # FUNC_NAME is used for error messages
             line = line.replace('FUNC_NAME', f'"{func_name}"')
-            print(line, file=file)
+            out.dump(line)
 
 
-def print_profiling_header(fn_name, file=sys.stdout):
+def print_profiling_header(fn_name, out):
     """Print the profiling header code."""
-    print('#if OMPI_BUILD_MPI_PROFILING')
-    print('#if OPAL_HAVE_WEAK_SYMBOLS', file=file)
-    print(f'#pragma weak {fn_name} = P{fn_name}', file=file)
-    print('#endif', file=file)
-    print(f'#define {fn_name} P{fn_name}', file=file)
-    print('#endif')
+    out.dump('#if OMPI_BUILD_MPI_PROFILING')
+    out.dump('#if OPAL_HAVE_WEAK_SYMBOLS')
+    out.dump(f'#pragma weak {fn_name} = P{fn_name}')
+    out.dump('#endif')
+    out.dump(f'#define {fn_name} P{fn_name}')
+    out.dump('#endif')
 
 
-def ompi_abi(base_name, template):
+def ompi_abi(base_name, template, out):
     """Generate the OMPI ABI functions."""
-    template.print_header()
-    print_profiling_header(base_name)
-    print(template.prototype.signature('ompi', base_name))
-    template.print_body(func_name=base_name)
+    template.print_header(out)
+    print_profiling_header(base_name, out)
+    out.dump(template.prototype.signature('ompi', base_name))
+    template.print_body(func_name=base_name, out=out)
     # Check if we need to generate the bigcount interface
     if template.prototype.need_bigcount:
         base_name_c = f'{base_name}_c'
-        print_profiling_header(base_name_c)
-        print(template.prototype.signature('ompi', base_name_c, count_type='MPI_Count'))
-        template.print_body(func_name=base_name_c)
+        print_profiling_header(base_name_c, out)
+        out.dump(template.prototype.signature('ompi', base_name_c, count_type='MPI_Count'))
+        template.print_body(func_name=base_name_c, out=out)
 
 
 ABI_INTERNAL_HEADER = 'ompi/mpi/c/abi.h'
@@ -1180,17 +1180,17 @@ def indent_lines(lines, tab, start=0):
     return new_lines
 
 
-def standard_abi(base_name, template):
+def standard_abi(base_name, template, out):
     """Generate the standard ABI functions."""
-    template.print_header()
-    print(f'#include "{ABI_INTERNAL_HEADER}"')
+    template.print_header(out)
+    out.dump(f'#include "{ABI_INTERNAL_HEADER}"')
 
     # Static internal function (add a random component to avoid conflicts)
     internal_name = f'ompi_abi_{template.prototype.name}'
     internal_sig = template.prototype.signature('ompi', internal_name,
                                                 count_type='MPI_Count')
-    print(INLINE_ATTRS, internal_sig)
-    template.print_body(func_name=base_name)
+    out.dump(INLINE_ATTRS, internal_sig)
+    template.print_body(func_name=base_name, out=out)
 
     def generate_function(prototype, fn_name, internal_fn, count_type='int'):
         """Generate a function for the standard ABI."""
@@ -1198,8 +1198,8 @@ def standard_abi(base_name, template):
 
         # Handle type conversions and arguments
         params = [param.construct('standard') for param in prototype.params]
-        print(prototype.signature('standard', fn_name, count_type=count_type))
-        print('{')
+        out.dump(prototype.signature('standard', fn_name, count_type=count_type))
+        out.dump('{')
         lines = []
         return_type = prototype.return_type.construct('standard')
         lines.append(f'{return_type.tmp_type_text()} ret_value;')
@@ -1216,8 +1216,8 @@ def standard_abi(base_name, template):
         # Indent the lines
         lines = indent_lines(lines, 4 * ' ', start=1)
         for line in lines:
-            print(line)
-        print('}')
+            out.dump(line)
+        out.dump('}')
 
     generate_function(template.prototype, base_name, internal_name)
     if template.prototype.need_bigcount:
@@ -1226,53 +1226,20 @@ def standard_abi(base_name, template):
                           count_type='MPI_Count')
 
 
-def gen_header(args):
+def generate_header(args, out):
     """Generate an ABI header and conversion code."""
+    out.dump(f'/* {consts.GENERATED_MESSAGE} */')
     prototypes = [SourceTemplate.load(file_, args.srcdir).prototype for file_ in args.file]
-
-    builder = ABIHeaderBuilder(prototypes, external=args.external)
+    builder = ABIHeaderBuilder(prototypes, out, external=args.external)
     builder.dump_header()
 
 
-def gen_source(args):
+def generate_source(args, out):
     """Generate source file."""
+    out.dump(f'/* {consts.GENERATED_MESSAGE} */')
     template = SourceTemplate.load(args.source_file)
-
     base_name = mpi_fn_name_from_base_fn_name(template.prototype.name)
     if args.type == 'ompi':
-        ompi_abi(base_name, template)
+        ompi_abi(base_name, template, out)
     else:
-        standard_abi(base_name, template)
-
-
-def main():
-    if len(sys.argv) < 2:
-        # Fix required for Python 3.6
-        print('ERROR: missing subparser argument (see --help)')
-        sys.exit(1)
-
-    parser = argparse.ArgumentParser(description='generate ABI header file and conversion code')
-    subparsers = parser.add_subparsers()
-
-    parser_header = subparsers.add_parser('header')
-    parser_header.add_argument('file', nargs='+', help='list of template source files')
-    parser_header.add_argument('--external', action='store_true', help='generate external mpi.h header file')
-    parser_header.add_argument('--srcdir', help='source directory')
-    parser_header.set_defaults(func=gen_header)
-
-    parser_gen = subparsers.add_parser('source')
-    # parser = argparse.ArgumentParser(description='C ABI binding generation code')
-    parser_gen.add_argument('type', choices=('ompi', 'standard'),
-                            help='generate the OMPI ABI functions or the standard ABI functions')
-    parser_gen.add_argument('source_file', help='source template file')
-    parser_gen.set_defaults(func=gen_source)
-
-    args = parser.parse_args()
-
-    # Always add the header
-    print('/* THIS FILE WAS AUTOGENERATED BY ompi/mpi/c/abi.py. DO NOT EDIT BY HAND. */')
-    args.func(args)
-
-
-if __name__ == '__main__':
-    main()
+        standard_abi(base_name, template, out)
