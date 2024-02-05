@@ -43,6 +43,8 @@ headers = bindings.h
 
 prototype_sources = \
         abort.c.in \
+        alltoallv.c.in \
+        alltoallw.c.in \
         send.c.in \
         isend.c.in \
         recv.c.in \
@@ -106,10 +108,10 @@ interface_profile_sources = \
         alltoall.c \
         ialltoall.c \
         alltoall_init.c \
-        alltoallv.c \
+        ompi_alltoallv.c \
         ialltoallv.c \
         alltoallv_init.c \
-        alltoallw.c \
+        ompi_alltoallw.c \
         ialltoallw.c \
         alltoallw_init.c \
         attr_delete.c \

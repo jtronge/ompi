@@ -34,20 +34,10 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Alltoallw = PMPI_Alltoallw
-#endif
-#define MPI_Alltoallw PMPI_Alltoallw
-#endif
-
-static const char FUNC_NAME[] = "MPI_Alltoallw";
-
-
-int MPI_Alltoallw(const void *sendbuf, const int sendcounts[],
-                  const int sdispls[], const MPI_Datatype sendtypes[],
-                  void *recvbuf, const int recvcounts[], const int rdispls[],
-                  const MPI_Datatype recvtypes[], MPI_Comm comm)
+PROTOTYPE ERROR_CLASS alltoallw(BUFFER sendbuf, COUNT_ARRAY sendcounts,
+                                DISPL_ARRAY sdispls, DATATYPE_ARRAY sendtypes,
+                                BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISPL_ARRAY rdispls,
+                                DATATYPE_ARRAY recvtypes, COMM comm)
 {
     int i, size, err;
 

@@ -334,7 +334,7 @@ def print_profiling_rename_macros(prototypes, out):
         name = util.fortran_f08_name(prototype.fn_name)
         out.dump(f'#define {name} P{name}')
         # Check for bigcount version
-        if prototype_has_bigcount(prototype):
+        if util.fortran_prototype_has_bigcount(prototype):
             bigcount_name = util.fortran_f08_name(prototype.fn_name, bigcount=True)
             out.dump(f'#define {bigcount_name} P{bigcount_name}')
     out.dump('#endif /* OMPI_BUILD_MPI_PROFILING */')
@@ -365,11 +365,6 @@ def print_binding(prototype, lang, out, bigcount=False):
         binding.print_c_source()
 
 
-def prototype_has_bigcount(prototype):
-    """Should this prototype have a bigcount version?"""
-    return any(param.type_name == 'COUNT' for param in prototype.parameters)
-
-
 def generate_code(args, out):
     """Generate binding code based on arguments."""
     prototypes = load_prototypes(args.template)
@@ -383,7 +378,7 @@ def generate_code(args, out):
     for prototype in prototypes:
         out.dump()
         print_binding(prototype, args.lang, out)
-        if prototype_has_bigcount(prototype):
+        if util.fortran_prototype_has_bigcount(prototype):
             out.dump()
             print_binding(prototype, args.lang, bigcount=True, out=out)
 
@@ -397,7 +392,7 @@ def generate_interface(args, out):
         out.dump(f'interface {ext_name}')
         binding = FortranBinding(prototype, out=out)
         binding.print_interface()
-        if prototype_has_bigcount(prototype):
+        if util.fortran_prototype_has_bigcount(prototype):
             out.dump()
             binding_c = FortranBinding(prototype, out=out, bigcount=True)
             binding_c.print_interface()

@@ -1437,6 +1437,9 @@ OMPI_DECLSPEC  int MPI_Alltoall_init(const void *sendbuf, int sendcount, MPI_Dat
 OMPI_DECLSPEC  int MPI_Alltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype,
                                  void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype,
                                  MPI_Comm comm);
+OMPI_DECLSPEC  int MPI_Alltoallv_c(const void *sendbuf, const MPI_Count sendcounts[], const MPI_Aint sdispls[], MPI_Datatype sendtype,
+                                   void *recvbuf, const MPI_Count recvcounts[], const MPI_Aint rdispls[], MPI_Datatype recvtype,
+                                   MPI_Comm comm);
 OMPI_DECLSPEC  int MPI_Ialltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype,
                                   void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype,
                                   MPI_Comm comm, MPI_Request *request);
@@ -1446,6 +1449,9 @@ OMPI_DECLSPEC  int MPI_Alltoallv_init(const void *sendbuf, const int sendcounts[
 OMPI_DECLSPEC  int MPI_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[],
                                  void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[],
                                  MPI_Comm comm);
+OMPI_DECLSPEC  int MPI_Alltoallw_c(const void *sendbuf, const MPI_Count sendcounts[], const MPI_Aint sdispls[], const MPI_Datatype sendtypes[],
+                                   void *recvbuf, const MPI_Count recvcounts[], const MPI_Aint rdispls[], const MPI_Datatype recvtypes[],
+                                   MPI_Comm comm);
 OMPI_DECLSPEC  int MPI_Ialltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[],
                                   void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[],
                                   MPI_Comm comm, MPI_Request *request);
@@ -2209,6 +2215,9 @@ OMPI_DECLSPEC  int PMPI_Alltoall_init(const void *sendbuf, int sendcount, MPI_Da
 OMPI_DECLSPEC  int PMPI_Alltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype,
                                   void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype,
                                   MPI_Comm comm);
+OMPI_DECLSPEC  int PMPI_Alltoallv_c(const void *sendbuf, const MPI_Count sendcounts[], const MPI_Aint sdispls[], MPI_Datatype sendtype,
+                                    void *recvbuf, const MPI_Count recvcounts[], const MPI_Aint rdispls[], MPI_Datatype recvtype,
+                                    MPI_Comm comm);
 OMPI_DECLSPEC  int PMPI_Ialltoallv(const void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype,
                                    void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype,
                                    MPI_Comm comm, MPI_Request *request);
@@ -2218,6 +2227,9 @@ OMPI_DECLSPEC  int PMPI_Alltoallv_init(const void *sendbuf, const int sendcounts
 OMPI_DECLSPEC  int PMPI_Alltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[],
                                   void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[],
                                   MPI_Comm comm);
+OMPI_DECLSPEC  int PMPI_Alltoallw_c(const void *sendbuf, const MPI_Count sendcounts[], const MPI_Aint sdispls[], const MPI_Datatype sendtypes[],
+                                    void *recvbuf, const MPI_Count recvcounts[], const MPI_Aint rdispls[], const MPI_Datatype recvtypes[],
+                                    MPI_Comm comm);
 OMPI_DECLSPEC  int PMPI_Ialltoallw(const void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[],
                                    void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[],
                                    MPI_Comm comm, MPI_Request *request);

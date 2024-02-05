@@ -124,3 +124,8 @@ def abi_internal_name(extname):
     Used to avoid conflicts with existing MPI names.
     """
     return f'{extname}_ABI_INTERNAL'
+
+
+def fortran_prototype_has_bigcount(prototype):
+    """Should this prototype have a bigcount version?"""
+    return any(param.type_name in ('COUNT', 'COUNT_ARRAY') for param in prototype.parameters)

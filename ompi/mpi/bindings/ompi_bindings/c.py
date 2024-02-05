@@ -53,11 +53,11 @@ class ABIHeaderBuilder:
                                                   mangle_name=mangle_name))
             if prototype.need_bigcount:
                 signatures.append(prototype.signature('standard', f'{base_name}_c',
-                                                      count_type='MPI_Count',
+                                                      enable_count=True,
                                                       mangle_name=mangle_name))
                 # Profiling prototype
                 signatures.append(prototype.signature('standard', f'P{base_name}_c',
-                                                      count_type='MPI_Count',
+                                                      enable_count=True,
                                                       mangle_name=mangle_name))
         self.signatures = signatures
 
@@ -316,13 +316,13 @@ class Prototype:
         self.return_type = return_type
         self.params = params
 
-    def signature(self, abi_type, fn_name, count_type=None, **kwargs):
-        """Build a signature with the given name and count_type."""
-        params = ', '.join(param.construct(abi_type, **kwargs).parameter(count_type=count_type, **kwargs)
+    def signature(self, abi_type, fn_name, enable_count=False, **kwargs):
+        """Build a signature with the given name and if count is enabled."""
+        params = ', '.join(param.construct(abi_type, **kwargs).parameter(enable_count=enable_count, **kwargs)
                            for param in self.params)
         if not params:
             params = 'void'
-        return_type_text = self.return_type.construct(abi_type, **kwargs).type_text(count_type=count_type)
+        return_type_text = self.return_type.construct(abi_type, **kwargs).type_text(enable_count=enable_count)
         return f'{return_type_text} {fn_name}({params})'
 
     @property
@@ -433,7 +433,7 @@ def ompi_abi(base_name, template, out):
     if template.prototype.need_bigcount:
         base_name_c = f'{base_name}_c'
         print_profiling_header(base_name_c, out)
-        out.dump(template.prototype.signature('ompi', base_name_c, count_type='MPI_Count'))
+        out.dump(template.prototype.signature('ompi', base_name_c, enable_count=True))
         template.print_body(func_name=base_name_c, out=out)
 
 
@@ -448,17 +448,17 @@ def standard_abi(base_name, template, out):
     # Static internal function (add a random component to avoid conflicts)
     internal_name = f'ompi_abi_{template.prototype.name}'
     internal_sig = template.prototype.signature('ompi', internal_name,
-                                                count_type='MPI_Count')
+                                                enable_count=True)
     out.dump(consts.INLINE_ATTRS, internal_sig)
     template.print_body(func_name=base_name, out=out)
 
-    def generate_function(prototype, fn_name, internal_fn, count_type='int'):
+    def generate_function(prototype, fn_name, internal_fn, enable_count=False):
         """Generate a function for the standard ABI."""
         print_profiling_header(fn_name)
 
         # Handle type conversions and arguments
         params = [param.construct('standard') for param in prototype.params]
-        out.dump(prototype.signature('standard', fn_name, count_type=count_type))
+        out.dump(prototype.signature('standard', fn_name, enable_count=enable_count))
         out.dump('{')
         lines = []
         return_type = prototype.return_type.construct('standard')
@@ -483,7 +483,7 @@ def standard_abi(base_name, template, out):
     if template.prototype.need_bigcount:
         base_name_c = f'{base_name}_c'
         generate_function(template.prototype, base_name_c, internal_name,
-                          count_type='MPI_Count')
+                          enable_count=True)
 
 
 def generate_header(args, out):

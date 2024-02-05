@@ -843,3 +843,39 @@ class IntArray(FortranType):
 
     def c_argument(self):
         return f'OMPI_ARRAY_NAME_CONVERT({self.name})'
+
+
+@FortranType.add('COUNT_ARRAY')
+class CountArray(IntArray):
+    """Array of MPI_Count or int."""
+
+    def declare(self):
+        kind = '(KIND=MPI_COUNT_KIND)' if self.bigcount else ''
+        return f'INTEGER{kind}, INTENT(IN) :: {self.name}(*)'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+        return []
+
+    def c_parameter(self):
+        count_type = 'MPI_Count' if self.bigcount else 'MPI_Fint'
+        return f'{count_type} *{self.name}'
+
+
+@FortranType.add('DISPL_ARRAY')
+class DisplArray(IntArray):
+    """Array of MPI_Aint or int."""
+
+    def declare(self):
+        kind = '(KIND=MPI_ADDRESS_KIND)' if self.bigcount else ''
+        return f'INTEGER{kind}, INTENT(IN) :: {self.name}(*)'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+        return []
+
+    def c_parameter(self):
+        count_type = 'MPI_Aint' if self.bigcount else 'MPI_Fint'
+        return f'{count_type} *{self.name}'
