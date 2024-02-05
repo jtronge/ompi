@@ -27,7 +27,7 @@ FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'lno', 'parameters
 def parse_prototype(lno, line):
     """Parse a prototype for the given line and string."""
     if consts.PROTOTYPE_RE.match(line) is None:
-        raise util.FortranBindingError(
+        raise util.BindingError(
             f'Invalid function prototype for Fortran interface starting on line {lno}'
         )
 
@@ -60,12 +60,12 @@ def parse_prototype(lno, line):
 
             parsed_parameters.append(FortranParameter(type_name, name, dep_params))
         return FortranPrototype(fn_name, lno, parsed_parameters)
-    except util.FortranBindingError as err:
-        raise util.FortranBindingError(
+    except util.BindingError as err:
+        raise util.BindingError(
             f'Failed to parse prototype starting on line {lno}: {err}'
         ) from None
     except KeyError as err:
-        raise util.FortranBindingError(
+        raise util.BindingError(
             f'Found invalid type starting on line {lno}: {err}'
         ) from None
 
@@ -137,7 +137,7 @@ class FortranBinding:
             for name, deps in dep_params.items():
                 param_map[name].dep_params = {key: param_map[dep_name] for key, dep_name in deps.items()}
         except KeyError as err:
-            raise util.FortranBindingError(
+            raise util.BindingError(
                 f'Invalid dependent type in prototype starting on line {prototype.lno}: {err}'
             )
 

@@ -9,7 +9,7 @@
 #
 """Fortran type base class."""
 from abc import ABC, abstractmethod
-from ompi_bindings import code, compiler, consts, util
+from ompi_bindings import compiler, consts, util
 
 
 class FortranType(ABC):

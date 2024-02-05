@@ -39,7 +39,7 @@ def prepare_text(text):
     return '\n'.join(line for line in lines if line.strip())
 
 
-class FortranBindingError(Exception):
+class BindingError(Exception):
     """Thrown when a binding error is encountered."""
 
 
@@ -49,11 +49,11 @@ def validate_allowed_keys(keys, req_keys, type_name, param_name):
     invalid_keys = [key for key in keys if key not in req_keys]
     init_message = f'Param {param_name} with type {type_name}'
     if missing_keys and invalid_keys:
-        raise FortranBindingError(f'{init_message} has missing keys ({missing_keys}) and invalid keys ({invalid_keys})')
+        raise BindingError(f'{init_message} has missing keys ({missing_keys}) and invalid keys ({invalid_keys})')
     elif missing_keys:
-        raise FortranBindingError(f'{init_message} has missing keys: {missing_keys}')
+        raise BindingError(f'{init_message} has missing keys: {missing_keys}')
     elif invalid_keys:
-        raise FortranBindingError(f'{init_message} has invalid keys: {invalid_keys}')
+        raise BindingError(f'{init_message} has invalid keys: {invalid_keys}')
 
 
 def ext_api_func_name(fn_name, bigcount=False):
@@ -93,3 +93,34 @@ def break_param_lines_fortran(start, params, end):
         result_lines.append(f'{line}{spaces}&')
     result_lines.append(last_line)
     return result_lines
+
+
+def indent_lines(lines, tab, start=0):
+    """Crude pretty-printing function."""
+    new_lines = []
+    indent_count = start
+    for line in lines:
+        # Closing bracket
+        if '}' in line:
+            indent_count -= 1
+
+        prefix = indent_count * tab
+        new_lines.append(f'{prefix}{line}')
+
+        # Opening bracket
+        if '{' in line:
+            indent_count += 1
+    return new_lines
+
+
+def mpi_fn_name_from_base_fn_name(name):
+    """Convert from a base name to the standard 'MPI_*' name."""
+    return f'MPI_{name.capitalize()}'
+
+
+def abi_internal_name(extname):
+    """Convert from the ABI external name to an internal name.
+
+    Used to avoid conflicts with existing MPI names.
+    """
+    return f'{extname}_ABI_INTERNAL'
