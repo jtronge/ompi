@@ -230,8 +230,6 @@ ompi/mpi/fortran/use-mpi-f08/mod/mpi-f08-constants.h
 ompi/mpi/fortran/use-mpi-f08/mod/mpi-f08-interfaces.h
 ompi/mpi/fortran/use-mpi-f08/sizeof_f08.f90
 ompi/mpi/fortran/use-mpi-f08/sizeof_f08.h
-ompi/mpi/fortran/use-mpi-f08/profile/psizeof_f08.f90
-ompi/mpi/fortran/use-mpi-f08/profile/*.F90
 
 ompi/mpi/fortran/use-mpi-ignore-tkr/mpi-ignore-tkr-interfaces.h
 ompi/mpi/fortran/use-mpi-ignore-tkr/mpi-ignore-tkr-file-interfaces.h
@@ -549,7 +547,7 @@ docs/man
 ompi/mpi/bindings/ompi_bindings/compiler.py
 
 # Generated C Bindings
-ompi/mpi/c/ompi_*.c
+ompi/mpi/c/generated_*.c
 
 # Generated Fortran Bindings
 ompi/mpi/fortran/use-mpi-f08/*_generated.F90

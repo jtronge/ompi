@@ -8,7 +8,11 @@
 # $HEADERS$
 #
 #
-"""MPI Standard ABI Generation.
+"""MPI C Binding Code.
+
+This file is used for generating C bindings, as well as bigcount interfaces,
+from individual *.c.in template files. This also currently includes unused ABI
+code, in preparation for the standard ABI.
 
 TEMPLATE SOURCE FILE ASSUMPTIONS:
 * Only one function per file

@@ -6,6 +6,11 @@
 # Additional copyrights may follow
 #
 # $HEADER$
+"""Main binding generation script.
+
+This script is used for generating the bindings for both C and Fortran. See the
+scripts in 'ompi_bindings/' for the bulk of the code.
+"""
 import argparse
 import os
 import sys
@@ -35,18 +40,18 @@ def main():
     parser_code.set_defaults(handler=lambda args, out: fortran.generate_code(args, out))
     # Handler for generating the Fortran interface files
     parser_interface = subparsers_fortran.add_parser('interface',
-                                                     help='generate Fortran interface specifcations')
+                                                     help='generate Fortran interface specifications')
     parser_interface.set_defaults(handler=lambda args, out: fortran.generate_interface(args, out))
 
     # C set up code
     parser_c = subparsers.add_parser('c', help='subcommand for generating C code')
     subparsers_c = parser_c.add_subparsers()
-    parser_header = subparsers_c.add_parser('header')
+    parser_header = subparsers_c.add_parser('header', help='generate header file from template files')
     parser_header.add_argument('file', nargs='+', help='list of template source files')
     parser_header.add_argument('--external', action='store_true', help='generate external mpi.h header file')
     parser_header.add_argument('--srcdir', help='source directory')
     parser_header.set_defaults(handler=lambda args, out: c.generate_header(args, out))
-    parser_gen = subparsers_c.add_parser('source')
+    parser_gen = subparsers_c.add_parser('source', help='generate source file from template file')
     # parser = argparse.ArgumentParser(description='C ABI binding generation code')
     parser_gen.add_argument('type', choices=('ompi', 'standard'),
                             help='generate the OMPI ABI functions or the standard ABI functions')

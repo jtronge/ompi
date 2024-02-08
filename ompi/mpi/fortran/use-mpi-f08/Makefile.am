@@ -500,17 +500,9 @@ mpi_api_files = \
         win_wait_f08.F90 \
         api_f08_generated.F90
 
-# JMS Somehow this variable substitution isn't quite working, and I
-# don't have time to figure it out.  So just wholesale copy the file
-# list.  :-(
-#pmpi_api_files = $(mpi_api_files:%=p%)
-
 lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES = \
         $(mpi_api_files) \
         mpi-f08.F90
-
-# These are generated; do not ship them
-# nodist_lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES =
 
 if BUILD_FORTRAN_SIZEOF
 SIZEOF_H = sizeof_f08.h
@@ -539,9 +531,10 @@ lib@OMPI_LIBMPI_NAME@_usempif08_la_LIBADD = \
         $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la \
         mod/libusempif08_internal_modules.la \
         base/libusempif08_ccode.la
+
 #
-# I'm not sure why, but the profile library is not getting built before this
-# library even when listed in LIBADD, so adding it here as a dependency.
+# Make sure to build the profile library before this library, since adding it
+# to LIBADD doesn't enforce any ordering
 #
 lib@OMPI_LIBMPI_NAME@_usempif08_la_DEPENDENCIES = \
         $(module_sentinel_files) \
@@ -574,16 +567,12 @@ lib@OMPI_LIBMPI_NAME@_usempif08_profile_la_FCFLAGS = \
 
 # Include script and template files for ABI generation from a distribution
 # tarball
-EXTRA_DIST = \
-        generate_bindings.py \
-        interface.in
+EXTRA_DIST = interface.in
 
 #
 # Generate the Fortran bindings and C wrapper functions for bindings with a
 # *.in template.
 #
-
-DISTCLEANFILES = api_f08_generated.F90
 
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.F90: interface.in
@@ -595,6 +584,9 @@ api_f08_generated.F90: interface.in
 	    --template $(abs_srcdir)/$< \
 	    code \
 	    fortran
+
+# Delete generated file on maintainer-clean
+MAINTAINERCLEANFILES = api_f08_generated.F90
 endif
 
 ###########################################################################

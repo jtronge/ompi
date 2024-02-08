@@ -7,7 +7,12 @@
 #
 # $HEADER$
 #
-"""Fortran type base class."""
+"""Fortran types and corresponding template code.
+
+All types used in the Fortran bindings are defined here as classes that derive
+from the FortranType base class. These are used for generating both Fortran and
+supporting C code for the mpi_f08 bindings.
+"""
 from abc import ABC, abstractmethod
 from ompi_bindings import compiler, consts, util
 

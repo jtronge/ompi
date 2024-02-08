@@ -40,8 +40,6 @@ libusempif08_ccode_la_SOURCES += \
         ts.c
 endif
 
-DISTCLEANFILES = api_f08_generated.c
-
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.c: ../interface.in
 	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
@@ -52,6 +50,9 @@ api_f08_generated.c: ../interface.in
 	    --template $(abs_srcdir)/$< \
 	    code \
 	    c
+
+# Delete generated file on maintainer-clean
+MAINTAINERCLEANFILES = api_f08_generated.c
 endif
 
 endif

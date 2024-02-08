@@ -7,9 +7,11 @@
 #
 # $HEADER$
 #
-# This file contains a list of prototypes to be used by 'generate_bindings.py'
+# This file contains a list of prototypes to be used by 'bindings.py'
 # to generate Fortran subroutines and internal C functions that wrap the C MPI
-# interface versions of each function.
+# interface versions of each function. Interfaces that include a COUNT or
+# COUNT_ARRAY type provide a bigcount interface (one using MPI_Count instead of
+# int), and the binding script will automatically generate these.
 #
 # Parameters of the form 'TYPE param_name[key=other_param_name]' allow for
 # dependencies between different parameters (this is useful for buffer

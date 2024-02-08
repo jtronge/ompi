@@ -157,6 +157,16 @@ include_HEADERS =
 dist_ompidata_DATA =
 lib@OMPI_LIBMPI_NAME@_la_SOURCES += $(headers)
 
+# Python binding files
+EXTRA_DIST = \
+        mpi/bindings/bindings.py \
+        mpi/bindings/ompi_bindings/consts.py \
+        mpi/bindings/ompi_bindings/c.py \
+        mpi/bindings/ompi_bindings/c_type.py \
+        mpi/bindings/ompi_bindings/fortran.py \
+        mpi/bindings/ompi_bindings/fortran_type.py \
+        mpi/bindings/ompi_bindings/util.py
+
 # Conditionally install the header files
 
 if WANT_INSTALL_HEADERS

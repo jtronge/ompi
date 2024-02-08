@@ -64,19 +64,17 @@ libforce_usempif08_internal_modules_to_be_built_la_SOURCES = \
         pmpi-f08-interfaces.F90 \
         mpi-f08-interfaces-callbacks.F90
 
-nodist_noinst_HEADERS = \
-        mpi-f08-interfaces.h \
-        mpi-f08-interfaces-generated.h
+nodist_noinst_HEADERS = mpi-f08-interfaces.h
 
-noinst_HEADERS = mpi-f08-rename.h
+noinst_HEADERS = \
+	mpi-f08-rename.h \
+        mpi-f08-interfaces-generated.h
 
 libforce_usempi_internal_modules_to_be_built.la: libusempif08_internal_modules.la
 
 config_h = \
     $(top_builddir)/ompi/mpi/fortran/configure-fortran-output.h \
     $(top_srcdir)/ompi/mpi/fortran/configure-fortran-output-bottom.h
-
-DISTCLEANFILES = mpi-f08-interfaces-generated.h
 
 # Generate the Fortran interfaces
 if OMPI_GENERATE_BINDINGS
@@ -88,6 +86,9 @@ mpi-f08-interfaces-generated.h: ../interface.in
 	    fortran \
 	    --template $(abs_srcdir)/$< \
 	    interface
+
+# Delete generated file on maintainer-clean
+MAINTAINERCLEANFILES = mpi-f08-interfaces-generated.h
 endif
 
 #
