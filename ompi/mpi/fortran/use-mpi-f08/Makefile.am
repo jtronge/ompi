@@ -506,7 +506,7 @@ lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES = \
 
 if BUILD_FORTRAN_SIZEOF
 SIZEOF_H = sizeof_f08.h
-lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES += \
+nodist_lib@OMPI_LIBMPI_NAME@_usempif08_la_SOURCES = \
         sizeof_f08.h \
         sizeof_f08.f90 \
         psizeof_f08.f90
@@ -576,7 +576,7 @@ EXTRA_DIST = interface.in
 
 if OMPI_GENERATE_BINDINGS
 api_f08_generated.F90: interface.in
-	$(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
+	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
 	    --output $(abs_builddir)/$@ \

@@ -118,8 +118,11 @@ def load_prototypes(fname):
 class FortranBinding:
     """Class for generating the binding for a single function."""
 
-    def __init__(self, prototype, out, bigcount=False):
+    def __init__(self, prototype, out, bigcount=False, ts=False):
+        # Generate bigcount interface version
         self.bigcount = bigcount
+        # Generate files with support for TS 29113 or not
+        self.ts = ts
         self.fn_name = prototype.fn_name
         self.out = out
         self.parameters = []
@@ -127,7 +130,7 @@ class FortranBinding:
         dep_params = {}
         for param in prototype.parameters:
             type_ = FortranType.get(param.type_name)
-            param_type = type_(param.name, self.fn_name, bigcount=bigcount)
+            param_type = type_(param.name, self.fn_name, bigcount=bigcount, ts=ts)
             self.parameters.append(param_type)
             param_map[param.name] = param_type
             if param.dep_params is not None:
@@ -340,10 +343,10 @@ def print_profiling_rename_macros(prototypes, out):
     out.dump('#endif /* OMPI_BUILD_MPI_PROFILING */')
 
 
-def print_c_source_header(out):
+def print_c_source_header(out, ts=False):
     """Print the header of the C source file."""
     out.dump(f'/* {consts.GENERATED_MESSAGE} */')
-    if compiler.HAVE_TS:
+    if ts:
         out.dump('#include <ISO_Fortran_binding.h>')
         out.dump('#include "ts.h"')
     out.dump('#include "ompi_config.h"')
@@ -356,9 +359,9 @@ def print_c_source_header(out):
     out.dump('#include "ompi/communicator/communicator.h"')
 
 
-def print_binding(prototype, lang, out, bigcount=False):
+def print_binding(prototype, lang, out, bigcount=False, ts=False):
     """Print the binding with or without bigcount."""
-    binding = FortranBinding(prototype, out=out, bigcount=bigcount)
+    binding = FortranBinding(prototype, out=out, bigcount=bigcount, ts=ts)
     if lang == 'fortran':
         binding.print_f_source()
     else:
@@ -374,13 +377,13 @@ def generate_code(args, out):
         print_profiling_rename_macros(prototypes, out)
         out.dump()
     else:
-        print_c_source_header(out)
+        print_c_source_header(out, ts=args.ts)
     for prototype in prototypes:
         out.dump()
-        print_binding(prototype, args.lang, out)
+        print_binding(prototype, args.lang, out, ts=args.ts)
         if util.fortran_prototype_has_bigcount(prototype):
             out.dump()
-            print_binding(prototype, args.lang, bigcount=True, out=out)
+            print_binding(prototype, args.lang, bigcount=True, out=out, ts=args.ts)
 
 
 def generate_interface(args, out):
@@ -390,10 +393,10 @@ def generate_interface(args, out):
     for prototype in prototypes:
         ext_name = util.ext_api_func_name(prototype.fn_name)
         out.dump(f'interface {ext_name}')
-        binding = FortranBinding(prototype, out=out)
+        binding = FortranBinding(prototype, out=out, ts=args.ts)
         binding.print_interface()
         if util.fortran_prototype_has_bigcount(prototype):
             out.dump()
-            binding_c = FortranBinding(prototype, out=out, bigcount=True)
+            binding_c = FortranBinding(prototype, out=out, bigcount=True, ts=args.ts)
             binding_c.print_interface()
         out.dump(f'end interface {ext_name}')

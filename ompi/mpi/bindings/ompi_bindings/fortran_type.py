@@ -19,10 +19,13 @@ from ompi_bindings import compiler, consts, util
 
 class FortranType(ABC):
 
-    def __init__(self, name, fn_name, bigcount=False, **kwargs):
+    def __init__(self, name, fn_name, bigcount=False, ts=False, **kwargs):
         self.name = name
         self.fn_name = fn_name
+        # Generate the bigcount interface version?
         self.bigcount = bigcount
+        # Generate with support for TS 29113?
+        self.ts = ts
         # List of dependent type/parameters, such as for counts
         self.dep_params = None
         self.used_counters = 0
@@ -144,32 +147,34 @@ class BufferType(FortranType):
         util.validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
 
     def interface_predeclare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_PREDECL} {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_PREDECL {self.name}'
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE, INTENT(IN) :: {self.name}'
 
-    if compiler.HAVE_TS:
-        def c_parameter(self):
+    @property
+    def tmp_datatype1(self):
+        return self.dep_params['type'].tmp_name
+
+    @property
+    def tmp_datatype2(self):
+        return self.dep_params['type'].tmp_name2
+
+    @property
+    def tmp_count(self):
+        return self.dep_params['count'].tmp_name
+
+    @property
+    def tmp_comm(self):
+        return self.dep_params['comm'].tmp_name
+
+    def c_parameter(self):
+        if self.ts:
             return f'CFI_cdesc_t *{self.name}'
+        return f'char *{self.name}'
 
-        @property
-        def tmp_datatype1(self):
-            return self.dep_params['type'].tmp_name
-
-        @property
-        def tmp_datatype2(self):
-            return self.dep_params['type'].tmp_name2
-
-        @property
-        def tmp_count(self):
-            return self.dep_params['count'].tmp_name
-
-        @property
-        def tmp_comm(self):
-            return self.dep_params['comm'].tmp_name
-
-        def c_declare_tmp(self):
+    def c_declare_tmp(self):
+        if self.ts:
             type_name = self.dep_params['type'].name
             count_name = self.dep_params['count'].name
             if self.bigcount:
@@ -181,8 +186,10 @@ class BufferType(FortranType):
             {count_init}
             MPI_Datatype {self.tmp_datatype1} = PMPI_Type_f2c(*{type_name}), {self.tmp_datatype2};
             """)
+        return ''
 
-        def c_prepare(self):
+    def c_prepare(self):
+        if self.ts:
             type_name = self.dep_params['type'].name
             return util.prepare_text(f"""
             OMPI_CFI_2_C({self.name}, {self.tmp_count}, {self.tmp_datatype1}, {self.tmp_datatype2}, {consts.C_ERROR_TMP_NAME});
@@ -191,39 +198,38 @@ class BufferType(FortranType):
                 OMPI_ERRHANDLER_INVOKE({self.tmp_comm}, {consts.C_ERROR_TMP_NAME}, "{self.fn_api_name}");
                 return;
             }}""")
+        return ''
 
-        def c_argument(self):
+    def c_argument(self):
+        if self.ts:
             return f'OMPI_F2C_BOTTOM({self.tmp_name})'
+        return f'OMPI_F2C_BOTTOM({self.name})'
 
-        def c_post(self):
+    def c_post(self):
+        if self.ts:
             return util.prepare_text(f"""
             if ({self.tmp_datatype2} != {self.tmp_datatype1}) {{
                 ompi_datatype_destroy(&{self.tmp_datatype2});
             }}""")
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
-
-        def c_argument(self):
-            return f'OMPI_F2C_BOTTOM({self.name})'
+        return ''
 
 
 @FortranType.add('BUFFER_ASYNC')
 class BufferAsyncType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE, INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 @FortranType.add('BUFFER_OUT')
 class BufferOutType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE :: {self.name}'
 
 
 @FortranType.add('BUFFER_ASYNC_OUT')
 class BufferAsyncOutType(BufferType):
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} OMPI_ASYNCHRONOUS :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE OMPI_ASYNCHRONOUS :: {self.name}'
 
 
 @FortranType.add('VBUFFER')
@@ -234,21 +240,25 @@ class VBufferType(FortranType):
         util.validate_allowed_keys(keys, ['counts', 'displs', 'type', 'comm'], 'VBUFFER', param_name)
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE, INTENT(IN) :: {self.name}'
 
-    if compiler.HAVE_TS:
-        def c_parameter(self):
+    def c_parameter(self):
+        if self.ts:
             return f'CFI_cdesc_t *{self.name}'
+        return f'char *{self.name}'
 
-        def c_declare_tmp(self):
+    def c_declare_tmp(self):
+        if self.ts:
             datatype = self.dep_params['type']
             # NOTE: Using tmp_name2 here for the datatype, since the datatype
             #       class assumes it will be used when TS support is enabled
             return util.prepare_text(f"""
             MPI_Datatype {datatype.tmp_name2} = NULL;
             char *{self.tmp_name} = {self.name}->base_addr;""")
+        return ''
 
-        def c_prepare(self):
+    def c_prepare(self):
+        if self.ts:
             comm = self.dep_params['comm']
             datatype = self.dep_params['type'].name
             tmp_datatype = self.dep_params['type'].tmp_name2
@@ -269,22 +279,20 @@ class VBufferType(FortranType):
                 {self.tmp_name} = MPI_IN_PLACE;
             }}
             """)
+        return ''
 
-        def c_argument(self):
-            return self.tmp_name
-
-        def c_post(self):
+    def c_post(self):
+        if self.ts:
             counts = self.dep_params['counts'].name
             displs = self.dep_params['displs'].name
             return util.prepare_text(f"""
             OMPI_ARRAY_FINT_2_INT_CLEANUP({counts});
             OMPI_ARRAY_FINT_2_INT_CLEANUP({displs});""")
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
+        return ''
 
     def c_argument(self):
-        return f'OMPI_F2C_BOTTOM(OMPI_F2C_IN_PLACE({self.name}))'
+        name = self.tmp_name if self.ts else self.name
+        return f'OMPI_F2C_BOTTOM(OMPI_F2C_IN_PLACE({name}))'
 
 
 @FortranType.add('VBUFFER_OUT')
@@ -295,20 +303,24 @@ class VBufferType(FortranType):
         util.validate_allowed_keys(keys, ['type', 'comm'], 'VBUFFER_OUT', param_name)
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE :: {self.name}'
 
-    if compiler.HAVE_TS:
-        def c_parameter(self):
+    def c_parameter(self):
+        if self.ts:
             return f'CFI_cdesc_t *{self.name}'
+        return f'char *{self.name}'
 
-        def c_declare_tmp(self):
+    def c_declare_tmp(self):
+        if self.ts:
             datatype = self.dep_params['type']
             return util.prepare_text(f"""
             MPI_Datatype {datatype.tmp_name2} = PMPI_Type_f2c(*{datatype.name});
             char *{self.tmp_name} = {self.name}->base_addr;
             """)
+        return ''
 
-        def c_prepare(self):
+    def c_prepare(self):
+        if self.ts:
             comm = self.dep_params['comm']
             return util.prepare_text(f"""
             OMPI_CFI_CHECK_CONTIGUOUS({self.name}, {consts.C_ERROR_TMP_NAME});
@@ -317,18 +329,16 @@ class VBufferType(FortranType):
                 OMPI_ERRHANDLER_INVOKE({comm.tmp_name}, {consts.C_ERROR_TMP_NAME}, "{self.fn_name}");
             }}
             """)
-    else:
-        def c_parameter(self):
-            return f'char *{self.name}'
+        return ''
 
     def c_argument(self):
-        name = self.tmp_name if compiler.HAVE_TS else self.name
+        name = self.tmp_name if self.ts else self.name
         return f'OMPI_F2C_BOTTOM({name})'
 
 
 class WBufferBase(FortranType):
     def c_prepare(self):
-        if compiler.HAVE_TS:
+        if self.ts:
             c_ierr = consts.C_ERROR_TMP_NAME
             return util.prepare_text(f"""
             OMPI_CFI_CHECK_CONTIGUOUS({self.name}, {c_ierr});
@@ -337,7 +347,6 @@ class WBufferBase(FortranType):
                 OMPI_ERRHANDLER_INVOKE({self.dep_params['comm'].tmp_name}, {c_ierr}, "{self.fn_name}")
                 return;
             }}""")
-
         return ''
 
 
@@ -350,17 +359,17 @@ class WBufferType(WBufferBase):
                                    param_name)
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE}, INTENT(IN) :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE, INTENT(IN) :: {self.name}'
 
     def c_parameter(self):
-        if compiler.HAVE_TS:
+        if self.ts:
             return f'CFI_cdesc_t *{self.name}'
         else:
             return f'char *{self.name}'
 
     def c_declare_tmp(self):
         lines = [f'MPI_Datatype *{self.dep_params["types"].tmp_name} = NULL;']
-        if compiler.HAVE_TS:
+        if self.ts:
             lines.append(f'char *{self.tmp_name} = {self.name}->base_addr;')
         return '\n'.join(lines)
 
@@ -370,7 +379,7 @@ class WBufferType(WBufferBase):
         comm = self.dep_params['comm']
         counts = self.dep_params['counts']
         displs = self.dep_params['displs']
-        name = self.tmp_name if compiler.HAVE_TS else self.name
+        name = self.tmp_name if self.ts else self.name
         second_part = util.prepare_text(f"""
         if (!OMPI_IS_FORTRAN_IN_PLACE({name})) {{
             {datatypes.tmp_name} = malloc({comm.size} * sizeof(MPI_Datatype));
@@ -383,14 +392,14 @@ class WBufferType(WBufferBase):
         return '\n'.join([first_part, second_part])
 
     def c_argument(self):
-        name = self.tmp_name if compiler.HAVE_TS else self.name
+        name = self.tmp_name if self.ts else self.name
         return f'OMPI_F2C_BOTTOM(OMPI_F2C_IN_PLACE({name}))'
 
     def c_post(self):
         datatypes = self.dep_params['types']
         counts = self.dep_params['counts']
         displs = self.dep_params['displs']
-        name = self.tmp_name if compiler.HAVE_TS else self.name
+        name = self.tmp_name if self.ts else self.name
         return util.prepare_text(f"""
         if (!OMPI_IS_FORTRAN_IN_PLACE({name})) {{
             free({datatypes.tmp_name});
@@ -407,17 +416,16 @@ class WBufferType(WBufferBase):
         util.validate_allowed_keys(keys, ['comm', 'counts', 'displs', 'types'], 'WBUFFER_OUT', param_name)
 
     def declare(self):
-        return f'{compiler.OMPI_F08_IGNORE_TKR_TYPE} :: {self.name}'
+        return f'OMPI_F08_IGNORE_TKR_TYPE :: {self.name}'
 
     def c_parameter(self):
-        if compiler.HAVE_TS:
+        if self.ts:
             return f'CFI_cdesc_t *{self.name}'
-        else:
-            return f'char *{self.name}'
+        return f'char *{self.name}'
 
     def c_declare_tmp(self):
         lines = [f'MPI_Datatype *{self.dep_params["types"].tmp_name} = NULL;']
-        if compiler.HAVE_TS:
+        if self.ts:
             lines.append(f'char *{self.tmp_name} = {self.name}->base_addr;')
         return '\n'.join(lines)
 
@@ -437,7 +445,7 @@ class WBufferType(WBufferBase):
         return '\n'.join([first_part, second_part])
 
     def c_argument(self):
-        name = self.tmp_name if compiler.HAVE_TS else self.name
+        name = self.tmp_name if self.ts else self.name
         return f'OMPI_F2C_BOTTOM({name})'
 
     def c_post(self):
@@ -466,7 +474,7 @@ class CountType(FortranType):
         return f'{type_} *{self.name}'
 
     def c_argument(self):
-        arg = self.tmp_name if compiler.HAVE_TS else f'*{self.name}'
+        arg = self.tmp_name if self.ts else f'*{self.name}'
         return arg if self.bigcount else f'OMPI_FINT_2_INT({arg})'
 
 
@@ -487,19 +495,16 @@ class DatatypeType(FortranType):
     def c_parameter(self):
         return f'MPI_Fint *{self.name}'
 
-    if compiler.HAVE_TS:
-        def c_prepare(self):
+    def c_prepare(self):
+        if self.ts:
             # Preparation code is done by the BUFFER type
             return ''
+        return f'MPI_Datatype {self.tmp_name} = PMPI_Type_f2c(*{self.name});'
 
-        def c_argument(self):
+    def c_argument(self):
+        if self.ts:
             return self.tmp_name2
-    else:
-        def c_prepare(self):
-            return f'MPI_Datatype {self.tmp_name} = PMPI_Type_f2c(*{self.name});'
-
-        def c_argument(self):
-            return self.tmp_name
+        return self.tmp_name
 
 
 @FortranType.add('DATATYPE_ARRAY')
