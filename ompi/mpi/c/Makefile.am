@@ -34,6 +34,8 @@
 # layer, if weak symbols can't be used to alias the MPI_ namespace
 # into the PMPI_ namespace.
 
+include $(top_srcdir)/Makefile.ompi-rules
+
 noinst_LTLIBRARIES = libmpi_c.la libmpi_c_profile.la
 if BUILD_MPI_BINDINGS_LAYER
 noinst_LTLIBRARIES += libmpi_c_noprofile.la
