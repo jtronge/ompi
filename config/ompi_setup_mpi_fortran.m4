@@ -899,11 +899,11 @@ end type test_mpi_handle],
 
     AS_IF([test $OMPI_FORTRAN_HAVE_TS -eq 1],
           [OMPI_F08_IGNORE_TKR_TYPE="type(*), dimension(..)"
-           OMPI_F08_IGNORE_TKR_PREDECL="! no attribute required for"
+           OMPI_F08_IGNORE_TKR_PREDECL="no attribute required for"
            OMPI_F08_BINDINGS_EXTENSION="ts"
            OMPI_F08_BINDINGS_TS_SUFFIX="ts"],
           [OMPI_F08_IGNORE_TKR_TYPE=$OMPI_FORTRAN_IGNORE_TKR_TYPE
-           OMPI_F08_IGNORE_TKR_PREDECL=$OMPI_FORTRAN_IGNORE_TKR_PREDECL
+           OMPI_F08_IGNORE_TKR_PREDECL=${OMPI_FORTRAN_IGNORE_TKR_PREDECL:1}
            OMPI_F08_BINDINGS_EXTENSION="f"
            OMPI_F08_BINDINGS_TS_SUFFIX=""])
     AC_SUBST(OMPI_F08_BINDINGS_EXTENSION)

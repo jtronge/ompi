@@ -147,7 +147,7 @@ class BufferType(FortranType):
         util.validate_allowed_keys(keys, ['count', 'type', 'comm'], 'BUFFER', param_name)
 
     def interface_predeclare(self):
-        return f'OMPI_F08_IGNORE_TKR_PREDECL {self.name}'
+        return f'!OMPI_F08_IGNORE_TKR_PREDECL {self.name}'
 
     def declare(self):
         return f'OMPI_F08_IGNORE_TKR_TYPE, INTENT(IN) :: {self.name}'
