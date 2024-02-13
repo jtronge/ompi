@@ -49,8 +49,8 @@ class FortranType(ABC):
         """Validate the keys that are allowed to be used for a dependent param."""
         # No dependent parameters allowed by default
         if keys:
-            raise util.FortranBindingError(
-                f'Invalid keys found for parameter {param_name}: {list(keys)}'
+            raise util.BindingError(
+                f'Invalid keys found for parameter "{param_name}": {list(keys)}'
             )
 
     @property

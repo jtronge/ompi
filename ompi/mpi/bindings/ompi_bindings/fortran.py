@@ -15,104 +15,36 @@ subroutines in one file and the C wraping code in another for all prototypes
 listed.
 """
 from collections import namedtuple
+import json
 import re
 from ompi_bindings import compiler, consts, util
 from ompi_bindings.fortran_type import FortranType
 
 
 FortranParameter = namedtuple('FortranParameter', ['type_name', 'name', 'dep_params'])
-FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'lno', 'parameters'])
-
-
-def parse_prototype(lno, line):
-    """Parse a prototype for the given line and string."""
-    if consts.PROTOTYPE_RE.match(line) is None:
-        raise util.BindingError(
-            f'Invalid function prototype for Fortran interface starting on line {lno}'
-        )
-
-    start = line.index('(')
-    end = line.index(')')
-    fn_name = line[1:start].strip()
-    parameters = line[start+1:end].split(',')
-
-    # Attempt to parse each parameter
-    parsed_parameters = []
-    try:
-        for param in parameters:
-            param = param.strip()
-            param_parts = param.split()
-            type_name = param_parts[0]
-            name = ''.join(param_parts[1:])
-            type_ = FortranType.get(type_name)
-            dep_params = None
-
-            # Check for 'param[name=param(;name=param)]' parameters,
-            # indicating a dependency on that other parameter
-            if '[' in name:
-                idx = name.index('[')
-                dep_params = [part.split('=') for part in name[idx+1:-1].split(';')]
-                dep_params = dict(dep_params)
-                name = name[:idx]
-
-            # Validate the parameter key values (or an empty list if not found)
-            type_.validate_dep_param_keys(name, [] if dep_params is None else dep_params.keys())
-
-            parsed_parameters.append(FortranParameter(type_name, name, dep_params))
-        return FortranPrototype(fn_name, lno, parsed_parameters)
-    except util.BindingError as err:
-        raise util.BindingError(
-            f'Failed to parse prototype starting on line {lno}: {err}'
-        ) from None
-    except KeyError as err:
-        raise util.BindingError(
-            f'Found invalid type starting on line {lno}: {err}'
-        ) from None
+FortranPrototype = namedtuple('FortranPrototype', ['fn_name', 'parameters'])
 
 
 def load_prototypes(fname):
-    """Load the prototypes from a file."""
+    """Load the prototypes from a JSON file."""
     with open(fname) as fp:
-        tmp_proto_string = []
-        proto_strings = []
-        cur_lno = 0
-        reading_proto = False
-
-        # The loop below is designed to read in each prototype, each delimited
-        # by a '.' preceding the name of the subroutine, allowing for the
-        # prototype to run across multiple lines.
-        for i, line in enumerate(fp):
-            lno = i + 1
-            line = line.strip()
-
-            # First strip comments
-            comm_idx = line.find('#')
-            if comm_idx != -1:
-                line = line[:comm_idx]
-            if not line:
-                continue
-
-            # Set the current line for the prototype
-            if not tmp_proto_string:
-                cur_lno = lno
-
-            # Check for initial '.' character, indicating the start of a prototype
-            reading_proto = reading_proto or line[0] == '.'
-            if line[0] == '.' and tmp_proto_string:
-                # If the buffer is not empty, then the previous prototype
-                # string is complete and can be saved
-                proto_strings.append((cur_lno, ' '.join(tmp_proto_string)))
-                cur_lno = lno
-                tmp_proto_string = []
-            # Only add the line to the current buffer if we already encountered
-            # a '.' at the start of this or a previous line
-            if reading_proto:
-                tmp_proto_string.append(line)
-
-        if tmp_proto_string:
-            proto_strings.append((cur_lno, ' '.join(tmp_proto_string)))
-
-        return [parse_prototype(lno, proto_string) for lno, proto_string in proto_strings]
+        data = json.load(fp)
+        prototypes = []
+        for proto in data:
+            fn_name = proto['name']
+            parameters = []
+            for param in proto['parameters']:
+                type_name = param['type']
+                type_ = FortranType.get(type_name)
+                param_name = param['name']
+                dep_params = param['dep_params'] if 'dep_params' in param else None
+                try:
+                    type_.validate_dep_param_keys(param_name, [] if dep_params is None else dep_params.keys())
+                except util.BindingError as err:
+                    raise util.BindingError(f'Invalid prototype "{fn_name}": {err}') from None
+                parameters.append(FortranParameter(type_name, param_name, dep_params))
+            prototypes.append(FortranPrototype(fn_name, parameters))
+        return prototypes
 
 
 class FortranBinding:
@@ -136,13 +68,13 @@ class FortranBinding:
             if param.dep_params is not None:
                 dep_params[param.name] = param.dep_params
         # Set dependent parameters for those that need them
-        try:
-            for name, deps in dep_params.items():
+        for name, deps in dep_params.items():
+            try:
                 param_map[name].dep_params = {key: param_map[dep_name] for key, dep_name in deps.items()}
-        except KeyError as err:
-            raise util.BindingError(
-                f'Invalid dependent type in prototype starting on line {prototype.lno}: {err}'
-            )
+            except KeyError as err:
+                raise util.BindingError(
+                    f'Invalid dependent type for parameter "{name}" (prototype "{prototype.fn_name}"): {err}'
+                ) from None
 
     def dump(self, *pargs, **kwargs):
         """Write to the output file."""
@@ -370,7 +302,7 @@ def print_binding(prototype, lang, out, bigcount=False, ts=False):
 
 def generate_code(args, out):
     """Generate binding code based on arguments."""
-    prototypes = load_prototypes(args.template)
+    prototypes = load_prototypes(args.prototypes)
     if args.lang == 'fortran':
         print_f_source_header(out)
         out.dump()
@@ -388,7 +320,7 @@ def generate_code(args, out):
 
 def generate_interface(args, out):
     """Generate the Fortran interface files."""
-    prototypes = load_prototypes(args.template)
+    prototypes = load_prototypes(args.prototypes)
     out.dump(f'! {consts.GENERATED_MESSAGE}')
     for prototype in prototypes:
         ext_name = util.ext_api_func_name(prototype.fn_name)

@@ -78,13 +78,13 @@ config_h = \
 
 # Generate the Fortran interfaces
 if OMPI_GENERATE_BINDINGS
-mpi-f08-interfaces-generated.h: ../interface.in
+mpi-f08-interfaces-generated.h: ../interface.json
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
 	    --output $(abs_builddir)/$@ \
 	    fortran \
-	    --template $(abs_srcdir)/$< \
+	    --prototypes $(abs_srcdir)/$< \
 	    interface
 
 # Delete generated file on maintainer-clean

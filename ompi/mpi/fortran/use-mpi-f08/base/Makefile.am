@@ -49,24 +49,24 @@ endif
 # binding scripts in order to generate the specific version for their compiler.
 #
 if OMPI_GENERATE_BINDINGS
-api_f08_generated.c: ../interface.in
+api_f08_generated.c: ../interface.json
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
 	    --output $(abs_builddir)/$@ \
 	    fortran \
-	    --template $(abs_srcdir)/$< \
+	    --prototypes $(abs_srcdir)/$< \
 	    code \
 	    c
 
-api_f08_ts_generated.c: ../interface.in
+api_f08_ts_generated.c: ../interface.json
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
 	    --output $(abs_builddir)/$@ \
 	    fortran \
 	    --ts \
-	    --template $(abs_srcdir)/$< \
+	    --prototypes $(abs_srcdir)/$< \
 	    code \
 	    c
 

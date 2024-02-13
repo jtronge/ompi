@@ -565,9 +565,9 @@ lib@OMPI_LIBMPI_NAME@_usempif08_profile_la_FCFLAGS = \
         -DOMPI_BUILD_MPI_PROFILING=1
 
 
-# Include script and template files for ABI generation from a distribution
+# Include script and JSON file for ABI generation from a distribution
 # tarball
-EXTRA_DIST = interface.in
+EXTRA_DIST = interface.json
 
 #
 # Generate the Fortran bindings and C wrapper functions for bindings with a
@@ -575,13 +575,13 @@ EXTRA_DIST = interface.in
 #
 
 if OMPI_GENERATE_BINDINGS
-api_f08_generated.F90: interface.in
+api_f08_generated.F90: interface.json
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
 	    --output $(abs_builddir)/$@ \
 	    fortran \
-	    --template $(abs_srcdir)/$< \
+	    --prototypes $(abs_srcdir)/$< \
 	    code \
 	    fortran
 

@@ -69,23 +69,47 @@ generated file name must be of the form ``generated_${basename}.c``, where
 Fortran Bindings
 ----------------
 
-Adding a new Fortran binding may be as simple as adding an additional prototype
-to ``ompi/mpi/fortran/use-mpi-f08/interface.in``, as long as all the required
-types are already supported by the binding code. Below is an example prototype
-for ``MPI_Waitall``:
+To add a new Fortran binding, or update an existing one, one will need to
+modify the ``ompi/mpi/fortran/use-mpi-f08/interface.json`` file; this JSON file
+contains a list of prototype objects, including information about their name
+and each parameter passed. Below is an example for ``MPI_Waitall``:
 
 .. code-block::
 
-    .waitall(SHORTCUT_COUNT count, REQUEST_ARRAY array_of_requests[count=count],
-             STATUS_ARRAY array_of_statuses[count=count])
+    {
+        "name": "waitall",
+        "parameters": [
+            {
+                "type": "SHORTCUT_COUNT",
+                "name": "count"
+            },
+            {
+                "type": "REQUEST_ARRAY",
+                "name": "array_of_requests",
+                "dep_params": {
+                    "count": "count"
+                }
+            },
+            {
+                "type": "STATUS_ARRAY",
+                "name": "array_of_statuses",
+                "dep_params": {
+                    "count": "count"
+                }
+            }
+        ]
+    }
 
-First, notice that the function name is listed with the ``MPI_`` prefix removed
-and in all lowercase along with a ``.`` before the name---this makes it easier
-to delimit prototypes across multiple lines. Parameters are listed in a
-simplified ``TYPE NAME`` form, with an optional ``[key=value;...]`` attribute
-coming after if required for the specific type. This key-value attribute is
-used to specify dependencies betwen parameters, where the key is validated by
-the type and the value must be the name of another parameter.
+This object includes two properties: the ``name`` property holding the
+subroutine name, converted to lowercase and the ``mpi_`` prefix removed; and
+the ``parameters`` property describing all parameters, their types and
+dependencies. Some parameters may depend on other types and this is listed in
+the ``dep_params`` field. An example of this can be seen with
+``array_of_requests`` above, in which ``dep_params`` holds a key-value pair
+``"count": "count"``, where the key ``count`` corresponds to a key required by
+the ``REQUEST_ARRAY`` type and the value ``count`` to the name of another
+parameter. These parameter dependencies are specific to the types used and are
+validated by the binding scripts.
 
 The Fortran binding code not only generates Fortran, but also additional
 wrapping C code that calls into the C bindings, making conversions and checking
