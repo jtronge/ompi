@@ -1943,6 +1943,8 @@ OMPI_DECLSPEC  int MPI_Rsend_init(const void *buf, int count, MPI_Datatype datat
                                   MPI_Request *request);
 OMPI_DECLSPEC  int MPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                             MPI_Op op, MPI_Comm comm);
+OMPI_DECLSPEC  int MPI_Scan_c(const void *sendbuf, void *recvbuf, MPI_Count count, MPI_Datatype datatype,
+                              MPI_Op op, MPI_Comm comm);
 OMPI_DECLSPEC  int MPI_Iscan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                              MPI_Op op, MPI_Comm comm, MPI_Request *request);
 OMPI_DECLSPEC  int MPI_Scan_init(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
@@ -2723,6 +2725,8 @@ OMPI_DECLSPEC  int PMPI_Rsend_init(const void *buf, int count, MPI_Datatype data
                                    MPI_Request *request);
 OMPI_DECLSPEC  int PMPI_Scan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                              MPI_Op op, MPI_Comm comm);
+OMPI_DECLSPEC  int PMPI_Scan_c(const void *sendbuf, void *recvbuf, MPI_Count count, MPI_Datatype datatype,
+                               MPI_Op op, MPI_Comm comm);
 OMPI_DECLSPEC  int PMPI_Iscan(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                               MPI_Op op, MPI_Comm comm, MPI_Request *request);
 OMPI_DECLSPEC  int PMPI_Scan_init(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,

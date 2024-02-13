@@ -52,6 +52,7 @@ prototype_sources = \
         alltoallw.c.in \
         send.c.in \
         isend.c.in \
+        scan.c.in \
         recv.c.in \
         irecv.c.in \
         waitsome.c.in \
@@ -393,7 +394,7 @@ interface_profile_sources = \
         rput.c \
         rsend_init.c \
         rsend.c \
-        scan.c \
+        generated_scan.c \
         iscan.c \
         scan_init.c \
         scatter.c \
