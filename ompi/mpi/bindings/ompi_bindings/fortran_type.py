@@ -264,6 +264,11 @@ class VBufferType(FortranType):
             tmp_datatype = self.dep_params['type'].tmp_name2
             counts = self.dep_params['counts'].name
             displs = self.dep_params['displs'].name
+            array_setup = ''
+            if not self.bigcount:
+                array_setup = f"""
+                OMPI_ARRAY_FINT_2_INT({counts}, {comm.size});
+                OMPI_ARRAY_FINT_2_INT({displs}, {comm.size});"""
             return util.prepare_text(f"""
             if (OMPI_COMM_IS_INTER({comm.tmp_name}) || !OMPI_IS_FORTRAN_IN_PLACE({self.tmp_name})) {{
                 {tmp_datatype} = PMPI_Type_f2c(*{datatype});
@@ -273,8 +278,7 @@ class VBufferType(FortranType):
                     OMPI_ERRHANDLER_INVOKE({comm.tmp_name}, {consts.C_ERROR_TMP_NAME}, "{self.fn_name}");
                     return;
                 }}
-                OMPI_ARRAY_FINT_2_INT({counts}, {comm.size});
-                OMPI_ARRAY_FINT_2_INT({displs}, {comm.size});
+                {array_setup}
             }} else {{
                 {self.tmp_name} = MPI_IN_PLACE;
             }}
@@ -282,7 +286,7 @@ class VBufferType(FortranType):
         return ''
 
     def c_post(self):
-        if self.ts:
+        if self.ts and not self.bigcount:
             counts = self.dep_params['counts'].name
             displs = self.dep_params['displs'].name
             return util.prepare_text(f"""
@@ -380,11 +384,16 @@ class WBufferType(WBufferBase):
         counts = self.dep_params['counts']
         displs = self.dep_params['displs']
         name = self.tmp_name if self.ts else self.name
-        second_part = util.prepare_text(f"""
-        if (!OMPI_IS_FORTRAN_IN_PLACE({name})) {{
-            {datatypes.tmp_name} = malloc({comm.size} * sizeof(MPI_Datatype));
+        array_setup = ''
+        if not self.bigcount:
+            array_setup = """
             OMPI_ARRAY_FINT_2_INT({counts.name}, {comm.size});
             OMPI_ARRAY_FINT_2_INT({displs.name}, {comm.size});
+            """
+        second_part = util.prepare_text(f"""
+        if (!OMPI_IS_FORTRAN_IN_PLACE({name})) {{
+            {array_setup}
+            {datatypes.tmp_name} = malloc({comm.size} * sizeof(MPI_Datatype));
             for (int i = 0; i < size; ++i) {{
                 {datatypes.tmp_name}[i] = PMPI_Type_f2c({datatypes.name}[i]);
             }}
@@ -400,11 +409,16 @@ class WBufferType(WBufferBase):
         counts = self.dep_params['counts']
         displs = self.dep_params['displs']
         name = self.tmp_name if self.ts else self.name
+        array_cleanup = ''
+        if not self.bigcount:
+            array_cleanup = """
+            OMPI_ARRAY_FINT_2_INT_CLEANUP({counts.name});
+            OMPI_ARRAY_FINT_2_INT_CLEANUP({displs.name});
+            """
         return util.prepare_text(f"""
         if (!OMPI_IS_FORTRAN_IN_PLACE({name})) {{
             free({datatypes.tmp_name});
-            OMPI_ARRAY_FINT_2_INT_CLEANUP({counts.name});
-            OMPI_ARRAY_FINT_2_INT_CLEANUP({displs.name});
+            {array_cleanup}
         }}""")
 
 
@@ -439,10 +453,13 @@ class WBufferType(WBufferBase):
         {datatype.tmp_name} = malloc({comm.size} * sizeof(MPI_Datatype));
         for (int i = 0; i < {comm.size}; ++i) {{
             {datatype.tmp_name}[i] = PMPI_Type_f2c({datatype.name}[i]);
-        }}
-        OMPI_ARRAY_FINT_2_INT({counts.name}, {comm.size});
-        OMPI_ARRAY_FINT_2_INT({displs.name}, {comm.size});""")
-        return '\n'.join([first_part, second_part])
+        }}""")
+        third_part = ''
+        if not self.bigcount:
+            third_part = util.prepare_text(f"""
+            OMPI_ARRAY_FINT_2_INT({counts.name}, {comm.size});
+            OMPI_ARRAY_FINT_2_INT({displs.name}, {comm.size});""")
+        return '\n'.join([first_part, second_part, third_part])
 
     def c_argument(self):
         name = self.tmp_name if self.ts else self.name
@@ -452,10 +469,14 @@ class WBufferType(WBufferBase):
         datatypes = self.dep_params['types']
         counts = self.dep_params['counts']
         displs = self.dep_params['displs']
+        array_cleanup = ''
+        if not self.bigcount:
+            util.prepare_text(f"""
+            OMPI_ARRAY_FINT_2_INT_CLEANUP({counts.name});
+            OMPI_ARRAY_FINT_2_INT_CLEANUP({displs.name});""")
         return util.prepare_text(f"""
         free({datatypes.tmp_name});
-        OMPI_ARRAY_FINT_2_INT_CLEANUP({counts.name});
-        OMPI_ARRAY_FINT_2_INT_CLEANUP({displs.name});""")
+        {array_cleanup}""")
 
 
 @FortranType.add('COUNT')
@@ -847,12 +868,16 @@ class IntArray(FortranType):
         return f'MPI_Fint *{self.name}'
 
     def c_declare_tmp(self):
-        return f'OMPI_ARRAY_NAME_DECL({self.name});'
+        if not self.bigcount:
+            return f'OMPI_ARRAY_NAME_DECL({self.name});'
+        return ''
 
     # NOTE: Most of this code is initialized and freed in the W/VBUFFER code
 
     def c_argument(self):
-        return f'OMPI_ARRAY_NAME_CONVERT({self.name})'
+        if not self.bigcount:
+            return f'OMPI_ARRAY_NAME_CONVERT({self.name})'
+        return self.name
 
 
 @FortranType.add('COUNT_ARRAY')

@@ -357,6 +357,10 @@ def validate_body(body):
         raise util.BindingError('Mismatched brackets found in template')
 
 
+# Values to replace in function bodies per-function (empty for now).
+FUNCTION_BODY_REPLACEMENTS = {}
+
+
 class SourceTemplate:
     """Source template for a single API function."""
 
@@ -414,6 +418,9 @@ class SourceTemplate:
         for line in self.body:
             # FUNC_NAME is used for error messages
             line = line.replace('FUNC_NAME', f'"{func_name}"')
+            if func_name in FUNCTION_BODY_REPLACEMENTS:
+                for key, value in FUNCTION_BODY_REPLACEMENTS[func_name]:
+                    line = line.replace(key, value)
             out.dump(line)
 
 
@@ -435,10 +442,12 @@ def ompi_abi(base_name, template, out):
     template.print_body(func_name=base_name, out=out)
     # Check if we need to generate the bigcount interface
     if template.prototype.need_bigcount:
+        out.dump('#if OMPI_BIGCOUNT')
         base_name_c = f'{base_name}_c'
         print_profiling_header(base_name_c, out)
         out.dump(template.prototype.signature('ompi', base_name_c, enable_count=True))
         template.print_body(func_name=base_name_c, out=out)
+        out.dump('#endif /* OMPI_BIGCOUNT */')
 
 
 ABI_INTERNAL_HEADER = 'ompi/mpi/c/abi.h'
