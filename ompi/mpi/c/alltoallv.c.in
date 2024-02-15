@@ -40,7 +40,12 @@ PROTOTYPE ERROR_CLASS alltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts,
                                 DATATYPE recvtype, COMM comm)
 {
     int i, size, err;
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_DECL(sendcounts);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_DECL(sdispls);
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_DECL(recvcounts);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_DECL(rdispls);
 
+    size = OMPI_COMM_IS_INTER(comm)?ompi_comm_remote_size(comm):ompi_comm_size(comm);
     SPC_RECORD(OMPI_SPC_ALLTOALLV, 1);
 
     MEMCHECKER(
@@ -56,7 +61,6 @@ PROTOTYPE ERROR_CLASS alltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts,
 
         memchecker_comm(comm);
 
-        size = OMPI_COMM_IS_INTER(comm)?ompi_comm_remote_size(comm):ompi_comm_size(comm);
         for ( i = 0; i < size; i++ ) {
             if (MPI_IN_PLACE != sendbuf) {
                 /* check if send chunks are defined. */
@@ -125,10 +129,21 @@ PROTOTYPE ERROR_CLASS alltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts,
     }
 #endif
 
+    /* TODO: MPI_IN_PLACE? */
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_PREPARE(sendcounts, size, i);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_PREPARE(sdispls, size, i);
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_PREPARE(recvcounts, size, i);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_PREPARE(rdispls, size, i);
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_alltoallv(sendbuf, sendcounts, sdispls, sendtype,
-                                      recvbuf, recvcounts, rdispls, recvtype,
-                                      comm, comm->c_coll->coll_alltoallv_module);
+    err = comm->c_coll->coll_alltoallv(sendbuf, OMPI_BIGCOUNT_ARRAY_NAME(sendcounts),
+                                       OMPI_BIGCOUNT_ARRAY_NAME(sdispls), sendtype,
+                                       recvbuf, OMPI_BIGCOUNT_ARRAY_NAME(recvcounts),
+                                       OMPI_BIGCOUNT_ARRAY_NAME(rdispls), recvtype,
+                                       comm, comm->c_coll->coll_alltoallv_module);
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_POST(sendcounts);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_POST(sdispls);
+    OMPI_BIGCOUNT_ARRAY_COUNT_IN_POST(recvcounts);
+    OMPI_BIGCOUNT_ARRAY_DISPL_IN_POST(rdispls);
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }
 
