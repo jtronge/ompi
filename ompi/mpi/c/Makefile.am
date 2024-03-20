@@ -48,6 +48,7 @@ headers = bindings.h
 #
 prototype_sources = \
         abort.c.in \
+	add_error_class.c.in \
         alltoallv.c.in \
         alltoallw.c.in \
         send.c.in \
@@ -99,7 +100,7 @@ endif
 #
 interface_profile_sources = \
         generated_abort.c \
-        add_error_class.c \
+	generated_add_error_class.c \
         add_error_code.c \
         add_error_string.c \
         allgather.c \

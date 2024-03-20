@@ -28,17 +28,8 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/attribute/attribute.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Add_error_class = PMPI_Add_error_class
-#endif
-#define MPI_Add_error_class PMPI_Add_error_class
-#endif
 
-static const char FUNC_NAME[] = "MPI_Add_error_class";
-
-
-int MPI_Add_error_class(int *errorclass)
+PROTOTYPE ERROR_CLASS Add_error_class(ERROR_CLASS errorclass)
 {
     int err_class;
     int rc;
@@ -74,7 +65,7 @@ int MPI_Add_error_class(int *errorclass)
 	return OMPI_ERRHANDLER_NOHANDLE_INVOKE(rc, FUNC_NAME);
     }
 
-    *errorclass = err_class;
+    errorclass = err_class;
     return MPI_SUCCESS;
 }
 
