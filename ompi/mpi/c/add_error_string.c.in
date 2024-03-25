@@ -28,17 +28,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/errhandler/errcode.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Add_error_string = PMPI_Add_error_string
-#endif
-#define MPI_Add_error_string PMPI_Add_error_string
-#endif
 
-static const char FUNC_NAME[] = "MPI_Add_error_string";
-
-
-int MPI_Add_error_string(int errorcode, const char *string)
+int PROTOTYPE ERROR CLASS Add_error_string(INT errorcode, STRING string)
 {
     int rc;
 

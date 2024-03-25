@@ -49,7 +49,8 @@ headers = bindings.h
 prototype_sources = \
         abort.c.in \
         add_error_class.c.in \
-        add_error_code.c.in
+        add_error_code.c.in \
+        add_error_string.c.in \
         alltoallv.c.in \
         alltoallw.c.in \
         send.c.in \
@@ -103,7 +104,7 @@ interface_profile_sources = \
         generated_abort.c \
         generated_add_error_class.c \
         generated_add_error_code.c \
-        add_error_string.c \
+        generated_add_error_string.c \
         allgather.c \
         iallgather.c \
         allgather_init.c \
