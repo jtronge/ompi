@@ -56,7 +56,15 @@ prototype_sources = \
         allgather_init.c.in \
         allgatherv.c.in \
         iallgatherv.c.in \
-        allgatherv_init.c \
+        allgatherv_init.c.in \
+        alloc_mem.c.in \
+        ialloc_reduce.c.in \
+        allreduce_init.c.in \
+        alltoall.c.in \
+        ialltoall.c.in \
+        alltoall_init.c.in \
+        ialltoallv.c.in \
+        alltoallv_init.c.in \
         alltoallv.c.in \
         alltoallw.c.in \
         send.c.in \
@@ -117,16 +125,16 @@ interface_profile_sources = \
         generated_allgatherv.c \
         generated_iallgatherv.c \
         generated_allgatherv_init.c \
-        alloc_mem.c \
+        generated_alloc_mem.c \
         generated_allreduce.c \
-        iallreduce.c \
-        allreduce_init.c \
-        alltoall.c \
-        ialltoall.c \
-        alltoall_init.c \
+        generated_iallreduce.c \
+        generated_allreduce_init.c \
+        generated_alltoall.c \
+        generated_ialltoall.c \
+        generated_alltoall_init.c \
         generated_alltoallv.c \
-        ialltoallv.c \
-        alltoallv_init.c \
+        generated_ialltoallv.c \
+        generated_alltoallv_init.c \
         generated_alltoallw.c \
         ialltoallw.c \
         alltoallw_init.c \

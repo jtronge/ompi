@@ -34,24 +34,15 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Alltoallv_init = PMPI_Alltoallv_init
-#endif
-#define MPI_Alltoallv_init PMPI_Alltoallv_init
-#endif
 
-static const char FUNC_NAME[] = "MPI_Alltoallv_init";
-
-
-int MPI_Alltoallv_init(const void *sendbuf, const int sendcounts[], const int sdispls[],
-                       MPI_Datatype sendtype, void *recvbuf, const int recvcounts[],
-                       const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm,
-                       MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Ialltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts, DISPL_ARRAY sdispls,
+                   DATATYPE sendtype, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
+                   DISPL_ARRAY rdispls, DATATYPE recvtype, COMM comm,
+                   REQUEST_INOUT request)
 {
     int i, size, err;
 
-    SPC_RECORD(OMPI_SPC_ALLTOALLV_INIT, 1);
+    SPC_RECORD(OMPI_SPC_IALLTOALLV, 1);
 
     MEMCHECKER(
         ptrdiff_t recv_ext;
@@ -126,9 +117,9 @@ int MPI_Alltoallv_init(const void *sendbuf, const int sendcounts[], const int sd
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_alltoallv_init(sendbuf, sendcounts, sdispls,
-                                            sendtype, recvbuf, recvcounts, rdispls,
-                                            recvtype, comm, info, request, comm->c_coll->coll_alltoallv_init_module);
+    err = comm->c_coll->coll_ialltoallv(sendbuf, sendcounts, sdispls,
+                                       sendtype, recvbuf, recvcounts, rdispls,
+                                       recvtype, comm, request, comm->c_coll->coll_ialltoallv_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         ompi_coll_base_retain_datatypes(*request, (MPI_IN_PLACE==sendbuf)?NULL:sendtype, recvtype);
     }
