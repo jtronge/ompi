@@ -29,7 +29,7 @@
 #include "ompi/attribute/attribute.h"
 
 
-PROTOTYPE ERROR_CLASS Add_error_class(ERROR_CLASS errorclass)
+PROTOTYPE ERROR_CLASS Add_error_class(INT_OUT errorclass)
 {
     int err_class;
     int rc;
