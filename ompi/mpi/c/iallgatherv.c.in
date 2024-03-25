@@ -11,12 +11,11 @@
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
  * Copyright (c) 2010      University of Houston.  All rights reserved.
- * Copyright (c) 2010-2012 Oak Ridge National Labs.  All rights reserved.
  * Copyright (c) 2012 Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2012-2013 Los Alamos National Security, LLC.  All rights
  *                         reserved.
- * Copyright (c) 2015      Research Organization for Information Science
- *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2015-2019 Research Organization for Information Science
+ *                         and Technology (RIST).  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -32,26 +31,17 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/datatype/ompi_datatype.h"
+#include "ompi/mca/coll/base/coll_base_util.h"
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Allgatherv = PMPI_Allgatherv
-#endif
-#define MPI_Allgatherv PMPI_Allgatherv
-#endif
-
-static const char FUNC_NAME[] = "MPI_Allgatherv";
-
-
-int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                   void *recvbuf, const int recvcounts[],
-                   const int displs[], MPI_Datatype recvtype, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Iallgatherv(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
+                    BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISPL_ARRAY displs,
+                    DATATYPE recvtype, COMM comm, REQUEST_INOUT request)
 {
     int i, size, err;
 
-    SPC_RECORD(OMPI_SPC_ALLGATHERV, 1);
+    SPC_RECORD(OMPI_SPC_IALLGATHERV, 1);
 
     MEMCHECKER(
         int rank;
@@ -120,42 +110,14 @@ int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
         }
     }
 
-#if OPAL_ENABLE_FT_MPI
-    /*
-     * An early check, so as to return early if we are using a broken
-     * communicator. This is not absolutely necessary since we will
-     * check for this, and other, error conditions during the operation.
-     */
-    if( OPAL_UNLIKELY(!ompi_comm_iface_coll_check(comm, &err)) ) {
-        OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
-    }
-#endif
-
-    /* Do we need to do anything?  Everyone had to give the same
-       signature, which means that everyone must have given a
-       sum(recvounts) > 0 if there's anything to do. */
-
-    if ( OMPI_COMM_IS_INTRA( comm) ) {
-	for (i = 0; i < ompi_comm_size(comm); ++i) {
-	    if (0 != recvcounts[i]) {
-		break;
-	    }
-	}
-	if (i >= ompi_comm_size(comm)) {
-	    return MPI_SUCCESS;
-	}
-    }
-    /* There is no rule that can be applied for inter-communicators, since
-       recvcount(s)=0 only indicates that the processes in the other group
-       do not send anything, sendcount=0 only indicates that I do not send
-       anything. However, other processes in my group might very well send
-       something */
-
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_allgatherv(sendbuf, sendcount, sendtype,
-                                       recvbuf, (int *) recvcounts,
-                                       (int *) displs, recvtype, comm,
-                                       comm->c_coll->coll_allgatherv_module);
+    err = comm->c_coll->coll_iallgatherv(sendbuf, sendcount, sendtype,
+                                        recvbuf, recvcounts, displs,
+                                        recvtype, comm, request,
+                                        comm->c_coll->coll_iallgatherv_module);
+    if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
+        ompi_coll_base_retain_datatypes(*request, (MPI_IN_PLACE==sendbuf)?NULL:sendtype, recvtype);
+    }
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }
 

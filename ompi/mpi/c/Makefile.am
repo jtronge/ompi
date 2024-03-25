@@ -51,6 +51,12 @@ prototype_sources = \
         add_error_class.c.in \
         add_error_code.c.in \
         add_error_string.c.in \
+        allgather.c.in \
+        iallgather.c.in \
+        allgather_init.c.in \
+        allgatherv.c.in \
+        iallgatherv.c.in \
+        allgatherv_init.c \
         alltoallv.c.in \
         alltoallw.c.in \
         send.c.in \
@@ -105,12 +111,12 @@ interface_profile_sources = \
         generated_add_error_class.c \
         generated_add_error_code.c \
         generated_add_error_string.c \
-        allgather.c \
-        iallgather.c \
-        allgather_init.c \
-        allgatherv.c \
-        iallgatherv.c \
-        allgatherv_init.c \
+        generated_allgather.c \
+        generated_iallgather.c \
+        generated_allgather_init.c \
+        generated_allgatherv.c \
+        generated_iallgatherv.c \
+        generated_allgatherv_init.c \
         alloc_mem.c \
         generated_allreduce.c \
         iallreduce.c \
