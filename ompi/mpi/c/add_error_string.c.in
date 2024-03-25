@@ -29,7 +29,7 @@
 #include "ompi/errhandler/errcode.h"
 
 
-int PROTOTYPE ERROR CLASS Add_error_string(INT errorcode, STRING string)
+PROTOTYPE ERROR_CLASS Add_error_string(INT errorcode, STRING string)
 {
     int rc;
 
