@@ -9,8 +9,8 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2009      Cisco Systems, Inc.  All rights reserved.
- * Copyright (c) 2015      Research Organization for Information Science
+ * Copyright (c) 2012      Oak Rigde National Laboratory. All rights reserved.
+ * Copyright (c) 2015-2018 Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * $COPYRIGHT$
  *
@@ -18,7 +18,6 @@
  *
  * $HEADER$
  */
-
 #include "ompi_config.h"
 #include <stdio.h>
 
@@ -26,45 +25,33 @@
 #include "ompi/runtime/params.h"
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
-#include "ompi/request/request.h"
+#include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Cancel = PMPI_Cancel
-#endif
-#define MPI_Cancel PMPI_Cancel
-#endif
 
-static const char FUNC_NAME[] = "MPI_Cancel";
-
-
-int MPI_Cancel(MPI_Request *request)
+PROTOTYPE ERROR_CLASS Barrier_init(COMM comm, INFO info, REQUEST_INOUT request)
 {
-    int rc;
+    int err = MPI_SUCCESS;
 
-    SPC_RECORD(OMPI_SPC_CANCEL, 1);
+    SPC_RECORD(OMPI_SPC_BARRIER_INIT, 1);
 
     MEMCHECKER(
-        memchecker_request(request);
-    );
+            memchecker_comm(comm);
+            );
 
-    if ( MPI_PARAM_CHECK ) {
-        rc = MPI_SUCCESS;
+    /* Error checking */
+
+    if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-        if (NULL == request || NULL == *request ||
-            MPI_REQUEST_NULL == *request) {
-            OMPI_ERRHANDLER_NOHANDLE_RETURN(MPI_ERR_REQUEST, 
-                                   MPI_ERR_REQUEST, FUNC_NAME);
+        if (ompi_comm_invalid(comm)) {
+            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_COMM, FUNC_NAME);
         }
     }
 
-    if (MPI_REQUEST_NULL == *request) {
-        return MPI_SUCCESS;
-    }
+    err = comm->c_coll->coll_barrier_init(comm, info, request, comm->c_coll->coll_barrier_init_module);
 
-    rc = ompi_request_cancel(*request);
-    OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME);
+    /* All done */
+
+    OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }
-

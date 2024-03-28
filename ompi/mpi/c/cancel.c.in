@@ -9,7 +9,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2009      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * $COPYRIGHT$
@@ -26,38 +26,35 @@
 #include "ompi/runtime/params.h"
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
-#include "ompi/attribute/attribute.h"
+#include "ompi/request/request.h"
 #include "ompi/memchecker.h"
+#include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Attr_delete = PMPI_Attr_delete
-#endif
-#define MPI_Attr_delete PMPI_Attr_delete
-#endif
-
-static const char FUNC_NAME[] = "MPI_Attr_delete";
-
-
-int MPI_Attr_delete(MPI_Comm comm, int keyval)
+PROTOTYPE ERROR_CLASS MPI_Cancel(REQUEST_INOUT request)
 {
-    int ret;
+    int rc;
+
+    SPC_RECORD(OMPI_SPC_CANCEL, 1);
 
     MEMCHECKER(
-        memchecker_comm(comm);
+        memchecker_request(request);
     );
 
-    if (MPI_PARAM_CHECK) {
+    if ( MPI_PARAM_CHECK ) {
+        rc = MPI_SUCCESS;
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-        if (ompi_comm_invalid(comm)) {
-            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_COMM,
-                                          FUNC_NAME);
+        if (NULL == request || NULL == *request ||
+            MPI_REQUEST_NULL == *request) {
+            OMPI_ERRHANDLER_NOHANDLE_RETURN(MPI_ERR_REQUEST, 
+                                   MPI_ERR_REQUEST, FUNC_NAME);
         }
     }
 
-    ret = ompi_attr_delete(COMM_ATTR, comm, comm->c_keyhash, keyval,
-                           false);
+    if (MPI_REQUEST_NULL == *request) {
+        return MPI_SUCCESS;
+    }
 
-    OMPI_ERRHANDLER_RETURN(ret, comm, MPI_ERR_OTHER, FUNC_NAME);
+    rc = ompi_request_cancel(*request);
+    OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME);
 }
 

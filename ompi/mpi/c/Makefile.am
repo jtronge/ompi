@@ -67,6 +67,21 @@ prototype_sources = \
         alltoallv_init.c.in \
         alltoallv.c.in \
         alltoallw.c.in \
+        ialltoallw.c.in \
+        alltoallw_init.c.in \
+        attr_delete.c.in \
+        attr_get.c.in \
+        attr_put.c.in \
+        barrier.c.in \
+        ibarrier.c.in \
+        barrier_init.c.in \
+        bcast.c.in \
+        ibcast.c.in \
+        bcast_init.c.in \
+        bsend.c.in \
+        bsend_init.c.in \
+        buffer_attach.c.in \
+        buffer_detach.c.in \
         send.c.in \
         isend.c.in \
         scan.c.in \
@@ -89,8 +104,7 @@ prototype_sources = \
         initialized.c.in \
         allreduce.c.in \
         get_library_version.c.in \
-        get_processor_name.c.in \
-        barrier.c.in
+        get_processor_name.c.in
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -136,21 +150,21 @@ interface_profile_sources = \
         generated_ialltoallv.c \
         generated_alltoallv_init.c \
         generated_alltoallw.c \
-        ialltoallw.c \
-        alltoallw_init.c \
-        attr_delete.c \
-        attr_get.c \
-        attr_put.c \
+        generated_ialltoallw.c \
+        generated_alltoallw_init.c \
+        generated_attr_delete.c \
+        generated_attr_get.c \
+        generated_attr_put.c \
         generated_barrier.c \
-        ibarrier.c \
-        barrier_init.c \
-        bcast.c \
-        ibcast.c \
-        bcast_init.c \
-        bsend.c \
-        bsend_init.c \
-        buffer_attach.c \
-        buffer_detach.c \
+        generated_ibarrier.c \
+        generated_barrier_init.c \
+        generated_bcast.c \
+        generated_ibcast.c \
+        generated_bcast_init.c \
+        generated_bsend.c \
+        generated_bsend_init.c \
+        generated_buffer_attach.c \
+        generated_buffer_detach.c \
         cancel.c \
         cart_coords.c \
         cart_create.c \
