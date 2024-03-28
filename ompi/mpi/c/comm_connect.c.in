@@ -37,18 +37,9 @@
 #include "ompi/dpm/dpm.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_connect = PMPI_Comm_connect
-#endif
-#define MPI_Comm_connect PMPI_Comm_connect
-#endif
 
-static const char FUNC_NAME[] = "MPI_Comm_connect";
-
-
-int MPI_Comm_connect(const char *port_name, MPI_Info info, int root,
-                     MPI_Comm comm, MPI_Comm *newcomm)
+PROTOTYPE ERROR_CLASS Comm_connect(STRING port_name, INFO info, INT root,
+                     COMM comm, COMM_OUT newcomm)
 {
     int rank, rc;
     bool send_first=true;   /* yes, we are the active part in this game */

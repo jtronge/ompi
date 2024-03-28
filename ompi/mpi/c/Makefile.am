@@ -95,6 +95,15 @@ prototype_sources = \
         comm_accept.c.in \
         comm_c2f.c.in \
         comm_call_errhandler.c.in \
+        comm_connect.c.in \
+        comm_delete_attr.c.in \
+        comm_disconnect.c.in \
+        comm_dup.c.in \
+        comm_dup_with_info.c.in \
+        comm_idup.c.in \
+        comm_idup_with_info.c.in \
+        comm_free_keyval.c.in \
+        comm_get_attr.c.in \
         send.c.in \
         isend.c.in \
         scan.c.in \
@@ -192,22 +201,22 @@ interface_profile_sources = \
         generated_comm_c2f.c \
         generated_comm_call_errhandler.c \
         comm_compare.c \
-        comm_connect.c \
+        generated_comm_connect.c \
         comm_create.c \
         comm_create_errhandler.c \
         comm_create_from_group.c \
         comm_create_group.c \
         comm_create_keyval.c \
-        comm_delete_attr.c \
-        comm_disconnect.c \
-        comm_dup.c \
-        comm_dup_with_info.c \
-        comm_idup.c \
-        comm_idup_with_info.c \
+        generated_comm_delete_attr.c \
+        generated_comm_disconnect.c \
+        generated_comm_dup.c \
+        generated_comm_dup_with_info.c \
+        generated_comm_idup.c \
+        generated_comm_idup_with_info.c \
         generated_comm_f2c.c \
         generated_comm_free.c \
-        comm_free_keyval.c \
-        comm_get_attr.c \
+        generated_comm_free_keyval.c \
+        generated_comm_get_attr.c \
         comm_get_errhandler.c \
         comm_get_info.c \
         comm_get_name.c \

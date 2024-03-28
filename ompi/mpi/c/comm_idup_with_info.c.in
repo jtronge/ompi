@@ -17,6 +17,9 @@
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * Copyright (c) 2016-2017 IBM Corporation. All rights reserved.
+ * Copyright (c) 2021      Triad National Security, LLC. All rights
+ *                         reserved.
+ *
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -32,16 +35,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_dup_with_info = PMPI_Comm_dup_with_info
-#endif
-#define MPI_Comm_dup_with_info PMPI_Comm_dup_with_info
-#endif
 
-static const char FUNC_NAME[] = "MPI_Comm_dup_with_info";
-
-int MPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
+PROTOTYPE ERROR_CLASS Comm_idup_with_info(COMM comm, INFO info, COMM_OUT newcomm, REQUEST_INOUT request)
 {
     int rc;
 
@@ -77,7 +72,7 @@ int MPI_Comm_dup_with_info(MPI_Comm comm, MPI_Info info, MPI_Comm *newcomm)
     }
 #endif
 
-    rc = ompi_comm_dup_with_info (comm, &info->super, newcomm);
+    rc = ompi_comm_idup_with_info (comm, &info->super, newcomm, request);
     OMPI_ERRHANDLER_RETURN(rc, comm, rc, FUNC_NAME);
 }
 

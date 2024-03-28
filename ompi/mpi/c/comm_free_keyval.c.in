@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/attribute/attribute.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_free_keyval = PMPI_Comm_free_keyval
-#endif
-#define MPI_Comm_free_keyval PMPI_Comm_free_keyval
-#endif
 
-static const char FUNC_NAME[] = "MPI_Comm_free_keyval";
-
-
-int MPI_Comm_free_keyval(int *comm_keyval)
+PROTOTYPE ERROR_CLASS Comm_free_keyval(INT_OUT comm_keyval)
 {
     int ret;
 
