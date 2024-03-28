@@ -30,7 +30,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS MPI_Cancel(REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS Cancel(REQUEST_INOUT request)
 {
     int rc;
 

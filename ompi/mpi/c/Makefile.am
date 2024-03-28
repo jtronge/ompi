@@ -82,6 +82,19 @@ prototype_sources = \
         bsend_init.c.in \
         buffer_attach.c.in \
         buffer_detach.c.in \
+        cancel.c.in \
+        cart_coords.c.in \
+        cart_create.c.in \
+        cartdim_get.c.in \
+        cart_get.c.in \
+        cart_map.c.in \
+        cart_rank.c.in \
+        cart_shift.c.in \
+        cart_sub.c.in \
+        close_port.c.in \
+        comm_accept.c.in \
+        comm_c2f.c.in \
+        comm_call_errhandler.c.in \
         send.c.in \
         isend.c.in \
         scan.c.in \
@@ -165,19 +178,19 @@ interface_profile_sources = \
         generated_bsend_init.c \
         generated_buffer_attach.c \
         generated_buffer_detach.c \
-        cancel.c \
-        cart_coords.c \
-        cart_create.c \
-        cartdim_get.c \
-        cart_get.c \
-        cart_map.c \
-        cart_rank.c \
-        cart_shift.c \
-        cart_sub.c \
-        close_port.c \
-        comm_accept.c \
-        comm_c2f.c \
-        comm_call_errhandler.c \
+        generated_cancel.c \
+        generated_cart_coords.c \
+        generated_cart_create.c \
+        generated_cartdim_get.c \
+        generated_cart_get.c \
+        generated_cart_map.c \
+        generated_cart_rank.c \
+        generated_cart_shift.c \
+        generated_cart_sub.c \
+        generated_close_port.c \
+        generated_comm_accept.c \
+        generated_comm_c2f.c \
+        generated_comm_call_errhandler.c \
         comm_compare.c \
         comm_connect.c \
         comm_create.c \

@@ -9,7 +9,8 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2009      Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2012      Los Alamos Nat Security, LLC. All rights reserved.
  * Copyright (c) 2012-2013 Inria.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
@@ -29,18 +30,9 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Cartdim_get = PMPI_Cartdim_get
-#endif
-#define MPI_Cartdim_get PMPI_Cartdim_get
-#endif
 
-
-static const char FUNC_NAME[] = "MPI_Cartdim_get";
-
-
-int MPI_Cartdim_get(MPI_Comm comm, int *ndims)
+PROTOTYPE ERROR_CLASS Cart_get(COMM comm, INT maxdims, INT_OUT dims,
+                INT_OUT periods, INT_OUT coords)
 {
     int err;
 
@@ -48,28 +40,27 @@ int MPI_Cartdim_get(MPI_Comm comm, int *ndims)
         memchecker_comm(comm);
     );
 
+    /* check the arguments */
     if (MPI_PARAM_CHECK) {
-       OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-       if (ompi_comm_invalid(comm)) {
-           return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_COMM,
-                                        FUNC_NAME);
-       }
-       if (OMPI_COMM_IS_INTER(comm)) {
-           return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_COMM,
-                                         FUNC_NAME);
-       }
-       if (NULL == ndims) {
-           return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_ARG,
+        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+        if (ompi_comm_invalid(comm) || OMPI_COMM_IS_INTER(comm)) {
+            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_COMM,
                                           FUNC_NAME);
-       }
+        }
+        if ((0 > maxdims) || (0 < maxdims &&
+                              ((NULL == dims) || (NULL == periods) ||
+                               (NULL == coords)))) {
+            return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_ARG,
+                                          FUNC_NAME);
+        }
     }
 
     if (!OMPI_COMM_IS_CART(comm)) {
         return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_TOPOLOGY,
-                                       FUNC_NAME);
+                                      FUNC_NAME);
     }
 
-    err = comm->c_topo->topo.cart.cartdim_get(comm, ndims);
+    err = comm->c_topo->topo.cart.cart_get(comm, maxdims, dims, periods, coords);
 
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

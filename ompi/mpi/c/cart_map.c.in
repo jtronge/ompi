@@ -1,3 +1,4 @@
+/* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil -*- */
 /*
  * Copyright (c) 2004-2007 The Trustees of Indiana University and Indiana
  *                         University Research and Technology
@@ -10,7 +11,8 @@
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
  * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
- * Copyright (c) 2012      Los Alamos Nat Security, LLC. All rights reserved.
+ * Copyright (c) 2012-2013 Los Alamos National Security, LLC.  All rights
+ *                         reserved.
  * Copyright (c) 2012-2013 Inria.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
@@ -30,19 +32,11 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Cart_get = PMPI_Cart_get
-#endif
-#define MPI_Cart_get PMPI_Cart_get
-#endif
 
-static const char FUNC_NAME[] = "MPI_Cart_get";
-
-int MPI_Cart_get(MPI_Comm comm, int maxdims, int dims[],
-                 int periods[], int coords[])
+PROTOTYPE ERROR_CLASS Cart_map(COMM comm, INT ndims, COUNT_ARRAY dims,
+                 COUNT_ARRAY periods, INT_OUT newrank)
 {
-    int err;
+    int err = MPI_SUCCESS;
 
     MEMCHECKER(
         memchecker_comm(comm);
@@ -51,24 +45,29 @@ int MPI_Cart_get(MPI_Comm comm, int maxdims, int dims[],
     /* check the arguments */
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-        if (ompi_comm_invalid(comm) || OMPI_COMM_IS_INTER(comm)) {
+        if (ompi_comm_invalid(comm)) {
             return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_COMM,
                                           FUNC_NAME);
         }
-        if ((0 > maxdims) || (0 < maxdims &&
-                              ((NULL == dims) || (NULL == periods) ||
-                               (NULL == coords)))) {
+        if (OMPI_COMM_IS_INTER(comm)) {
+            return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_COMM,
+                                          FUNC_NAME);
+        }
+        if ((NULL == dims) || (NULL == periods) || (NULL == newrank)) {
             return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_ARG,
                                           FUNC_NAME);
         }
     }
 
-    if (!OMPI_COMM_IS_CART(comm)) {
-        return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_TOPOLOGY,
-                                      FUNC_NAME);
+    if(!OMPI_COMM_IS_CART(comm)) {
+        /* In case the communicator has no topo-module attached to
+           it, we just return the "default" value suggested by MPI:
+           newrank = rank */
+        *newrank = ompi_comm_rank(comm);
+    } else {
+        err = comm->c_topo->topo.cart.cart_map(comm, ndims, dims,
+                                               periods, newrank);
     }
-
-    err = comm->c_topo->topo.cart.cart_get(comm, maxdims, dims, periods, coords);
 
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }
