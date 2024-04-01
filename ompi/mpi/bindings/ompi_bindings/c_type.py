@@ -111,7 +111,7 @@ class TypeCount(Type):
 
 
 @Type.add_type('COUNT_ARRAY')
-class TypeCount(Type):
+class TypeCountArray(Type):
     """Array of counts (either int or MPI_Count)."""
 
     @property
@@ -127,7 +127,7 @@ class TypeCount(Type):
 
 
 @Type.add_type('DISPL_ARRAY')
-class TypeCount(Type):
+class TypeDisplArray(Type):
 
     @property
     def is_count(self):
@@ -142,17 +142,24 @@ class TypeCount(Type):
 
 
 @Type.add_type('INT')
-class TypeBufferOut(Type):
+class TypeInt(Type):
 
     def type_text(self, enable_count=False):
         return 'int'
 
 
 @Type.add_type('AINT')
-class TypeBufferOut(Type):
+class TypeAint(Type):
 
     def type_text(self, enable_count=False):
         return 'MPI_Aint'
+
+
+@Type.add_type('AINT_OUT')
+class TypeAintOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Aint *'
 
 
 @Type.add_type('INT_OUT')
@@ -166,6 +173,13 @@ class TypeBufferOut(Type):
             return f'int *{self.name}'
         else:
             return f'int {self.name}[]'
+
+
+@Type.add_type('OFFSET_OUT')
+class TypeOffsetOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Offset *{self.name}'
 
 
 @Type.add_type('DOUBLE')
@@ -491,6 +505,43 @@ class TypeInfoStandard(StandardABIType):
         return self.mangle_name('MPI_Info')
 
 
+@Type.add_type('INFO_OUT', abi_type=['ompi'])
+class TypeInfoOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Info *'
+
+
+@Type.add_type('INFO_OUT', abi_type=['standard'])
+class TypeInfoOutStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_Info *) {self.name}'
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Info')
+        return f'{type_name} *'
+
+
+@Type.add_type('FILE', abi_type=['ompi'])
+class TypeFile(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_File'
+
+
+@Type.add_type('FILE', abi_type=['standard'])
+class TypeFileStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_File) {self.name}'
+
+    def type_text(self, enable_count=False):
+        return self.mangle_name('MPI_File')
+
+
 @Type.add_type('FILE_OUT', abi_type=['ompi'])
 class TypeFileOut(Type):
 
@@ -512,3 +563,103 @@ class TypeFileOutStandard(Type):
     def type_text(self, enable_count=False):
         type_name = self.mangle_name('MPI_File')
         return f'{type_name} *'
+
+
+@Type.add_type('MESSAGE_OUT', abi_type=['ompi'])
+class TypeMessageOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Message *'
+
+
+@Type.add_type('MESSAGE_OUT', abi_type=['standard'])
+class TypeMessageOutStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_Message *) {self.name}'
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Message')
+        return f'{type_name} *'
+
+
+@Type.add_type('COMM_ERRHANDLER_FUNCTION', abi_type=['ompi'])
+class TypeCommErrhandlerFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Comm_errhandler_function *'
+
+
+@Type.add_type('COMM_ERRHANDLER_FUNCTION', abi_type=['standard'])
+class TypeCommErrhandlerFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the calllback
+    pass
+
+
+@Type.add_type('FILE_ERRHANDLER_FUNCTION', abi_type=['ompi'])
+class TypeFileErrhandlerFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_File_errhandler_function *'
+
+
+@Type.add_type('FILE_ERRHANDLER_FUNCTION', abi_type=['standard'])
+class TypeFileErrhandlerFunction(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('ERRHANDLER', abi_type=['ompi'])
+class TypeErrhandler(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Errhandler'
+
+
+@Type.add_type('ERRHANDLER', abi_type=['standard'])
+class TypeErrhandlerStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_Errhandler) {self.name}'
+
+    def type_text(self, enable_count=False):
+        return self.mangle_name('MPI_Errhandler')
+
+
+@Type.add_type('ERRHANDLER_OUT', abi_type=['ompi'])
+class TypeErrhandlerOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Errhandler *'
+
+
+@Type.add_type('ERRHANDLER_OUT', abi_type=['standard'])
+class TypeErrhandlerOutStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_Errhandler *) {self.name}'
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Errhandler')
+        return f'{MPI_Errhandler} *'
+
+
+@Type.add_type('GROUP', abi_type=['ompi'])
+class TypeGroup(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Group'
+
+
+@Type.add_type('GROUP', abi_type=['standard'])
+class TypeGroupStandard(Type):
+
+    @property
+    def argument(self):
+        return f'(MPI_Group) {self.name}'
+
+    def type_text(self, enable_count=False):
+        return self.mangle_name('MPI_Group')
