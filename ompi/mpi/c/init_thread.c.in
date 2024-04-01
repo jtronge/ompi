@@ -34,18 +34,9 @@
 #include "ompi/constants.h"
 #include "ompi/mca/hook/base/base.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Init_thread = PMPI_Init_thread
-#endif
-#define MPI_Init_thread PMPI_Init_thread
-#endif
 
-static const char FUNC_NAME[] = "MPI_Init_thread";
-
-
-int MPI_Init_thread(int *argc, char ***argv, int required,
-                    int *provided)
+PROTOTYPE ERROR_CLASS Init_thread(INT_OUT argc, ARGV argv, INT required,
+                    INT_OUT provided)
 {
     int err, safe_required = MPI_THREAD_SERIALIZED;
     char *env;

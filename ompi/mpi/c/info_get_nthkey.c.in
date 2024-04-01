@@ -30,15 +30,6 @@
 #include "opal/util/string_copy.h"
 #include <string.h>
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_get_nthkey = PMPI_Info_get_nthkey
-#endif
-#define MPI_Info_get_nthkey PMPI_Info_get_nthkey
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_get_nthkey";
-
 
 /**
  *   MPI_Info_get_nthkey - Get a key indexed by integer from an 'MPI_Info' obje
@@ -52,7 +43,7 @@ static const char FUNC_NAME[] = "MPI_Info_get_nthkey";
  *   @retval MPI_ERR_INFO
  *   @retval MPI_ERR_INFO_KEY
  */
-int MPI_Info_get_nthkey(MPI_Info info, int n, char *key)
+PROTOTYPE ERROR_CLASS Info_get_nthkey(INFO info, INT n, STRING_OUT key)
 {
     int nkeys;
     int err;

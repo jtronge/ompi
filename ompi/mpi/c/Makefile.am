@@ -138,7 +138,16 @@ prototype_sources = \
         win_flush_all.c.in \
         win_flush_local.c.in \
         win_flush_local_all.c.in \
-        win_free_keyval.c.in
+        win_free_keyval.c.in \
+	ibsend.c.in \
+	info_get.c.in \
+	info_get_nkeys.c.in \
+	info_get_nthkeys.c.in \
+	into_get_string.c.in \
+	info_get_valuelen.c.in \
+	info_set.c.in \
+	init_thread.c.in \
+	iprobe.c.in
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -364,7 +373,7 @@ interface_profile_sources = \
         group_size.c \
         group_translate_ranks.c \
         group_union.c \
-        ibsend.c \
+        generated_ibsend.c \
         improbe.c \
         imrecv.c \
         info_c2f.c \
@@ -374,19 +383,19 @@ interface_profile_sources = \
         info_dup.c \
         info_f2c.c \
         info_free.c \
-        info_get.c \
-        info_get_nkeys.c \
-        info_get_nthkey.c \
-        info_get_string.c \
-        info_get_valuelen.c \
-        info_set.c \
+        generated_info_get.c \
+        generated_info_get_nkeys.c \
+        generated_info_get_nthkey.c \
+        generated_info_get_string.c \
+        generated_info_get_valuelen.c \
+        generated_info_set.c \
         generated_init.c \
-        init_thread.c \
+        generated_init_thread.c \
         generated_initialized.c \
         intercomm_create.c \
         intercomm_create_from_groups.c \
         intercomm_merge.c \
-        iprobe.c \
+        generated_iprobe.c \
         generated_irecv.c \
         irsend.c \
         is_thread_main.c \

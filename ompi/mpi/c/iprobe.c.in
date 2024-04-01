@@ -29,17 +29,8 @@
 #include "ompi/request/request.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Iprobe = PMPI_Iprobe
-#endif
-#define MPI_Iprobe PMPI_Iprobe
-#endif
 
-static const char FUNC_NAME[] = "MPI_Iprobe";
-
-
-int MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status)
+PROTOTYPE ERROR_CLASS Iprobe(INT source, INT tag, COMM comm, INT_OUT flag, STATUS_OUT status)
 {
     int rc;
 

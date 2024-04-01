@@ -35,14 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_get_string = PMPI_Info_get_string
-#endif
-#define MPI_Info_get_string PMPI_Info_get_string
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_get_string";
 
 /**
  *   MPI_Info_get_string - Get a (key, value) pair from an 'MPI_Info' object
@@ -61,8 +53,8 @@ static const char FUNC_NAME[] = "MPI_Info_get_string";
  *   @retval MPI_ERR_INFO_VALUE
  *
  */
-int MPI_Info_get_string(MPI_Info info, const char *key, int *buflen,
-                        char *value, int *flag)
+PROTOTYPE ERROR_CLASS Info_get_string(INFO info, STRING key, INT_OUT buflen,
+                        STRING_OUT value, INT_OUT flag)
 {
     int err;
     int key_length;
