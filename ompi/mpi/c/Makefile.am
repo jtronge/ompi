@@ -156,7 +156,21 @@ prototype_sources = \
 	gather_init.c.in \
 	gatherv.c.in \
 	igatherv.c.in \
-	gatherv_init.c.in
+	gatherv_init.c.in \
+	neighbor_allgather.c.in \
+        ineighbor_allgather.c.in \
+        neighbor_allgather_init.c.in \
+        neighbor_allgatherv.c.in \
+        ineighbor_allgatherv.c.in \
+        neighbor_allgatherv_init.c.in \
+        neighbor_alltoall.c.in \
+        ineighbor_alltoall.c.in \
+        neighbor_alltoall_init.c.in \
+        neighbor_alltoallv.c.in \
+	ineighbor_alltoallv.c.in \
+        neighbor_alltoallv_init.c.in
+
+
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -417,18 +431,18 @@ interface_profile_sources = \
         message_c2f.c \
         mprobe.c \
         mrecv.c \
-        neighbor_allgather.c \
-        ineighbor_allgather.c \
-        neighbor_allgather_init.c \
-        neighbor_allgatherv.c \
-        ineighbor_allgatherv.c \
-        neighbor_allgatherv_init.c \
-        neighbor_alltoall.c \
-        ineighbor_alltoall.c \
-        neighbor_alltoall_init.c \
-        neighbor_alltoallv.c \
-        ineighbor_alltoallv.c \
-        neighbor_alltoallv_init.c \
+        generated_neighbor_allgather.c \
+        generated_ineighbor_allgather.c \
+        generated_neighbor_allgather_init.c \
+        generated_neighbor_allgatherv.c \
+        generated_ineighbor_allgatherv.c \
+        generated_neighbor_allgatherv_init.c \
+        generated_neighbor_alltoall.c \
+        generated_ineighbor_alltoall.c \
+        generated_neighbor_alltoall_init.c \
+        generated_neighbor_alltoallv.c \
+        generated_ineighbor_alltoallv.c \
+        generated_neighbor_alltoallv_init.c \
         neighbor_alltoallw.c \
         ineighbor_alltoallw.c \
         neighbor_alltoallw_init.c \

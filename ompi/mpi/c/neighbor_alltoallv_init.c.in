@@ -37,20 +37,11 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Neighbor_alltoallv_init = PMPI_Neighbor_alltoallv_init
-#endif
-#define MPI_Neighbor_alltoallv_init PMPI_Neighbor_alltoallv_init
-#endif
 
-static const char FUNC_NAME[] = "MPI_Neighbor_alltoallv_init";
-
-
-int MPI_Neighbor_alltoallv_init(const void *sendbuf, const int sendcounts[], const int sdispls[],
-                                MPI_Datatype sendtype, void *recvbuf, const int recvcounts[],
-                                const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm,
-                                MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Neighbor_alltoallv_init(BUFFER sendbuf, COUNT_ARRAY sendcounts, DISPL_ARRAY sdispls,
+                                DATATYPE sendtype, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
+                                DISPL_ARRAY rdispls, DATATYPE recvtype, COMM comm,
+                                INFO info, REQUEST_INOUT request)
 {
     int i, err;
     int indegree, outdegree;

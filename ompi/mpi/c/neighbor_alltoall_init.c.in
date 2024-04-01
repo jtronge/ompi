@@ -38,19 +38,10 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Neighbor_alltoall_init = PMPI_Neighbor_alltoall_init
-#endif
-#define MPI_Neighbor_alltoall_init PMPI_Neighbor_alltoall_init
-#endif
 
-static const char FUNC_NAME[] = "MPI_Neighbor_alltoall_init";
-
-
-int MPI_Neighbor_alltoall_init(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                               void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                               MPI_Comm comm, MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Neighbor_alltoall_init(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
+                               BUFFER_OUT recvbuf, INT recvcount, DATATYPE recvtype,
+                               COMM comm, INFO info, REQUEST_INOUT request)
 {
     size_t sendtype_size, recvtype_size;
     int err;

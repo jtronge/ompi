@@ -38,24 +38,14 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Neighbor_allgatherv_init = PMPI_Neighbor_allgatherv_init
-#endif
-#define MPI_Neighbor_allgatherv_init PMPI_Neighbor_allgatherv_init
-#endif
 
-static const char FUNC_NAME[] = "MPI_Neighbor_allgatherv_init";
-
-
-int MPI_Neighbor_allgatherv_init(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                                 void *recvbuf, const int recvcounts[], const int displs[],
-                                 MPI_Datatype recvtype, MPI_Comm comm,
-                                 MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Ineighbor_allgatherv(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
+                             BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISPL_ARRAY displs,
+                             DATATYPE recvtype, COMM comm, REQUEST_INOUT request)
 {
     int i, size, err;
 
-    SPC_RECORD(OMPI_SPC_NEIGHBOR_ALLGATHERV_INIT, 1);
+    SPC_RECORD(OMPI_SPC_INEIGHBOR_ALLGATHERV, 1);
 
     MEMCHECKER(
         ptrdiff_t ext;
@@ -141,10 +131,10 @@ int MPI_Neighbor_allgatherv_init(const void *sendbuf, int sendcount, MPI_Datatyp
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_neighbor_allgatherv_init(sendbuf, sendcount, sendtype,
-                                                      recvbuf, (int *) recvcounts, (int *) displs,
-                                                      recvtype, comm, info, request,
-                                                      comm->c_coll->coll_neighbor_allgatherv_init_module);
+    err = comm->c_coll->coll_ineighbor_allgatherv(sendbuf, sendcount, sendtype,
+                                                 recvbuf, (int *) recvcounts, (int *) displs,
+                                                 recvtype, comm, request,
+                                                 comm->c_coll->coll_ineighbor_allgatherv_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         ompi_coll_base_retain_datatypes(*request, sendtype, recvtype);
     }
