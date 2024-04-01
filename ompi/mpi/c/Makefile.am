@@ -147,7 +147,16 @@ prototype_sources = \
 	info_get_valuelen.c.in \
 	info_set.c.in \
 	init_thread.c.in \
-	iprobe.c.in
+	iprobe.c.in \
+	file_close.c.in \
+	file_delete.c.in \
+	free_mem.c.in \
+	gather.c.in \
+	igather.c.in \
+	gather_init.c.in \
+	gatherv.c.in \
+	igatherv.c.in \
+	gatherv_init.c.in
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -274,9 +283,9 @@ interface_profile_sources = \
         fetch_and_op.c \
         file_c2f.c \
         file_call_errhandler.c \
-        file_close.c \
+        generated_file_close.c \
         file_create_errhandler.c \
-        file_delete.c \
+        generated_file_delete.c \
         file_f2c.c \
         file_get_amode.c \
         file_get_atomicity.c \
@@ -335,13 +344,13 @@ interface_profile_sources = \
         file_write_shared.c \
         generated_finalize.c \
         generated_finalized.c \
-        free_mem.c \
-        gather.c \
-        igather.c \
-        gather_init.c \
-        gatherv.c \
-        igatherv.c \
-        gatherv_init.c \
+        generated_free_mem.c \
+        generated_gather.c \
+        generated_igather.c \
+        generated_gather_init.c \
+        generated_gatherv.c \
+        generated_igatherv.c \
+        generated_gatherv_init.c \
         get_address.c \
         get_count.c \
         get_elements.c \

@@ -33,19 +33,10 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Gatherv = PMPI_Gatherv
-#endif
-#define MPI_Gatherv PMPI_Gatherv
-#endif
 
-static const char FUNC_NAME[] = "MPI_Gatherv";
-
-
-int MPI_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                void *recvbuf, const int recvcounts[], const int displs[],
-                MPI_Datatype recvtype, int root, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Gatherv(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
+                BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISPL_ARRAY displs,
+                DATATYPE recvtype, INT root, COMM comm)
 {
     int i, size, err;
 

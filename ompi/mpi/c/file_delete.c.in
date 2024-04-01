@@ -32,17 +32,8 @@
 #include "ompi/mca/io/io.h"
 #include "ompi/mca/io/base/base.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_delete = PMPI_File_delete
-#endif
-#define MPI_File_delete PMPI_File_delete
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_delete";
-
-
-int MPI_File_delete(const char *filename, MPI_Info info)
+PROTOTYPE ERROR_CLASS File_delete(STRING filename, INFO info)
 {
     int rc;
 
