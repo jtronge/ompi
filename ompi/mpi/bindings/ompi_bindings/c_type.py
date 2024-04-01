@@ -187,7 +187,7 @@ class TypeBufferOut(Type):
 class TypeOffsetOut(Type):
 
     def type_text(self, enable_count=False):
-        return 'MPI_Offset'
+        return 'MPI_Offset *'
 
 
 @Type.add_type('DOUBLE')
