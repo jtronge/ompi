@@ -33,18 +33,9 @@
 #include "opal/datatype/opal_convertor.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Pack = PMPI_Pack
-#endif
-#define MPI_Pack PMPI_Pack
-#endif
 
-static const char FUNC_NAME[] = "MPI_Pack";
-
-
-int MPI_Pack(const void *inbuf, int incount, MPI_Datatype datatype,
-             void *outbuf, int outsize, int *position, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Pack(BUFFER inbuf, INT incount, DATATYPE datatype,
+             BUFFER_OUT outbuf, INT outsize, INT_OUT position, COMM comm)
 {
     int rc = MPI_SUCCESS, ret;
     opal_convertor_t local_convertor;

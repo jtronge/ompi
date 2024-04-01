@@ -28,17 +28,8 @@
 #include "ompi/info/info.h"
 #include "ompi/dpm/dpm.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Open_port = PMPI_Open_port
-#endif
-#define MPI_Open_port PMPI_Open_port
-#endif
 
-static const char FUNC_NAME[] = "MPI_Open_port";
-
-
-int MPI_Open_port(MPI_Info info, char *port_name)
+PROTOTYPE ERROR_CLASS Open_port(INFO info, STRING_OUT port_name)
 {
     int rc;
 

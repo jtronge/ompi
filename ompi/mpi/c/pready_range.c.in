@@ -33,19 +33,11 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Pready_list = PMPI_Pready_list
-#endif
-#define MPI_Pready_list PMPI_Pready_list
-#endif
 
-static const char FUNC_NAME[] = "MPI_Pready_list";
-
-
-int MPI_Pready_list(int length, int* partitions, MPI_Request request)
+PROTOTYPE ERROR_CLASS Pready_range(INT partition_low, INT partition_high, REQUEST request)
 {
-    int rc = OMPI_SUCCESS;
+    int rc;
+
     SPC_RECORD(OMPI_SPC_PREADY, 1);
 
     if (MPI_PARAM_CHECK) {
@@ -58,8 +50,6 @@ int MPI_Pready_list(int length, int* partitions, MPI_Request request)
         OMPI_ERRHANDLER_CHECK(rc, MPI_COMM_WORLD, rc, FUNC_NAME);
     }
 
-    for(int i = 0; i < length && OMPI_SUCCESS == rc; i++) {
-        rc = mca_part.part_pready(partitions[i], partitions[i], request);
-    }
+    rc = mca_part.part_pready(partition_low, partition_high, request);
     OMPI_ERRHANDLER_RETURN(rc, MPI_COMM_WORLD, rc, FUNC_NAME);
 }

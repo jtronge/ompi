@@ -10,7 +10,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2006      Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2006-2022 Cisco Systems, Inc.  All rights reserved
  * Copyright (c) 2013-2015 Los Alamos National Security, LLC.  All rights
  *                         reserved.
  * Copyright (c) 2015      Research Organization for Information Science
@@ -33,21 +33,11 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Pready_range = PMPI_Pready_range
-#endif
-#define MPI_Pready_range PMPI_Pready_range
-#endif
-
-static const char FUNC_NAME[] = "MPI_Pready_range";
-
-
-int MPI_Pready_range(int partition_low, int partition_high, MPI_Request request)
+PROTOTYPE ERROR_CLASS Parrived(REQUEST request, INT partition, INT_OUT flag)
 {
     int rc;
 
-    SPC_RECORD(OMPI_SPC_PREADY, 1);
+    SPC_RECORD(OMPI_SPC_PARRIVED, 1);
 
     if (MPI_PARAM_CHECK) {
         rc = OMPI_SUCCESS;
@@ -59,6 +49,6 @@ int MPI_Pready_range(int partition_low, int partition_high, MPI_Request request)
         OMPI_ERRHANDLER_CHECK(rc, MPI_COMM_WORLD, rc, FUNC_NAME);
     }
 
-    rc = mca_part.part_pready(partition_low, partition_high, request);
+    rc = mca_part.part_parrived(partition, partition, flag, request);
     OMPI_ERRHANDLER_RETURN(rc, MPI_COMM_WORLD, rc, FUNC_NAME);
 }

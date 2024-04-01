@@ -168,8 +168,16 @@ prototype_sources = \
         neighbor_alltoall_init.c.in \
         neighbor_alltoallv.c.in \
 	ineighbor_alltoallv.c.in \
-        neighbor_alltoallv_init.c.in
-
+        neighbor_alltoallv_init.c.in\
+	keyval_free.c.in \
+	op_commutative.c.in \
+	pack.c.in \
+	pack_size.c.in \
+	parrived.c.in \
+	pready.c.in \
+	pready_list.c.in \
+	pready_range.c.in \
+	probe.c.in
 
 
 # Include template files in case someone wants to update them
@@ -447,24 +455,24 @@ interface_profile_sources = \
         ineighbor_alltoallw.c \
         neighbor_alltoallw_init.c \
         keyval_create.c \
-        keyval_free.c \
+        generated_keyval_free.c \
         op_c2f.c \
-        op_commutative.c \
+        generated_op_commutative.c \
         op_create.c \
         op_f2c.c \
         op_free.c \
-        open_port.c \
+        generated_open_port.c \
         pack_external.c \
         pack_external_size.c \
-        pack.c \
-        pack_size.c \
-        parrived.c \
+        generated_pack.c \
+        generated_pack_size.c \
+        generated_parrived.c \
         pcontrol.c \
-        pready.c \
-        pready_list.c \
-        pready_range.c \
+        generated_pready.c \
+        generated_pready_list.c \
+        generated_pready_range.c \
         precv_init.c \
-        probe.c \
+        generated_probe.c \
         psend_init.c \
         publish_name.c \
         query_thread.c \
