@@ -126,7 +126,19 @@ prototype_sources = \
         initialized.c.in \
         allreduce.c.in \
         get_library_version.c.in \
-        get_processor_name.c.in
+        get_processor_name.c.in \
+        win_attach.c.in \
+        win_c2f.c.in \
+        win_call_errhandler.c.in \
+        win_complete.c.in  \
+        win_delete_attr.c.in \
+        win_detach.c.in \
+        win_fence.c.in \
+        win_flush.c.in \
+        win_flush_all.c.in \
+        win_flush_local.c.in \
+        win_flush_local_all.c.in \
+        win_free_keyval.c.in
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -540,23 +552,23 @@ interface_profile_sources = \
         put.c \
         win_allocate.c \
         win_allocate_shared.c \
-        win_attach.c \
-        win_c2f.c \
-        win_call_errhandler.c \
-        win_complete.c  \
+        generated_win_attach.c \
+        generated_win_c2f.c \
+        generated_win_call_errhandler.c \
+        generated_win_complete.c  \
         win_create_errhandler.c \
         win_create_keyval.c \
         win_create.c \
         win_create_dynamic.c \
-        win_delete_attr.c \
-        win_detach.c \
+        generated_win_delete_attr.c \
+        generated_win_detach.c \
         win_f2c.c \
-        win_fence.c \
-        win_flush.c \
-        win_flush_all.c \
-        win_flush_local.c \
-        win_flush_local_all.c \
-        win_free_keyval.c \
+        generated_win_fence.c \
+        generated_win_flush.c \
+        generated_win_flush_all.c \
+        generated_win_flush_local.c \
+        generated_win_flush_local_all.c \
+        generated_win_free_keyval.c \
         win_free.c \
         win_get_attr.c \
         win_get_errhandler.c \

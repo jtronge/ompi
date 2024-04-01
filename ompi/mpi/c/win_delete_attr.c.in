@@ -24,22 +24,13 @@
 #include "ompi/runtime/params.h"
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
+#include "ompi/attribute/attribute.h"
 #include "ompi/win/win.h"
-#include "ompi/mca/osc/osc.h"
-
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Win_complete = PMPI_Win_complete
-#endif
-#define MPI_Win_complete PMPI_Win_complete
-#endif
-
-static const char FUNC_NAME[] = "MPI_Win_complete";
 
 
-int MPI_Win_complete(MPI_Win win)
+PROTOTYPE ERROR_CLASS Win_delete_attr(WIN win, INT win_keyval)
 {
-    int rc;
+    int ret;
 
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
@@ -49,6 +40,7 @@ int MPI_Win_complete(MPI_Win win)
         }
     }
 
-    rc = win->w_osc_module->osc_complete(win);
-    OMPI_ERRHANDLER_RETURN(rc, win, rc, FUNC_NAME);
+    ret = ompi_attr_delete(WIN_ATTR, win, win->w_keyhash, win_keyval,
+                           false);
+    OMPI_ERRHANDLER_RETURN(ret, win, MPI_ERR_OTHER, FUNC_NAME);
 }
