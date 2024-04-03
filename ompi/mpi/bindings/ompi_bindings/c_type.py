@@ -183,6 +183,13 @@ class TypeBufferOut(Type):
             return f'int {self.name}[]'
 
 
+@Type.add_type('OFFSET')
+class TypeOffset(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Offset'
+
+
 @Type.add_type('OFFSET_OUT')
 class TypeOffsetOut(Type):
 
@@ -259,6 +266,29 @@ class TypeDatatype(StandardABIType):
 
     def type_text(self, enable_count=False):
         return self.mangle_name('MPI_Op')
+
+
+@Type.add_type('OP_OUT', abi_type=['ompi'])
+class TypeOpOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Op *'
+
+
+@Type.add_type('OP_OUT', abi_type=['standard'])
+class TypeOpOutStandard(Type):
+
+    @property
+    def final_code(self):
+        return [f'*{self.name} = {ConvertOMPIToStandard.OP}((MPI_Op) *{self.name});']
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Op')
+        return f'{type_name} *'
+
+    @property
+    def argument(self):
+        return f'(MPI_Op *) {self.name}'
 
 
 @Type.add_type('RANK')
@@ -338,6 +368,29 @@ class TypeWindowStandard(StandardABIType):
 
     def type_text(self, enable_count=False):
         return self.mangle_name('MPI_Win')
+
+
+@Type.add_type('WIN_OUT', abi_type=['ompi'])
+class TypeWindowOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Win *'
+
+
+@Type.add_type('WIN_OUT', abi_type=['standard'])
+class TypeWindowOutStandard(StandardABIType):
+
+    @property
+    def final_code(self):
+        return [f'*{self.name} = {ConvertOMPIToStandard.WIN}((MPI_Win) *{self.name});']
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Win')
+        return f'{type_name} *'
+
+    @property
+    def argument(self):
+        return f'(MPI_Win *) {self.name}'
 
 
 @Type.add_type('REQUEST', abi_type=['ompi'])
@@ -618,6 +671,71 @@ class TypeFileErrhandlerFunction(Type):
     pass
 
 
+@Type.add_type('COPY_FUNCTION', abi_type=['ompi'])
+class TypeCopyFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Copy_function *'
+
+
+@Type.add_type('COPY_FUNCTION', abi_type=['standard'])
+class TypeCopyFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('DELETE_FUNCTION', abi_type=['ompi'])
+class TypeDeleteFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Delete_function *'
+
+
+@Type.add_type('DELETE_FUNCTION', abi_type=['standard'])
+class TypeDeleteFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('USER_FUNCTION', abi_type=['ompi'])
+class TypeUserFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_User_function *'
+
+
+@Type.add_type('USER_FUNCTION', abi_type=['standard'])
+class TypeUserFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('COMM_COPY_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeCommCopyAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Comm_copy_attr_function *'
+
+
+@Type.add_type('COMM_COPY_ATTR_FUNCTION', abi_type=['standard'])
+class TypeCommCopyAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('COMM_DELETE_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeCommDeleteAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Comm_delete_attr_function *'
+
+
+@Type.add_type('COMM_DELETE_ATTR_FUNCTION', abi_type=['standard'])
+class TypeCommDeleteAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
 @Type.add_type('ERRHANDLER', abi_type=['ompi'])
 class TypeErrhandler(Type):
 
@@ -671,3 +789,26 @@ class TypeGroupStandard(Type):
 
     def type_text(self, enable_count=False):
         return self.mangle_name('MPI_Group')
+
+
+@Type.add_type('GROUP_OUT', abi_type=['ompi'])
+class TypeGroupOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Group *'
+
+
+@Type.add_type('GROUP_OUT', abi_type=['standard'])
+class TypeGroupOutStandard(Type):
+
+    @property
+    def final_code(self):
+        return [f'*{self.name} = {ConvertOMPIToStandard.GROUP}((MPI_Group) *{self.name});']
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Group')
+        return f'{type_name} *'
+
+    @property
+    def argument(self):
+        return f'(MPI_Group *) {self.name}'
