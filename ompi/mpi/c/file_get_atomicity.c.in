@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_position_shared = PMPI_File_get_position_shared
-#endif
-#define MPI_File_get_position_shared PMPI_File_get_position_shared
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_position_shared";
-
-
-int MPI_File_get_position_shared(MPI_File fh, MPI_Offset *offset)
+PROTOTYPE ERROR_CLASS File_get_atomicity(FILE fh, INT_OUT flag)
 {
     int rc;
 
@@ -46,7 +37,7 @@ int MPI_File_get_position_shared(MPI_File fh, MPI_Offset *offset)
         if (ompi_file_invalid(fh)) {
             rc = MPI_ERR_FILE;
             fh = MPI_FILE_NULL;
-        } else if (NULL == offset) {
+        } else if (NULL == flag) {
             rc = MPI_ERR_ARG;
         }
         OMPI_ERRHANDLER_CHECK(rc, fh, rc, FUNC_NAME);
@@ -57,7 +48,7 @@ int MPI_File_get_position_shared(MPI_File fh, MPI_Offset *offset)
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_get_position_shared(fh, offset);
+            io_module_file_get_atomicity(fh, flag);
         break;
 
     default:

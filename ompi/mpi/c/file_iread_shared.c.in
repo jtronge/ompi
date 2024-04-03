@@ -30,18 +30,9 @@
 #include "ompi/mca/io/base/io_base_request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_iread = PMPI_File_iread
-#endif
-#define MPI_File_iread PMPI_File_iread
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_iread";
-
-
-int MPI_File_iread(MPI_File fh, void *buf, int count,
-                   MPI_Datatype datatype, MPI_Request *request)
+PROTOTYPE ERROR_CLASS File_iread_shared(FILE fh, BUFFER_OUT buf, INT count,
+                          DATATYPE datatype, REQUEST_INOUT request)
 {
     int rc;
 
@@ -69,7 +60,7 @@ int MPI_File_iread(MPI_File fh, void *buf, int count,
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_iread(fh, buf, count, datatype, request);
+            io_module_file_iread_shared(fh, buf, count, datatype, request);
         break;
 
     default:
@@ -78,5 +69,6 @@ int MPI_File_iread(MPI_File fh, void *buf, int count,
     }
 
     /* All done */
+
     OMPI_ERRHANDLER_RETURN(rc, fh, rc, FUNC_NAME);
 }

@@ -31,17 +31,8 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_info = PMPI_File_get_info
-#endif
-#define MPI_File_get_info PMPI_File_get_info
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_info";
-
-
-int MPI_File_get_info(MPI_File fh, MPI_Info *info_used)
+PROTOTYPE ERROR_CLASS File_get_info(FILE fh, INFO_OUT info_used)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

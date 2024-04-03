@@ -177,7 +177,22 @@ prototype_sources = \
 	pready.c.in \
 	pready_list.c.in \
 	pready_range.c.in \
-	probe.c.in
+	probe.c.in \
+	file_get_amode.c.in \
+	file_get_atomicity.c.in \
+	file_get_errhandler.c.in \
+	file_get_info.c.in \
+	file_get_position.c.in \
+	file_get_position_shared.c.in \
+	file_get_size.c.in \
+	file_get_type_extent.c.in \
+	file_iread.c.in \
+	file_iread_all.c.in \
+	file_iread_all.c.in \
+	file_iread_shared.c.in \
+	file_iwrite.c.in \
+	file_iwrite_all.c \
+	file_iwrite_shared.c.in
 
 
 # Include template files in case someone wants to update them
@@ -309,27 +324,27 @@ interface_profile_sources = \
         file_create_errhandler.c \
         generated_file_delete.c \
         file_f2c.c \
-        file_get_amode.c \
-        file_get_atomicity.c \
+        generated_file_get_amode.c \
+        generated_file_get_atomicity.c \
         file_get_byte_offset.c \
-        file_get_errhandler.c \
+        generated_file_get_errhandler.c \
         file_get_group.c \
-        file_get_info.c \
-        file_get_position.c \
-        file_get_position_shared.c \
-        file_get_size.c \
-        file_get_type_extent.c \
+        generated_file_get_info.c \
+        generated_file_get_position.c \
+        generated_file_get_position_shared.c \
+        generated_file_get_size.c \
+        generated_file_get_type_extent.c \
         file_get_view.c \
         file_iread_at.c \
         file_iread_at_all.c \
-        file_iread.c \
-        file_iread_all.c \
-        file_iread_shared.c \
+        generated_file_iread.c \
+        generated_file_iread_all.c \
+        generated_file_iread_shared.c \
         file_iwrite_at.c \
         file_iwrite_at_all.c \
-        file_iwrite.c \
-        file_iwrite_all.c \
-        file_iwrite_shared.c \
+        generated_file_iwrite.c \
+        generated_file_iwrite_all.c \
+        generated_file_iwrite_shared.c \
         generated_file_open.c \
         file_preallocate.c \
         file_read_all_begin.c \

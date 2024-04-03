@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_size = PMPI_File_get_size
-#endif
-#define MPI_File_get_size PMPI_File_get_size
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_size";
-
-
-int MPI_File_get_size(MPI_File fh, MPI_Offset *size)
+PROTOTYPE ERROR_CLASS File_get_size(FILE fh, OFFSET_OUT size)
 {
     int rc;
 

@@ -32,17 +32,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_errhandler = PMPI_File_get_errhandler
-#endif
-#define MPI_File_get_errhandler PMPI_File_get_errhandler
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_errhandler";
-
-
-int MPI_File_get_errhandler( MPI_File file, MPI_Errhandler *errhandler)
+PROTOTYPE ERROR_CLASS File_get_errhandler(FILE file, ERRHANDLER_OUT errhandler)
 {
   int ret = MPI_SUCCESS;
 

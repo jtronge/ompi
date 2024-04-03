@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_amode = PMPI_File_get_amode
-#endif
-#define MPI_File_get_amode PMPI_File_get_amode
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_amode";
-
-
-int MPI_File_get_amode(MPI_File fh, int *amode)
+PROTOTYPE ERROR_CLASS File_get_position_shared(FILE fh, OFFSET_OUT offset)
 {
     int rc;
 
@@ -46,7 +37,7 @@ int MPI_File_get_amode(MPI_File fh, int *amode)
         if (ompi_file_invalid(fh)) {
             rc = MPI_ERR_FILE;
             fh = MPI_FILE_NULL;
-        } else if (NULL == amode) {
+        } else if (NULL == offset) {
             rc = MPI_ERR_ARG;
         }
         OMPI_ERRHANDLER_CHECK(rc, fh, rc, FUNC_NAME);
@@ -57,7 +48,7 @@ int MPI_File_get_amode(MPI_File fh, int *amode)
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_get_amode(fh, amode);
+            io_module_file_get_position_shared(fh, offset);
         break;
 
     default:
