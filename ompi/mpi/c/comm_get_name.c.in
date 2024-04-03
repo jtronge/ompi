@@ -33,17 +33,8 @@
 #include "ompi/totalview.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_get_name = PMPI_Comm_get_name
-#endif
-#define MPI_Comm_get_name PMPI_Comm_get_name
-#endif
 
-static const char FUNC_NAME[] = "MPI_Comm_get_name";
-
-
-int MPI_Comm_get_name(MPI_Comm comm, char *name, int *length)
+PROTOTYPE ERROR_CLASS Comm_get_name(COMM comm, STRING_OUT name, INT_OUT length)
 {
     MEMCHECKER(
         memchecker_comm(comm);

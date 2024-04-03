@@ -192,7 +192,22 @@ prototype_sources = \
 	file_iread_shared.c.in \
 	file_iwrite.c.in \
 	file_iwrite_all.c \
-	file_iwrite_shared.c.in
+	file_iwrite_shared.c.in \
+	comm_compare.c.in \
+	comm_create.c.in \
+	comm_create_errhandler.c.in \
+	comm_create_from_group.c.in \
+	comm_create_keyval.c.in \
+	comm_get_errhandler.c.in \
+	comm_get_info.c.in \
+	comm_get_name.c.in \
+	comm_get_parent.c.in \
+	comm_group.c.in \
+	comm_join.c.in \
+	comm_remote_group.c.in \
+	comm_remote_size.c.in \
+	comm_set_attr.c.in \
+	comm_set_info.c.in
 
 
 # Include template files in case someone wants to update them
@@ -267,13 +282,13 @@ interface_profile_sources = \
         generated_comm_accept.c \
         generated_comm_c2f.c \
         generated_comm_call_errhandler.c \
-        comm_compare.c \
+        generated_comm_compare.c \
         generated_comm_connect.c \
-        comm_create.c \
-        comm_create_errhandler.c \
-        comm_create_from_group.c \
-        comm_create_group.c \
-        comm_create_keyval.c \
+        generated_comm_create.c \
+        generated_comm_create_errhandler.c \
+        generated_comm_create_from_group.c \
+        generated_comm_create_group.c \
+        generated_comm_create_keyval.c \
         generated_comm_delete_attr.c \
         generated_comm_disconnect.c \
         generated_comm_dup.c \
@@ -284,17 +299,17 @@ interface_profile_sources = \
         generated_comm_free.c \
         generated_comm_free_keyval.c \
         generated_comm_get_attr.c \
-        comm_get_errhandler.c \
-        comm_get_info.c \
-        comm_get_name.c \
-        comm_get_parent.c \
-        comm_group.c \
-        comm_join.c \
+        generated_comm_get_errhandler.c \
+        generated_comm_get_info.c \
+        generated_comm_get_name.c \
+        generated_comm_get_parent.c \
+        generated_comm_group.c \
+        generated_comm_join.c \
         generated_comm_rank.c \
-        comm_remote_group.c \
-        comm_remote_size.c \
-        comm_set_attr.c \
-        comm_set_info.c \
+        generated_comm_remote_group.c \
+        generated_comm_remote_size.c \
+        generated_comm_set_attr.c \
+        generated_comm_set_info.c \
         dist_graph_create.c \
         dist_graph_create_adjacent.c \
         dist_graph_neighbors.c \

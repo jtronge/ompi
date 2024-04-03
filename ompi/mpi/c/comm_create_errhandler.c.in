@@ -29,19 +29,8 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_create_errhandler = PMPI_Comm_create_errhandler
-#endif
-#define MPI_Comm_create_errhandler PMPI_Comm_create_errhandler
-#endif
-
-
-static const char FUNC_NAME[] = "MPI_Comm_create_errhandler";
-
-
-int MPI_Comm_create_errhandler(MPI_Comm_errhandler_function *function,
-                               MPI_Errhandler *errhandler)
+PROTOTYPE ERROR_CLASS Comm_create_errhandler(COMM_ERRHANDLER_FUNCTION function,
+                               ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
 
