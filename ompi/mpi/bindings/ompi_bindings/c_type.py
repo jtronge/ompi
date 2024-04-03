@@ -126,6 +126,14 @@ class TypeCountArray(Type):
         return f'const {count_type} {self.name}[]'
 
 
+@Type.add_type('PARTITIONED_COUNT')
+class TypePartitionedCount(Type):
+    """Count type for partitioned communication functions."""
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count'
+
+
 @Type.add_type('DISPL_ARRAY')
 class TypeDisplArray(Type):
 
@@ -179,7 +187,7 @@ class TypeBufferOut(Type):
 class TypeOffsetOut(Type):
 
     def type_text(self, enable_count=False):
-        return 'MPI_Offset *{self.name}'
+        return 'MPI_Offset *'
 
 
 @Type.add_type('DOUBLE')
