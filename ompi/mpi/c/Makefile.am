@@ -208,13 +208,13 @@ prototype_sources = \
 	comm_remote_size.c.in \
 	comm_set_attr.c.in \
 	comm_set_info.c.in \
-	#dist_graph_create.c.in \
-	#dist_graph_create_adjacent.c.in \
-	#dist_graph_neighbors.c.in \
+	dist_graph_create.c.in \
+	dist_graph_create_adjacent.c.in \
+	dist_graph_neighbors.c.in \
 	dist_graph_neighbors_count.c.in \
 	comm_set_errhandler.c.in \
 	comm_set_name.c.in \
-	#comm_spawn.c.in \
+	comm_spawn.c.in \
 	#comm_spawn_multiple.c.in \
 	comm_spawn_multiple.c.in \
 	comm_test_inter.c.in \
@@ -225,7 +225,17 @@ prototype_sources = \
 	error_string.c.in \
 	exscan.c.in \
 	iexscan.c.in \
-	exscan_init.c
+	exscan_init.c.in \
+	fetch_and_op.c.in \
+	file_call_errhandler.c.in \
+	file_create_errhandler.c.in \
+	file_get_byte_offset.c.in \
+	file_get_group.c.in \
+	# file_get_view.c.in \
+	file_iread_at.c.in \
+	file_iread_at_all.c.in \
+	file_iwrite_at.c.in \
+	file_iwrite_at_all.c.in
      	
 
 
@@ -329,14 +339,14 @@ interface_profile_sources = \
         generated_comm_remote_size.c \
         generated_comm_set_attr.c \
         generated_comm_set_info.c \
-        dist_graph_create.c \
-        dist_graph_create_adjacent.c \
-        dist_graph_neighbors.c \
+        generated_dist_graph_create.c \
+        generated_dist_graph_create_adjacent.c \
+        generated_dist_graph_neighbors.c \
         generated_dist_graph_neighbors_count.c \
         generated_comm_set_errhandler.c \
         generated_comm_set_name.c \
         generated_comm_size.c \
-        comm_spawn.c \
+        generated_comm_spawn.c \
         comm_spawn_multiple.c \
         generated_comm_split.c \
         generated_comm_split_type.c \
@@ -351,31 +361,31 @@ interface_profile_sources = \
         generated_exscan.c \
         generated_iexscan.c \
         generated_exscan_init.c \
-        fetch_and_op.c \
+        generated_fetch_and_op.c \
         file_c2f.c \
-        file_call_errhandler.c \
+        generated_file_call_errhandler.c \
         generated_file_close.c \
-        file_create_errhandler.c \
+        generated_file_create_errhandler.c \
         generated_file_delete.c \
         file_f2c.c \
         generated_file_get_amode.c \
         generated_file_get_atomicity.c \
-        file_get_byte_offset.c \
+        generated_file_get_byte_offset.c \
         generated_file_get_errhandler.c \
-        file_get_group.c \
+        generated_file_get_group.c \
         generated_file_get_info.c \
         generated_file_get_position.c \
         generated_file_get_position_shared.c \
         generated_file_get_size.c \
         generated_file_get_type_extent.c \
         file_get_view.c \
-        file_iread_at.c \
-        file_iread_at_all.c \
+        generated_file_iread_at.c \
+        generated_file_iread_at_all.c \
         generated_file_iread.c \
         generated_file_iread_all.c \
         generated_file_iread_shared.c \
-        file_iwrite_at.c \
-        file_iwrite_at_all.c \
+        generated_file_iwrite_at.c \
+        generated_file_iwrite_at_all.c \
         generated_file_iwrite.c \
         generated_file_iwrite_all.c \
         generated_file_iwrite_shared.c \

@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_call_errhandler = PMPI_File_call_errhandler
-#endif
-#define MPI_File_call_errhandler PMPI_File_call_errhandler
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_call_errhandler";
-
-
-int MPI_File_call_errhandler(MPI_File fh, int errorcode)
+PROTOTYPE ERROR_CLASS File_call_errhandler(FILE fh, INT errorcode)
 {
   /* Error checking */
 

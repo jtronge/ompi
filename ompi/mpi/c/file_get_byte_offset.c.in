@@ -9,6 +9,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2008      Sun Microsystems, Inc.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * $COPYRIGHT$
@@ -22,21 +23,12 @@
 
 #include "ompi/mpi/c/bindings.h"
 #include "ompi/runtime/params.h"
-#include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_get_group = PMPI_File_get_group
-#endif
-#define MPI_File_get_group PMPI_File_get_group
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_get_group";
-
-
-int MPI_File_get_group(MPI_File fh, MPI_Group *group)
+PROTOTYPE ERROR_CLASS File_get_byte_offset(FILE fh, OFFSET offset,
+                             OFFSET_OUT disp)
 {
     int rc;
 
@@ -46,14 +38,26 @@ int MPI_File_get_group(MPI_File fh, MPI_Group *group)
         if (ompi_file_invalid(fh)) {
             rc = MPI_ERR_FILE;
             fh = MPI_FILE_NULL;
-        } else if (NULL == group) {
-            rc = MPI_ERR_GROUP;
+        } else if (NULL == disp) {
+            rc = MPI_ERR_ARG;
         }
         OMPI_ERRHANDLER_CHECK(rc, fh, rc, FUNC_NAME);
     }
 
-    /* Does not need to invoke a back-end io function */
+    /* Call the back-end io component function */
 
-    rc = ompi_comm_group (fh->f_comm, group);
+    switch (fh->f_io_version) {
+    case MCA_IO_BASE_V_2_0_0:
+        rc = fh->f_io_selected_module.v2_0_0.
+            io_module_file_get_byte_offset(fh, offset, disp);
+        break;
+
+    default:
+        rc = MPI_ERR_INTERN;
+        break;
+    }
+
+    /* All done */
+
     OMPI_ERRHANDLER_RETURN(rc, fh, rc, FUNC_NAME);
 }

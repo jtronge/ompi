@@ -33,9 +33,9 @@
 
 
 PROTOTYPE ERROR_CLASS Dist_graph_create_adjacent(COMM comm_old,
-                                   INT indegree, const int sources[],
-                                   const int sourceweights[], INT outdegree,
-                                   const int destinations[], const int destweights[],
+                                   INT indegree, INT_ARRAY sources,
+                                   INT_ARRAY sourceweights, INT outdegree,
+                                   INT_ARRAY destinations, INT_ARRAY destweights,
                                    INFO info, INT reorder,
                                    COMM_OUT comm_dist_graph)
 {

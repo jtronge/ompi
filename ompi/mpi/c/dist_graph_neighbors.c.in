@@ -27,9 +27,9 @@
 
 
 PROTOTYPE ERROR_CLASS Dist_graph_neighbors(COMM comm, INT maxindegree,
-                             COUNT_ARRAY sources, COUNT_ARRAY sourceweights,
-                             INT maxoutdegree, COUNT_ARRAY destinations,
-                             COUNT_ARRAY destweights)
+                             INT_OUT sources, INT_OUT sourceweights,
+                             INT maxoutdegree, INT_OUT destinations,
+                             INT_OUT destweights)
 {
     int err;
 
