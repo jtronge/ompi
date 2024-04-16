@@ -171,7 +171,7 @@ class TypeAintOut(Type):
 
 
 @Type.add_type('INT_OUT')
-class TypeBufferOut(Type):
+class TypeIntOut(Type):
 
     def type_text(self, enable_count=False):
         return 'int *'
@@ -181,6 +181,16 @@ class TypeBufferOut(Type):
             return f'int *{self.name}'
         else:
             return f'int {self.name}[]'
+
+
+@Type.add_type('INT_ARRAY')
+class TypeIntArray(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const int *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        return f'const int {self.name}[]'
 
 
 @Type.add_type('OFFSET')
@@ -209,6 +219,16 @@ class TypeArgv(Type):
 
     def type_text(self, enable_count=False):
         return 'char ***'
+
+
+@Type.add_type('STRING_ARRAY')
+class TypeStringArray(Type):
+
+    def type_text(self, enable_count=False):
+        return 'char **'
+
+    def parameter(self, enable_count=False, **kwargs):
+        return f'char *{self.name}[]'
 
 
 @Type.add_type('DATATYPE', abi_type=['ompi'])
@@ -583,6 +603,28 @@ class TypeInfoOutStandard(Type):
     def type_text(self, enable_count=False):
         type_name = self.mangle_name('MPI_Info')
         return f'{type_name} *'
+
+
+@Type.add_type('INFO_ARRAY', abi_type=['ompi'])
+class TypeInfoArray(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const MPI_Info *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        return f'const MPI_Info {self.name}[]'
+
+
+@Type.add_type('INFO_ARRAY', abi_type=['standard'])
+class TypeInfoArray(Type):
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Info')
+        return f'const {type_name} *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        type_name = self.mangle_name('MPI_Info')
+        return f'const {type_name} {self.name}[]'
 
 
 @Type.add_type('FILE', abi_type=['ompi'])
