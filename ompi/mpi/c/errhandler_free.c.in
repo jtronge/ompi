@@ -27,17 +27,8 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Errhandler_free = PMPI_Errhandler_free
-#endif
-#define MPI_Errhandler_free PMPI_Errhandler_free
-#endif
 
-static const char FUNC_NAME[] __opal_attribute_unused__ = "MPI_Errhandler_free";
-
-
-int MPI_Errhandler_free(MPI_Errhandler *errhandler)
+PROTOTYPE ERROR_CLASS Errhandler_free(ERRHANDLER_OUT errhandler)
 {
   /* Error checking */
 

@@ -31,112 +31,10 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Dims_create = PMPI_Dims_create
-#endif
-#define MPI_Dims_create PMPI_Dims_create
-#endif
-
-static const char FUNC_NAME[] = "MPI_Dims_create";
 
 /* static functions */
 static int assignnodes(int ndim, int nfactor, int *pfacts,int **pdims);
 static int getfactors(int num, int *nfators, int **factors);
-
-
-/*
- * This is a utility function, no need to have anything in the lower
- * layer for this at all
- */
-int MPI_Dims_create(int nnodes, int ndims, int dims[])
-{
-    int i;
-    int freeprocs;
-    int freedims;
-    int nfactors;
-    int *factors;
-    int *procs;
-    int *p;
-    int err;
-
-    if (MPI_PARAM_CHECK) {
-        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-
-        if (0 > ndims) {
-            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
-                                           MPI_ERR_DIMS, FUNC_NAME);
-        }
-
-        if ((0 != ndims) && (NULL == dims)) {
-            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
-                                           MPI_ERR_ARG, FUNC_NAME);
-        }
-
-        if (1 > nnodes) {
-            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
-                                           MPI_ERR_DIMS, FUNC_NAME);
-        }
-    }
-
-    /* Get # of free-to-be-assigned processes and # of free dimensions */
-    freeprocs = nnodes;
-    freedims = 0;
-    for (i = 0, p = dims; i < ndims; ++i,++p) {
-        if (*p == 0) {
-            ++freedims;
-        } else if ((*p < 0) || ((nnodes % *p) != 0)) {
-            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_DIMS,
-                                           FUNC_NAME);
-        } else {
-            freeprocs /= *p;
-        }
-    }
-
-    if (freedims == 0) {
-       if (freeprocs == 1) {
-          return MPI_SUCCESS;
-       }
-       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_DIMS,
-                                     FUNC_NAME);
-    }
-
-    if (freeprocs == 1) {
-        for (i = 0; i < ndims; ++i, ++dims) {
-            if (*dims == 0) {
-               *dims = 1;
-            }
-        }
-        return MPI_SUCCESS;
-    }
-
-    /* Factor the number of free processes */
-    if (MPI_SUCCESS != (err = getfactors(freeprocs, &nfactors, &factors))) {
-       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(err,
-                                     FUNC_NAME);
-    }
-
-    /* Assign free processes to free dimensions */
-    if (MPI_SUCCESS != (err = assignnodes(freedims, nfactors, factors, &procs))) {
-       free(factors);
-       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(err,
-                                     FUNC_NAME);
-    }
-
-    /* Return assignment results */
-    p = procs;
-    for (i = 0; i < ndims; ++i, ++dims) {
-        if (*dims == 0) {
-           *dims = *p++;
-        }
-    }
-
-    free((char *) factors);
-    free((char *) procs);
-
-    /* all done */
-    return MPI_SUCCESS;
-}
 
 /*
  *  assignnodes
@@ -152,8 +50,7 @@ int MPI_Dims_create(int nnodes, int ndims, int dims[])
  *          - ptr to array of dimensions (returned value)
  *  Returns:    - 0 or ERROR
  */
-static int
-assignnodes(int ndim, int nfactor, int *pfacts, int **pdims)
+static int assignnodes(int ndim, int nfactor, int *pfacts, int **pdims)
 {
     int *bins;
     int i, j;
@@ -213,8 +110,7 @@ assignnodes(int ndim, int nfactor, int *pfacts, int **pdims)
  *          - array of prime factors
  *  Returns:    - MPI_SUCCESS or ERROR
  */
-static int
-getfactors(int num, int *nfactors, int **factors) {
+static int getfactors(int num, int *nfactors, int **factors) {
     int size;
     int d;
     int i;
@@ -249,5 +145,97 @@ getfactors(int num, int *nfactors, int **factors) {
         (*factors)[i++] = num;
     }
     (*nfactors) = i;
+    return MPI_SUCCESS;
+}
+
+/*
+ * This is a utility function, no need to have anything in the lower
+ * layer for this at all
+ */
+PROTOTYPE ERROR_CLASS Dims_create(INT nnodes, INT ndims, INT_OUT dims)
+{
+    int i;
+    int freeprocs;
+    int freedims;
+    int nfactors;
+    int *factors;
+    int *procs;
+    int *p;
+    int err;
+
+    if (MPI_PARAM_CHECK) {
+        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+
+        if (0 > ndims) {
+            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
+                                           MPI_ERR_DIMS, FUNC_NAME);
+        }
+
+        if ((0 != ndims) && (NULL == dims)) {
+            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
+                                           MPI_ERR_ARG, FUNC_NAME);
+        }
+
+        if (1 > nnodes) {
+            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD,
+                                           MPI_ERR_DIMS, FUNC_NAME);
+        }
+    }
+
+    /* Get # of free-to-be-assigned processes and # of free dimensions */
+    freeprocs = nnodes;
+    freedims = 0;
+    for (i = 0, p = dims; i < ndims; ++i,++p) {
+        if (*p == 0) {
+            ++freedims;
+        } else if ((*p < 0) || ((nnodes % *p) != 0)) {
+            return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_DIMS,
+                                           FUNC_NAME);
+        } else {
+            freeprocs /= *p;
+        }
+    }
+
+    if (freedims == 0) {
+       if (freeprocs == 1) {
+          return MPI_SUCCESS;
+       }
+       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_DIMS,
+                                     FUNC_NAME);
+    }
+
+    if (freeprocs == 1) {
+        for (i = 0; i < ndims; ++i, ++dims) {
+            if (*dims == 0) {
+               *dims = 1;
+            }
+        }
+        return MPI_SUCCESS;
+    }
+    /* Factor the number of free processes */
+    if (MPI_SUCCESS != (err = getfactors(freeprocs, &nfactors, &factors))) {
+       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(err,
+                                     FUNC_NAME);
+    }
+
+    /* Assign free processes to free dimensions */
+    if (MPI_SUCCESS != (err = assignnodes(freedims, nfactors, factors, &procs))) {
+       free(factors);
+       return OMPI_ERRHANDLER_NOHANDLE_INVOKE(err,
+                                     FUNC_NAME);
+    }
+
+    /* Return assignment results */
+    p = procs;
+    for (i = 0; i < ndims; ++i, ++dims) {
+        if (*dims == 0) {
+           *dims = *p++;
+        }
+    }
+
+    free((char *) factors);
+    free((char *) procs);
+
+    /* all done */
     return MPI_SUCCESS;
 }

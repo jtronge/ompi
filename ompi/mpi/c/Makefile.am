@@ -207,7 +207,26 @@ prototype_sources = \
 	comm_remote_group.c.in \
 	comm_remote_size.c.in \
 	comm_set_attr.c.in \
-	comm_set_info.c.in
+	comm_set_info.c.in \
+	#dist_graph_create.c.in \
+	#dist_graph_create_adjacent.c.in \
+	#dist_graph_neighbors.c.in \
+	dist_graph_neighbors_count.c.in \
+	comm_set_errhandler.c.in \
+	comm_set_name.c.in \
+	#comm_spawn.c.in \
+	#comm_spawn_multiple.c.in \
+	comm_spawn_multiple.c.in \
+	comm_test_inter.c.in \
+	compare_an_swap.c.in \
+	dims_create.c.in \
+	errhandler_free.c.in \
+	error_class.c.in \
+	error_string.c.in \
+	exscan.c.in \
+	iexscan.c.in \
+	exscan_init.c
+     	
 
 
 # Include template files in case someone wants to update them
@@ -313,25 +332,25 @@ interface_profile_sources = \
         dist_graph_create.c \
         dist_graph_create_adjacent.c \
         dist_graph_neighbors.c \
-        dist_graph_neighbors_count.c \
-        comm_set_errhandler.c \
-        comm_set_name.c \
+        generated_dist_graph_neighbors_count.c \
+        generated_comm_set_errhandler.c \
+        generated_comm_set_name.c \
         generated_comm_size.c \
         comm_spawn.c \
         comm_spawn_multiple.c \
         generated_comm_split.c \
         generated_comm_split_type.c \
-        comm_test_inter.c \
-        compare_and_swap.c \
-        dims_create.c \
+        generated_comm_test_inter.c \
+        generated_compare_and_swap.c \
+        generated_dims_create.c \
         errhandler_c2f.c \
         errhandler_f2c.c \
-        errhandler_free.c \
-        error_class.c \
-        error_string.c \
-        exscan.c \
-        iexscan.c \
-        exscan_init.c \
+        generated_errhandler_free.c \
+        generated_error_class.c \
+        generated_error_string.c \
+        generated_exscan.c \
+        generated_iexscan.c \
+        generated_exscan_init.c \
         fetch_and_op.c \
         file_c2f.c \
         file_call_errhandler.c \

@@ -32,17 +32,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/errhandler/errcode.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Error_string = PMPI_Error_string
-#endif
-#define MPI_Error_string PMPI_Error_string
-#endif
-
-static const char FUNC_NAME[] = "MPI_Error_string";
-
-
-int MPI_Error_string(int errorcode, char *string, int *resultlen)
+PROTOTYPE ERROR_CLASS Error_string(INT errorcode, STRING_OUT string, INT_OUT resultlen)
 {
     int ret;
     char *tmpstring;

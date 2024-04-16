@@ -33,17 +33,7 @@
 #include "ompi/totalview.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Comm_set_name = PMPI_Comm_set_name
-#endif
-#define MPI_Comm_set_name PMPI_Comm_set_name
-#endif
-
-static const char FUNC_NAME[] = "MPI_Comm_set_name";
-
-
-int MPI_Comm_set_name(MPI_Comm comm, const char *name)
+PROTOTYPE ERROR_CLASS Comm_set_name(COMM comm, STRING name)
 {
     int rc;
 

@@ -28,17 +28,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/errhandler/errcode.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Error_class = PMPI_Error_class
-#endif
-#define MPI_Error_class PMPI_Error_class
-#endif
 
-static const char FUNC_NAME[] = "MPI_Error_class";
-
-
-int MPI_Error_class(int errorcode, int *errorclass)
+PROTOTYPE ERROR_CLASS Error_class(INT errorcode, INT_OUT errorclass)
 {
     int ret;
 
