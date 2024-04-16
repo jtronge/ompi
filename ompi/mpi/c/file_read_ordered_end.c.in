@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_preallocate = PMPI_File_preallocate
-#endif
-#define MPI_File_preallocate PMPI_File_preallocate
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_preallocate";
-
-
-int MPI_File_preallocate(MPI_File fh, MPI_Offset size)
+PROTOTYPE ERROR_CLASS File_read_ordered_end(FILE fh, BUFFER_OUT buf, STATUS_OUT status)
 {
     int rc;
 
@@ -44,8 +35,8 @@ int MPI_File_preallocate(MPI_File fh, MPI_Offset size)
         rc = MPI_SUCCESS;
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
         if (ompi_file_invalid(fh)) {
-            rc = MPI_ERR_FILE;
             fh = MPI_FILE_NULL;
+            rc = MPI_ERR_FILE;
         }
         OMPI_ERRHANDLER_CHECK(rc, fh, rc, FUNC_NAME);
     }
@@ -55,7 +46,7 @@ int MPI_File_preallocate(MPI_File fh, MPI_Offset size)
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_preallocate(fh, size);
+            io_module_file_read_ordered_end(fh, buf, status);
         break;
 
     default:

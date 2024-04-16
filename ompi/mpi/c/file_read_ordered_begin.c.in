@@ -28,18 +28,9 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_read_at = PMPI_File_read_at
-#endif
-#define MPI_File_read_at PMPI_File_read_at
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_read_at";
-
-
-int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
-                     int count, MPI_Datatype datatype, MPI_Status *status)
+PROTOTYPE ERROR_CLASS File_read_ordered_begin(FILE fh, BUFFER_OUT buf, INT count,
+                                DATATYPE datatype)
 {
     int rc;
 
@@ -66,7 +57,7 @@ int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_read_at(fh, offset, buf, count, datatype, status);
+            io_module_file_read_ordered_begin(fh, buf, count, datatype);
         break;
 
     default:

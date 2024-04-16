@@ -5,7 +5,7 @@
  * Copyright (c) 2004-2005 The University of Tennessee and The University
  *                         of Tennessee Research Foundation.  All rights
  *                         reserved.
- * Copyright (c) 2004-2005 High Performance Computing Center Stuttgart,
+ * Copyright (c) 2004-2008 High Performance Computing Center Stuttgart,
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
@@ -25,20 +25,18 @@
 #include "ompi/runtime/params.h"
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
+#include "ompi/datatype/ompi_datatype.h"
+#include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_read_ordered_end = PMPI_File_read_ordered_end
-#endif
-#define MPI_File_read_ordered_end PMPI_File_read_ordered_end
-#endif
-
-static const char FUNC_NAME[] = "MPI_File_read_ordered_end";
-
-
-int MPI_File_read_ordered_end(MPI_File fh, void *buf, MPI_Status *status)
+PROTOTYPE ERROR_CLASS File_read_at_all(FILE fh, OFFSET offset, BUFFER_OUT buf,
+                         INT count, DATATYPE datatype,
+                         STATUS_OUT status)
 {
     int rc;
+
+    MEMCHECKER(
+        memchecker_datatype(datatype);
+    );
 
     if (MPI_PARAM_CHECK) {
         rc = MPI_SUCCESS;
@@ -46,6 +44,10 @@ int MPI_File_read_ordered_end(MPI_File fh, void *buf, MPI_Status *status)
         if (ompi_file_invalid(fh)) {
             fh = MPI_FILE_NULL;
             rc = MPI_ERR_FILE;
+        } else if (count < 0) {
+            rc = MPI_ERR_COUNT;
+        } else {
+           OMPI_CHECK_DATATYPE_FOR_RECV(rc, datatype, count);
         }
         OMPI_ERRHANDLER_CHECK(rc, fh, rc, FUNC_NAME);
     }
@@ -55,7 +57,8 @@ int MPI_File_read_ordered_end(MPI_File fh, void *buf, MPI_Status *status)
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_read_ordered_end(fh, buf, status);
+            io_module_file_read_at_all(fh, offset, buf, count, datatype,
+                                       status);
         break;
 
     default:

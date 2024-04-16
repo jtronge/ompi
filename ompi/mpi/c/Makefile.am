@@ -235,7 +235,20 @@ prototype_sources = \
 	file_iread_at.c.in \
 	file_iread_at_all.c.in \
 	file_iwrite_at.c.in \
-	file_iwrite_at_all.c.in
+	file_iwrite_at_all.c.in \
+	file_preallocate.c.in \
+	file_read_all_begin.c.in \
+	file_read_all.c.in \
+	file_read_all_end.c.in \
+	file_read_at_all_begin.c.in \
+	file_read_at_all.c.in \
+	file_read_at_all_end.c.in \
+	file_read_at.c.in \
+	file_read.c.in \
+	file_read_ordered_begin.c.in \
+	file_read_ordered.c.in \
+	file_read_ordered_end.c.in \
+	file_read_shared.c.in
      	
 
 
@@ -390,19 +403,19 @@ interface_profile_sources = \
         generated_file_iwrite_all.c \
         generated_file_iwrite_shared.c \
         generated_file_open.c \
-        file_preallocate.c \
-        file_read_all_begin.c \
-        file_read_all.c \
-        file_read_all_end.c \
-        file_read_at_all_begin.c \
-        file_read_at_all.c \
-        file_read_at_all_end.c \
-        file_read_at.c \
-        file_read.c \
-        file_read_ordered_begin.c \
-        file_read_ordered.c \
-        file_read_ordered_end.c \
-        file_read_shared.c \
+        generated_file_preallocate.c \
+        generated_file_read_all_begin.c \
+        generated_file_read_all.c \
+        generated_file_read_all_end.c \
+        generated_file_read_at_all_begin.c \
+        generated_file_read_at_all.c \
+        generated_file_read_at_all_end.c \
+        generated_file_read_at.c \
+        generated_file_read.c \
+        generated_file_read_ordered_begin.c \
+        generated_file_read_ordered.c \
+        generated_file_read_ordered_end.c \
+        generated_file_read_shared.c \
         file_seek.c \
         file_seek_shared.c \
         file_set_atomicity.c \

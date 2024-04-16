@@ -28,18 +28,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_read_all = PMPI_File_read_all
-#endif
-#define MPI_File_read_all PMPI_File_read_all
-#endif
-
-static const char FUNC_NAME[] = "MPI_File_read_all";
-
-
-int MPI_File_read_all(MPI_File fh, void *buf, int count, MPI_Datatype
-                      datatype, MPI_Status *status)
+PROTOTYPE ERROR_CLASS File_read_all_begin(FILE fh, BUFFER_OUT buf, INT count,
+                            DATATYPE datatype)
 {
     int rc;
 
@@ -66,7 +56,7 @@ int MPI_File_read_all(MPI_File fh, void *buf, int count, MPI_Datatype
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_read_all(fh, buf, count, datatype, status);
+            io_module_file_read_all_begin(fh, buf, count, datatype);
         break;
 
     default:
