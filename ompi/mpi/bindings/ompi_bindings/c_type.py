@@ -126,6 +126,14 @@ class TypeCountArray(Type):
         return f'const {count_type} {self.name}[]'
 
 
+@Type.add_type('ELEMENT_COUNT')
+class ElementCountType(Type):
+    """Special count type for MPI_Get_element_x"""
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count *'
+
+
 @Type.add_type('PARTITIONED_COUNT')
 class TypePartitionedCount(Type):
     """Count type for partitioned communication functions."""
