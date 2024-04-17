@@ -9,7 +9,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
- * Copyright (c) 2007-2012 Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2007      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2012      Los Alamos Nat Security, LLC. All rights reserved.
  * Copyright (c) 2012-2013 Inria.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
@@ -30,18 +30,8 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Graph_get = PMPI_Graph_get
-#endif
-#define MPI_Graph_get PMPI_Graph_get
-#endif
-
-static const char FUNC_NAME[] = "MPI_Graph_get";
-
-
-int MPI_Graph_get(MPI_Comm comm, int maxindx, int maxedges,
-                  int indx[], int edges[])
+PROTOTYPE ERROR_CLASS Graph_neighbors(COMM comm, INT rank, INT maxneighbors,
+                        INT_OUT neighbors)
 {
     int err;
 
@@ -51,6 +41,7 @@ int MPI_Graph_get(MPI_Comm comm, int maxindx, int maxedges,
 
     /* check the arguments */
     if (MPI_PARAM_CHECK) {
+        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
         if (ompi_comm_invalid(comm)) {
             return OMPI_ERRHANDLER_INVOKE (MPI_COMM_WORLD, MPI_ERR_COMM,
                                            FUNC_NAME);
@@ -59,8 +50,12 @@ int MPI_Graph_get(MPI_Comm comm, int maxindx, int maxedges,
             return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_COMM,
                                            FUNC_NAME);
         }
-        if (0 > maxindx || 0 > maxedges || NULL == indx || NULL == edges) {
+        if ((0 > maxneighbors) || ((0 < maxneighbors) && NULL == neighbors)) {
             return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_ARG,
+                                           FUNC_NAME);
+        }
+        if ((0 > rank) || (rank > ompi_group_size(comm->c_local_group))) {
+            return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_RANK,
                                            FUNC_NAME);
         }
     }
@@ -71,7 +66,7 @@ int MPI_Graph_get(MPI_Comm comm, int maxindx, int maxedges,
     }
 
     /* call the function */
-    err = comm->c_topo->topo.graph.graph_get(comm, maxindx, maxedges, indx, edges);
+    err = comm->c_topo->topo.graph.graph_neighbors(comm, rank, maxneighbors, neighbors);
 
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

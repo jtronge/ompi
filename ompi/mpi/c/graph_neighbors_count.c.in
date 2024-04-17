@@ -29,17 +29,7 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Graphdims_get = PMPI_Graphdims_get
-#endif
-#define MPI_Graphdims_get PMPI_Graphdims_get
-#endif
-
-static const char FUNC_NAME[] = "MPI_Graphdims_get";
-
-
-int MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges)
+PROTOTYPE ERROR_CLASS Graph_neighbors_count(COMM comm, INT rank, INT_OUT nneighbors)
 {
     int err;
 
@@ -58,7 +48,11 @@ int MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges)
             return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_COMM,
                                            FUNC_NAME);
         }
-        if (NULL == nnodes || NULL == nedges) {
+        if ((0 > rank) || (rank > ompi_group_size(comm->c_local_group))) {
+            return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_RANK,
+                                           FUNC_NAME);
+        }
+        if (NULL == nneighbors) {
             return OMPI_ERRHANDLER_INVOKE (comm, MPI_ERR_ARG,
                                            FUNC_NAME);
         }
@@ -69,7 +63,7 @@ int MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges)
                                        FUNC_NAME);
     }
 
-    err = comm->c_topo->topo.graph.graphdims_get(comm, nnodes, nedges);
+    err = comm->c_topo->topo.graph.graph_neighbors_count(comm, rank, nneighbors);
 
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

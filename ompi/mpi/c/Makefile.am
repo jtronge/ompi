@@ -215,7 +215,7 @@ prototype_sources = \
 	comm_set_errhandler.c.in \
 	comm_set_name.c.in \
 	comm_spawn.c.in \
-	#comm_spawn_multiple.c.in \
+	comm_spawn_multiple.c.in \
 	comm_spawn_multiple.c.in \
 	comm_test_inter.c.in \
 	compare_an_swap.c.in \
@@ -268,7 +268,20 @@ prototype_sources = \
 	file_write_ordered_begin.c.in \
 	file_write_ordered.c.in \
 	file_write_ordered_end.c.in \
-	file_write_shared.c.in
+	file_write_shared.c.in \
+	get_address.c.in \
+	# get_count.c.in \
+	# get_elements.c.in \
+	# get_elements_x.c.in \
+	get_accumulate.c.in \
+	get_version.c.in \
+	graph_create.c.in \
+	graph_get.c.in \
+	graph_map.c.in \
+	graph_neighbors_count.c.in \
+	graph_neighbors.c.in \
+	graphdims_get.c.in \
+	grequest_complete.c.in
      	
 
 
@@ -380,7 +393,7 @@ interface_profile_sources = \
         generated_comm_set_name.c \
         generated_comm_size.c \
         generated_comm_spawn.c \
-        comm_spawn_multiple.c \
+        generated_comm_spawn_multiple.c \
         generated_comm_split.c \
         generated_comm_split_type.c \
         generated_comm_test_inter.c \
@@ -465,21 +478,21 @@ interface_profile_sources = \
         generated_gatherv.c \
         generated_igatherv.c \
         generated_gatherv_init.c \
-        get_address.c \
+        generated_get_address.c \
         get_count.c \
         get_elements.c \
         get_elements_x.c \
-        get_accumulate.c \
+        generated_get_accumulate.c \
         generated_get_library_version.c \
         generated_get_processor_name.c \
-        get_version.c \
-        graph_create.c \
-        graph_get.c \
-        graph_map.c \
-        graph_neighbors_count.c \
-        graph_neighbors.c \
-        graphdims_get.c \
-        grequest_complete.c \
+        generated_get_version.c \
+        generated_graph_create.c \
+        generated_graph_get.c \
+        generated_graph_map.c \
+        generated_graph_neighbors_count.c \
+        generated_graph_neighbors.c \
+        generated_graphdims_get.c \
+        generated_grequest_complete.c \
         grequest_start.c \
         group_c2f.c \
         group_compare.c \
