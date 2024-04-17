@@ -28,17 +28,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Group_union = PMPI_Group_union
-#endif
-#define MPI_Group_union PMPI_Group_union
-#endif
 
-static const char FUNC_NAME[] = "MPI_Group_union";
-
-
-int MPI_Group_union(MPI_Group group1, MPI_Group group2, MPI_Group *new_group)
+PROTOTYPE ERROR_CLASS Group_union(GROUP group1, GROUP group2, GROUP_OUT new_group)
 {
     int err;
 

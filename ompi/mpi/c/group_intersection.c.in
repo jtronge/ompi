@@ -9,6 +9,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2006      University of Houston. All rights reserved.
  * Copyright (c) 2006      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
@@ -23,36 +24,27 @@
 
 #include "ompi/mpi/c/bindings.h"
 #include "ompi/runtime/params.h"
-#include "ompi/communicator/communicator.h"
+#include "ompi/group/group.h"
 #include "ompi/errhandler/errhandler.h"
-#include "ompi/request/grequest.h"
+#include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Grequest_start = PMPI_Grequest_start
-#endif
-#define MPI_Grequest_start PMPI_Grequest_start
-#endif
-
-static const char FUNC_NAME[] = "MPI_Grequest_start";
-
-
-int MPI_Grequest_start(MPI_Grequest_query_function *query_fn,
-                       MPI_Grequest_free_function *free_fn,
-                       MPI_Grequest_cancel_function *cancel_fn,
-                       void *extra_state, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Group_intersection(GROUP group1, GROUP group2,
+        GROUP_OUT new_group)
 {
-    int rc;
+  int err;
 
-    if (MPI_PARAM_CHECK) {
-        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-        if (NULL == request) {
-            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_REQUEST,
-                                          FUNC_NAME);
-        }
-    }
+  if ( MPI_PARAM_CHECK ) {
+      OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
 
-    rc = ompi_grequest_start(query_fn,free_fn,cancel_fn,extra_state,request);
-    OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME);
+      /* verify that groups are valid */
+      if ( (MPI_GROUP_NULL == group1) || (MPI_GROUP_NULL == group2) ||
+           ( NULL == group1) || (NULL == group2) ||
+           (NULL == new_group) ) {
+          return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_GROUP,
+                                        FUNC_NAME);
+      }
+  }
+
+  err = ompi_group_intersection ( group1, group2,  new_group );
+  OMPI_ERRHANDLER_NOHANDLE_RETURN(err, err, FUNC_NAME );
 }
-

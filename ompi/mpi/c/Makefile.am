@@ -231,7 +231,7 @@ prototype_sources = \
 	file_create_errhandler.c.in \
 	file_get_byte_offset.c.in \
 	file_get_group.c.in \
-	# file_get_view.c.in \
+	file_get_view.c.in \
 	file_iread_at.c.in \
 	file_iread_at_all.c.in \
 	file_iwrite_at.c.in \
@@ -270,9 +270,9 @@ prototype_sources = \
 	file_write_ordered_end.c.in \
 	file_write_shared.c.in \
 	get_address.c.in \
-	# get_count.c.in \
-	# get_elements.c.in \
-	# get_elements_x.c.in \
+	get_count.c.in \
+	get_elements.c.in \
+	get_elements_x.c.in \
 	get_accumulate.c.in \
 	get_version.c.in \
 	graph_create.c.in \
@@ -281,7 +281,21 @@ prototype_sources = \
 	graph_neighbors_count.c.in \
 	graph_neighbors.c.in \
 	graphdims_get.c.in \
-	grequest_complete.c.in
+	grequest_complete.c.in \
+	grequest_start.c.in \
+	group_compare.c.in \
+	group_difference.c.in \
+	group_excl.c.in \
+	group_free.c.in \
+	# group_from_session_pset.c.in \
+	group_incl.c.in \
+	group_intersection.c.in \
+	# group_range_excl.c.in \
+	# group_range_incl.c.in \
+	group_rank.c.in \
+	group_size.c.in \
+	group_translate_ranks.c.in \
+	group_union.c.in
      	
 
 
@@ -424,7 +438,7 @@ interface_profile_sources = \
         generated_file_get_position_shared.c \
         generated_file_get_size.c \
         generated_file_get_type_extent.c \
-        file_get_view.c \
+        generated_file_get_view.c \
         generated_file_iread_at.c \
         generated_file_iread_at_all.c \
         generated_file_iread.c \
@@ -479,9 +493,9 @@ interface_profile_sources = \
         generated_igatherv.c \
         generated_gatherv_init.c \
         generated_get_address.c \
-        get_count.c \
-        get_elements.c \
-        get_elements_x.c \
+        generated_get_count.c \
+        generated_get_elements.c \
+        generated_get_elements_x.c \
         generated_get_accumulate.c \
         generated_get_library_version.c \
         generated_get_processor_name.c \
@@ -493,22 +507,22 @@ interface_profile_sources = \
         generated_graph_neighbors.c \
         generated_graphdims_get.c \
         generated_grequest_complete.c \
-        grequest_start.c \
+        generated_grequest_start.c \
         group_c2f.c \
-        group_compare.c \
-        group_difference.c \
-        group_excl.c \
+        generated_group_compare.c \
+        generated_group_difference.c \
+        generated_group_excl.c \
         group_f2c.c \
-        group_free.c \
+        generated_group_free.c \
         group_from_session_pset.c \
-        group_incl.c \
-        group_intersection.c \
+        generated_group_incl.c \
+        generated_group_intersection.c \
         group_range_excl.c \
         group_range_incl.c \
-        group_rank.c \
-        group_size.c \
-        group_translate_ranks.c \
-        group_union.c \
+        generated_group_rank.c \
+        generated_group_size.c \
+        generated_group_translate_ranks.c \
+        generated_group_union.c \
         generated_ibsend.c \
         improbe.c \
         imrecv.c \

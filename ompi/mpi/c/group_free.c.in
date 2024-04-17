@@ -27,17 +27,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Group_free = PMPI_Group_free
-#endif
-#define MPI_Group_free PMPI_Group_free
-#endif
 
-static const char FUNC_NAME[] = "MPI_Group_free";
-
-
-int MPI_Group_free(MPI_Group *group)
+PROTOTYPE ERROR_CLASS Group_free(GROUP_OUT group)
 {
     int ret;
 

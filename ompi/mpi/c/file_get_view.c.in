@@ -27,8 +27,8 @@
 #include "ompi/file/file.h"
 
 PROTOTYPE ERROR_CLASS File_get_view(FILE fh, OFFSET_OUT disp,
-                      MPI_Datatype *etype,
-                      MPI_Datatype *filetype, STRING_OUT datarep)
+                      DATATYPE_OUT etype,
+                      DATATYPE_OUT filetype, STRING_OUT datarep)
 {
     int rc;
 

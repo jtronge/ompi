@@ -32,7 +32,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Get_elements(const MPI_Status *status, DATATYPE datatype, INT_OUT count)
+PROTOTYPE ERROR_CLASS Get_elements(STATUS status, DATATYPE datatype, INT_OUT count)
 {
     size_t internal_count;
     int ret;

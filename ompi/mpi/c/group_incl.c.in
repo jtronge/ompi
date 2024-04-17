@@ -31,17 +31,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Group_incl = PMPI_Group_incl
-#endif
-#define MPI_Group_incl PMPI_Group_incl
-#endif
 
-static const char FUNC_NAME[] = "MPI_Group_incl";
-
-
-int MPI_Group_incl(MPI_Group group, int n, const int ranks[], MPI_Group *new_group)
+PROTOTYPE ERROR_CLASS Group_incl(GROUP group, INT n, INT_ARRAY ranks, GROUP_OUT new_group)
 {
   int i, group_size, err;
   ompi_group_t *group_pointer;

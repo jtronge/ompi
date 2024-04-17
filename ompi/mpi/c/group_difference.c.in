@@ -9,6 +9,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2006      University of Houston. All rights reserved.
  * Copyright (c) 2006      Cisco Systems, Inc.  All rights reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
@@ -27,32 +28,23 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Group_rank = PMPI_Group_rank
-#endif
-#define MPI_Group_rank PMPI_Group_rank
-#endif
-
-static const char FUNC_NAME[] = "MPI_Group_rank";
-
-
-int MPI_Group_rank(MPI_Group group, int *rank)
+PROTOTYPE ERROR_CLASS Group_difference(GROUP group1, GROUP group2,
+                         GROUP_OUT new_group)
 {
-    /* error checking */
-    if( MPI_PARAM_CHECK ) {
-        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+  int err;
 
-        if( (MPI_GROUP_NULL == group) || ( NULL == group) ){
-            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_GROUP,
-                                          FUNC_NAME);
-        } else if (NULL == rank) {
-            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_ARG,
-                                          FUNC_NAME);
-        }
-    }
+  /* error checking */
+  if( MPI_PARAM_CHECK ) {
+      OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
 
-    *rank=ompi_group_rank((ompi_group_t *)group);
+      if( (MPI_GROUP_NULL == group1) || (MPI_GROUP_NULL == group2) ||
+          (NULL == group1) || (NULL == group2) ||
+          (NULL == new_group) ) {
+          return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_GROUP,
+                                        FUNC_NAME);
+      }
+  }
 
-    return MPI_SUCCESS;
+  err = ompi_group_difference ( group1, group2,  new_group );
+  OMPI_ERRHANDLER_NOHANDLE_RETURN(err, err, FUNC_NAME );
 }

@@ -30,18 +30,9 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Group_translate_ranks = PMPI_Group_translate_ranks
-#endif
-#define MPI_Group_translate_ranks PMPI_Group_translate_ranks
-#endif
 
-static const char FUNC_NAME[] = "MPI_Group_translate_ranks";
-
-
-int MPI_Group_translate_ranks(MPI_Group group1, int n_ranks, const int ranks1[],
-                              MPI_Group group2, int ranks2[])
+PROTOTYPE ERROR_CLASS Group_translate_ranks(GROUP group1, INT n_ranks, INT_ARRAY ranks1,
+                              GROUP group2, INT_OUT ranks2)
 {
     int err;
 
