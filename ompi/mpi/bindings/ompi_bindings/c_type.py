@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ompi_bindings.consts import ConvertFuncs
+from ompi_bindings.consts import ConvertFuncs, ConvertOMPIToStandard
 
 
 class Type(ABC):
@@ -260,7 +260,7 @@ class StandardABIType(Type):
 
 
 @Type.add_type('DATATYPE', abi_type=['standard'])
-class TypeDatatype(StandardABIType):
+class TypeDatatypeStandard(StandardABIType):
 
     @property
     def init_code(self):
@@ -268,6 +268,29 @@ class TypeDatatype(StandardABIType):
 
     def type_text(self, enable_count=False):
         return self.mangle_name('MPI_Datatype')
+
+
+@Type.add_type('DATATYPE_OUT', abi_type=['ompi'])
+class TypeDatatypeOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Datatype *'
+
+
+@Type.add_type('DATATYPE_OUT', abi_type=['standard'])
+class TypeDatatypeStandard(Type):
+
+    @property
+    def final_code(self):
+        return [f'*{self.name} = {ConvertOMPIToStandard.DATATYPE}((MPI_Datatype) *{self.name});']
+
+    def type_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Datatype')
+        return f'{type_name} *'
+
+    @property
+    def argument(self):
+        return f'(MPI_Datatype *) {self.name}'
 
 
 @Type.add_type('OP', abi_type=['ompi'])
@@ -466,6 +489,26 @@ class TypeRequestInOutStandard(Type):
             return f'{type_name} *{self.name}'
         else:
             return f'{type_name} {self.name}[]'
+
+
+@Type.add_type('STATUS', abi_type=['ompi'])
+class TypeStatus(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const MPI_Status *'
+
+
+@Type.add_type('STATUS', abi_type=['standard'])
+class TypeStatusStandard(StandardABIType):
+
+    @property
+    def init_code(self):
+        # TODO: Need to ensure this is the correct conversion function for MPI_Status
+        return [f'{ConvertFuncs.STATUS}({self.name}, &{self.tmpname});']
+
+    def typ_text(self, enable_count=False):
+        type_name = self.mangle_name('MPI_Status')
+        return f'const {type_name} *'
 
 
 @Type.add_type('STATUS_OUT', abi_type=['ompi'])
@@ -774,6 +817,45 @@ class TypeCommDeleteAttrFunction(Type):
 
 @Type.add_type('COMM_DELETE_ATTR_FUNCTION', abi_type=['standard'])
 class TypeCommDeleteAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('GREQUEST_QUERY_FUNCTION', abi_type=['ompi'])
+class TypeGrequestQueryFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Grequest_query_function *'
+
+
+@Type.add_type('GREQUEST_QUERY_FUNCTION', abi_type=['standard'])
+class TypeGrequestQueryFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('GREQUEST_FREE_FUNCTION', abi_type=['ompi'])
+class TypeGrequestFreeFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Grequest_free_function *'
+
+
+@Type.add_type('GREQUEST_FREE_FUNCTION', abi_type=['standard'])
+class TypeGrequestFreeFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('GREQUEST_CANCEL_FUNCTION', abi_type=['ompi'])
+class TypeGrequestCancelFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Grequest_cancel_function *'
+
+
+@Type.add_type('GREQUEST_CANCEL_FUNCTION', abi_type=['standard'])
+class TypeGrequestCancelFunctionStandard(Type):
     # TODO: This may require a special function to wrap the callback
     pass
 
