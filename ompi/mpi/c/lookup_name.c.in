@@ -36,17 +36,8 @@
 #include "ompi/info/info.h"
 #include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Lookup_name = PMPI_Lookup_name
-#endif
-#define MPI_Lookup_name PMPI_Lookup_name
-#endif
 
-static const char FUNC_NAME[] = "MPI_Lookup_name";
-
-
-int MPI_Lookup_name(const char *service_name, MPI_Info info, char *port_name)
+PROTOTYPE ERROR_CLASS Lookup_name(STRING service_name, INFO info, STRING_OUT port_name)
 {
     int flag=0, ret;
     pmix_status_t rc;

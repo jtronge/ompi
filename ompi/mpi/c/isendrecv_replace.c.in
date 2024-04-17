@@ -35,15 +35,6 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Isendrecv_replace = PMPI_Isendrecv_replace
-#endif
-#define MPI_Isendrecv_replace PMPI_Isendrecv_replace
-#endif
-
-static const char FUNC_NAME[] = "MPI_Isendrecv_replace";
-
 struct ompi_isendrecv_replace_context_t {
     opal_object_t super;
     opal_convertor_t convertor;
@@ -111,9 +102,9 @@ static int ompi_isendrecv_replace_complete_func (ompi_comm_request_t *request)
 }
 
 
-int MPI_Isendrecv_replace(void * buf, int count, MPI_Datatype datatype,
-                         int dest, int sendtag, int source, int recvtag,
-                         MPI_Comm comm, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Isendrecv_replace(BUFFER_OUT buf, INT count, DATATYPE datatype,
+                         INT dest, INT sendtag, INT source, INT recvtag,
+                         COMM comm, REQUEST_INOUT request)
 
 {
     int rc = MPI_SUCCESS;

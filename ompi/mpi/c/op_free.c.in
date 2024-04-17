@@ -26,17 +26,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/op/op.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Op_free = PMPI_Op_free
-#endif
-#define MPI_Op_free PMPI_Op_free
-#endif
-
-static const char FUNC_NAME[] = "MPI_Op_free";
-
-
-int MPI_Op_free(MPI_Op *op)
+PROTOTYPE ERROR_CLASS Op_free(OP_OUT op)
 {
   /* Error checking */
 

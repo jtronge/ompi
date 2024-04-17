@@ -27,17 +27,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/op/op.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Op_create = PMPI_Op_create
-#endif
-#define MPI_Op_create PMPI_Op_create
-#endif
 
-static const char FUNC_NAME[] = "MPI_Op_create";
-
-
-int MPI_Op_create(MPI_User_function * function, int commute, MPI_Op * op)
+PROTOTYPE ERROR_CLASS Op_create(USER_FUNCTION function, INT commute, OP_OUT op)
 {
     int err = MPI_SUCCESS;
 

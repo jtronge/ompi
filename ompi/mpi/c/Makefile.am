@@ -307,7 +307,23 @@ prototype_sources = \
 	intercomm_create_from_groups.c.in \
 	intercomm_merge.c.in \
 	irsend.c.in \
-	is_thread_main.c.in
+	is_thread_main.c.in \
+	isendrecv.c.in \
+	isendrecv_replace.c.in \
+	issend.c.in \
+	lookup_name.c.in \
+	mprobe.c.in \
+	mrecv.c.in \
+	# neighbor_alltoallw.c.in \
+	# ineighbor_alltoallw.c.in \
+	# neighbor_alltoallw_init.c.in \
+	keyval_create.c.in \
+	op_create.c.in \
+	op_free.c.in \
+	pack_external.c.in \
+	pack_external_size.c.in \
+	# pcontrol.c.in \
+	precv_init.c.in
      	
 
 
@@ -562,14 +578,14 @@ interface_profile_sources = \
         generated_irsend.c \
         generated_is_thread_main.c \
         generated_isend.c \
-        isendrecv.c \
-        isendrecv_replace.c \
-        issend.c \
-        lookup_name.c \
+        generated_isendrecv.c \
+        generated_isendrecv_replace.c \
+        generated_issend.c \
+        generated_lookup_name.c \
         message_f2c.c \
         message_c2f.c \
-        mprobe.c \
-        mrecv.c \
+        generated_mprobe.c \
+        generated_mrecv.c \
         generated_neighbor_allgather.c \
         generated_ineighbor_allgather.c \
         generated_neighbor_allgather_init.c \
@@ -585,16 +601,16 @@ interface_profile_sources = \
         neighbor_alltoallw.c \
         ineighbor_alltoallw.c \
         neighbor_alltoallw_init.c \
-        keyval_create.c \
+        generated_keyval_create.c \
         generated_keyval_free.c \
         op_c2f.c \
         generated_op_commutative.c \
-        op_create.c \
+        generated_op_create.c \
         op_f2c.c \
-        op_free.c \
+        generated_op_free.c \
         generated_open_port.c \
-        pack_external.c \
-        pack_external_size.c \
+        generated_pack_external.c \
+        generated_pack_external_size.c \
         generated_pack.c \
         generated_pack_size.c \
         generated_parrived.c \
@@ -602,7 +618,7 @@ interface_profile_sources = \
         generated_pready.c \
         generated_pready_list.c \
         generated_pready_range.c \
-        precv_init.c \
+        generated_precv_init.c \
         generated_probe.c \
         psend_init.c \
         publish_name.c \

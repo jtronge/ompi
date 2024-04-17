@@ -25,17 +25,9 @@
 #include "ompi/request/request.h"
 #include "ompi/message/message.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Mprobe = PMPI_Mprobe
-#endif
-#define MPI_Mprobe PMPI_Mprobe
-#endif
 
-static const char FUNC_NAME[] = "MPI_Mprobe";
-
-int MPI_Mprobe(int source, int tag, MPI_Comm comm,
-               MPI_Message *message, MPI_Status *status)
+PROTOTYPE ERROR_CLASS Mprobe(INT source, INT tag, COMM comm,
+               MESSAGE_OUT message, STATUS_OUT status)
 {
     int rc;
 

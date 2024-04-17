@@ -29,19 +29,9 @@
 #include "ompi/attribute/attribute.h"
 #include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Keyval_create = PMPI_Keyval_create
-#endif
-#define MPI_Keyval_create PMPI_Keyval_create
-#endif
-
-static const char FUNC_NAME[] = "MPI_Keyval_create";
-
-
-int MPI_Keyval_create(MPI_Copy_function *copy_attr_fn,
-                      MPI_Delete_function *delete_attr_fn,
-                      int *keyval, void *extra_state)
+PROTOTYPE ERROR_CLASS Keyval_create(COPY_FUNCTION copy_attr_fn,
+                      DELETE_FUNCTION delete_attr_fn,
+                      INT_OUT keyval, BUFFER_OUT extra_state)
 {
     int ret;
     ompi_attribute_fn_ptr_union_t copy_fn;

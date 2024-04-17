@@ -33,18 +33,8 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Issend = PMPI_Issend
-#endif
-#define MPI_Issend PMPI_Issend
-#endif
-
-static const char FUNC_NAME[] = "MPI_Issend";
-
-
-int MPI_Issend(const void *buf, int count, MPI_Datatype type, int dest,
-               int tag, MPI_Comm comm, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Issend(BUFFER buf, INT count, DATATYPE type, INT dest,
+               INT tag, COMM comm, REQUEST_INOUT request)
 {
     int rc = MPI_SUCCESS;
 
