@@ -29,14 +29,6 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_create = PMPI_Info_create
-#endif
-#define MPI_Info_create PMPI_Info_create
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_create";
 
 /**
  * Create a new info object
@@ -50,7 +42,7 @@ static const char FUNC_NAME[] = "MPI_Info_create";
  * When an MPI_Info object is not being used, it should be freed using
  * MPI_Info_free
  */
-int MPI_Info_create(MPI_Info *info)
+PROTOTYPE ERROR_CLASS Info_create(INFO_OUT info)
 {
     if (MPI_PARAM_CHECK) {
         if (NULL == info) {

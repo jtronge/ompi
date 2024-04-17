@@ -36,19 +36,10 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Intercomm_create_from_groups = PMPI_Intercomm_create_from_groups
-#endif
-#define MPI_Intercomm_create_from_groups PMPI_Intercomm_create_from_groups
-#endif
 
-static const char FUNC_NAME[] = "MPI_Intercomm_create_from_groups";
-
-
-int MPI_Intercomm_create_from_groups (MPI_Group local_group, int local_leader, MPI_Group remote_group,
-                                      int remote_leader, const char *tag, MPI_Info info, MPI_Errhandler errhandler,
-                                      MPI_Comm *newintercomm)
+PROTOTYPE ERROR_CLASS Intercomm_create_from_groups (GROUP local_group, INT local_leader, GROUP remote_group,
+                                      INT remote_leader, STRING tag, INFO info, ERRHANDLER errhandler,
+                                      COMM_OUT newintercomm)
 {
     int rc;
 

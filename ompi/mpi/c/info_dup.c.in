@@ -29,16 +29,6 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_dup = PMPI_Info_dup
-#endif
-#define MPI_Info_dup PMPI_Info_dup
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_dup";
-
-
 /**
  *   MPI_Info_dup - Duplicate an 'MPI_Info' object
  *
@@ -54,7 +44,8 @@ static const char FUNC_NAME[] = "MPI_Info_dup";
  *   When an info object is no longer being used, it should be freed with
  *   'MPI_Info_free'.
  */
-int MPI_Info_dup(MPI_Info info, MPI_Info *newinfo) {
+PROTOTYPE ERROR_CLASS Info_dup(INFO info, INFO_OUT newinfo)
+{
     int err;
 
     /**

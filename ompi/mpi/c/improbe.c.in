@@ -23,18 +23,8 @@
 #include "ompi/request/request.h"
 #include "ompi/message/message.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Improbe = PMPI_Improbe
-#endif
-#define MPI_Improbe PMPI_Improbe
-#endif
-
-static const char FUNC_NAME[] = "MPI_Improbe";
-
-
-int MPI_Improbe(int source, int tag, MPI_Comm comm, int *flag,
-                MPI_Message *message, MPI_Status *status)
+PROTOTYPE ERROR_CLASS Improbe(INT source, INT tag, COMM comm, INT_OUT flag,
+                MESSAGE_OUT message, STATUS_OUT status)
 {
     int rc;
 

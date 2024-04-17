@@ -29,15 +29,6 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_create_env = PMPI_Info_create_env
-#endif
-#define MPI_Info_create_env PMPI_Info_create_env
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_create_env";
-
 /**
  *  Returns an info object with the same construction as MPI_INFO_ENV as created 
  *  during MPI_INIT or MPI_INIT_THREAD when the same arguments are used.
@@ -53,7 +44,7 @@ static const char FUNC_NAME[] = "MPI_Info_create_env";
  * When an MPI_Info object is not being used, it should be freed using
  * MPI_Info_free
  */
-int MPI_Info_create_env(int argc, char *argv[], MPI_Info *info)
+PROTOTYPE ERROR_CLASS Info_create_env(INT argc, STRING_ARRAY argv, INFO_OUT info)
 {
     int rc;
     ompi_info_t *the_info;

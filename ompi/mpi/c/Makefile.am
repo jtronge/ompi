@@ -295,7 +295,19 @@ prototype_sources = \
 	group_rank.c.in \
 	group_size.c.in \
 	group_translate_ranks.c.in \
-	group_union.c.in
+	group_union.c.in \
+	improbe.c.in \
+	imrecv.c.in \
+	info_create.c.in \
+	info_create_env.c.in \
+	info_delete.c.in \
+	info_dup.c.in \
+	info_free.c.in \
+	intercomm_create.c.in \
+	intercomm_create_from_groups.c.in \
+	intercomm_merge.c.in \
+	irsend.c.in \
+	is_thread_main.c.in
      	
 
 
@@ -524,15 +536,15 @@ interface_profile_sources = \
         generated_group_translate_ranks.c \
         generated_group_union.c \
         generated_ibsend.c \
-        improbe.c \
-        imrecv.c \
+        generated_improbe.c \
+        generated_imrecv.c \
         info_c2f.c \
-        info_create.c \
-        info_create_env.c \
-        info_delete.c \
-        info_dup.c \
+        generated_info_create.c \
+        generated_info_create_env.c \
+        generated_info_delete.c \
+        generated_info_dup.c \
         info_f2c.c \
-        info_free.c \
+        generated_info_free.c \
         generated_info_get.c \
         generated_info_get_nkeys.c \
         generated_info_get_nthkey.c \
@@ -542,13 +554,13 @@ interface_profile_sources = \
         generated_init.c \
         generated_init_thread.c \
         generated_initialized.c \
-        intercomm_create.c \
-        intercomm_create_from_groups.c \
-        intercomm_merge.c \
+        generated_intercomm_create.c \
+        generated_intercomm_create_from_groups.c \
+        generated_intercomm_merge.c \
         generated_iprobe.c \
         generated_irecv.c \
-        irsend.c \
-        is_thread_main.c \
+        generated_irsend.c \
+        generated_is_thread_main.c \
         generated_isend.c \
         isendrecv.c \
         isendrecv_replace.c \

@@ -37,18 +37,9 @@
 #include "ompi/proc/proc.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Intercomm_merge = PMPI_Intercomm_merge
-#endif
-#define MPI_Intercomm_merge PMPI_Intercomm_merge
-#endif
 
-static const char FUNC_NAME[] = "MPI_Intercomm_merge";
-
-
-int MPI_Intercomm_merge(MPI_Comm intercomm, int high,
-                        MPI_Comm *newcomm)
+PROTOTYPE ERROR_CLASS Intercomm_merge(COMM intercomm, INT high,
+                        COMM_OUT newcomm)
 {
     ompi_communicator_t *newcomp = MPI_COMM_NULL;
     ompi_proc_t **procs=NULL;

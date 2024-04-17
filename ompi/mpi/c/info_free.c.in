@@ -30,16 +30,6 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_free = PMPI_Info_free
-#endif
-#define MPI_Info_free PMPI_Info_free
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_free";
-
-
 /**
  *   MPI_Info_free - Free an 'MPI_Info' object.
  *
@@ -50,7 +40,7 @@ static const char FUNC_NAME[] = "MPI_Info_free";
  *
  *   Upon successful completion, 'info' will be set to 'MPI_INFO_NULL'.
  */
-int MPI_Info_free(MPI_Info *info)
+PROTOTYPE ERROR_CLASS Info_free(INFO_OUT info)
 {
     int err;
 

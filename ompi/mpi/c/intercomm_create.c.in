@@ -36,19 +36,10 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Intercomm_create = PMPI_Intercomm_create
-#endif
-#define MPI_Intercomm_create PMPI_Intercomm_create
-#endif
 
-static const char FUNC_NAME[] = "MPI_Intercomm_create";
-
-
-int MPI_Intercomm_create(MPI_Comm local_comm, int local_leader,
-                         MPI_Comm bridge_comm, int remote_leader,
-                         int tag, MPI_Comm *newintercomm)
+PROTOTYPE ERROR_CLASS Intercomm_create(COMM local_comm, INT local_leader,
+                         COMM bridge_comm, INT remote_leader,
+                         INT tag, COMM_OUT newintercomm)
 {
     int rc;
 

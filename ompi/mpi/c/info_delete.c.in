@@ -34,16 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Info_delete = PMPI_Info_delete
-#endif
-#define MPI_Info_delete PMPI_Info_delete
-#endif
-
-static const char FUNC_NAME[] = "MPI_Info_delete";
-
-
 /**
  * Delete a (key,value) pair from "info"
  *
@@ -55,7 +45,8 @@ static const char FUNC_NAME[] = "MPI_Info_delete";
  * @retval MPI_ERR_INFO
  * @retval MPI_ERR_INFO_KEYY
  */
-int MPI_Info_delete(MPI_Info info, const char *key) {
+PROTOTYPE ERROR_CLASS Info_delete(INFO info, STRING key)
+{
     int key_length;
     int err;
 

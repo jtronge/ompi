@@ -32,7 +32,8 @@
 
 
 PROTOTYPE ERROR_CLASS File_create_errhandler (FILE_ERRHANDLER_FUNCTION function,
-                                ERRHANDLER_OUT errhandler) {
+                                ERRHANDLER_OUT errhandler)
+{
     int err = MPI_SUCCESS;
 
     /* Error checking */
