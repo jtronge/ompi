@@ -31,18 +31,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_write_ordered = PMPI_File_write_ordered
-#endif
-#define MPI_File_write_ordered PMPI_File_write_ordered
-#endif
-
-static const char FUNC_NAME[] = "MPI_File_write_ordered";
-
-
-int MPI_File_write_ordered(MPI_File fh, const void *buf, int count,
-                           MPI_Datatype datatype, MPI_Status *status)
+PROTOTYPE ERROR_CLASS File_write_ordered(FILE fh, BUFFER buf, INT count,
+                           DATATYPE datatype, STATUS_OUT status)
 {
     int rc;
 

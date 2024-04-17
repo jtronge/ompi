@@ -248,7 +248,27 @@ prototype_sources = \
 	file_read_ordered_begin.c.in \
 	file_read_ordered.c.in \
 	file_read_ordered_end.c.in \
-	file_read_shared.c.in
+	file_read_shared.c.in \
+	file_seek.c.in \
+	file_seek_shared.c.in \
+	file_set_atomicity.c.in \
+	file_set_errhandler.c.in \
+	file_set_info.c.in \
+	file_set_size.c.in \
+	file_set_view.c.in \
+	file_sync.c.in \
+	file_write_all_begin.c.in \
+	file_write_all.c.in \
+	file_write_all_end.c.in \
+	file_write_at_all_begin.c.in \
+	file_write_at_all.c.in \
+	file_write_at_all_end.c.in \
+	file_write_at.c.in \
+	file_write.c.in \
+	file_write_ordered_begin.c.in \
+	file_write_ordered.c.in \
+	file_write_ordered_end.c.in \
+	file_write_shared.c.in
      	
 
 
@@ -416,26 +436,26 @@ interface_profile_sources = \
         generated_file_read_ordered.c \
         generated_file_read_ordered_end.c \
         generated_file_read_shared.c \
-        file_seek.c \
-        file_seek_shared.c \
-        file_set_atomicity.c \
-        file_set_errhandler.c \
-        file_set_info.c \
-        file_set_size.c \
-        file_set_view.c \
-        file_sync.c \
-        file_write_all_begin.c \
-        file_write_all.c \
-        file_write_all_end.c \
-        file_write_at_all_begin.c \
-        file_write_at_all.c \
-        file_write_at_all_end.c \
-        file_write_at.c \
-        file_write.c \
-        file_write_ordered_begin.c \
-        file_write_ordered.c \
-        file_write_ordered_end.c \
-        file_write_shared.c \
+        generated_file_seek.c \
+        generated_file_seek_shared.c \
+        generated_file_set_atomicity.c \
+        generated_file_set_errhandler.c \
+        generated_file_set_info.c \
+        generated_file_set_size.c \
+        generated_file_set_view.c \
+        generated_file_sync.c \
+        generated_file_write_all_begin.c \
+        generated_file_write_all.c \
+        generated_file_write_all_end.c \
+        generated_file_write_at_all_begin.c \
+        generated_file_write_at_all.c \
+        generated_file_write_at_all_end.c \
+        generated_file_write_at.c \
+        generated_file_write.c \
+        generated_file_write_ordered_begin.c \
+        generated_file_write_ordered.c \
+        generated_file_write_ordered_end.c \
+        generated_file_write_shared.c \
         generated_finalize.c \
         generated_finalized.c \
         generated_free_mem.c \

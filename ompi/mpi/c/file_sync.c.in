@@ -26,17 +26,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_set_size = PMPI_File_set_size
-#endif
-#define MPI_File_set_size PMPI_File_set_size
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_set_size";
-
-
-int MPI_File_set_size(MPI_File fh, MPI_Offset size)
+PROTOTYPE ERROR_CLASS File_sync(FILE fh)
 {
     int rc;
 
@@ -55,7 +46,7 @@ int MPI_File_set_size(MPI_File fh, MPI_Offset size)
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-            io_module_file_set_size(fh, size);
+            io_module_file_sync(fh);
         break;
 
     default:

@@ -31,19 +31,9 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_File_write_at = PMPI_File_write_at
-#endif
-#define MPI_File_write_at PMPI_File_write_at
-#endif
 
-static const char FUNC_NAME[] = "MPI_File_write_at";
-
-
-int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf,
-                      int count, MPI_Datatype datatype,
-                      MPI_Status *status)
+PROTOTYPE ERROR_CLASS File_write(FILE fh, BUFFER buf, INT count,
+                   DATATYPE datatype, STATUS_OUT status)
 {
     int rc;
 
@@ -71,7 +61,7 @@ int MPI_File_write_at(MPI_File fh, MPI_Offset offset, const void *buf,
     switch (fh->f_io_version) {
     case MCA_IO_BASE_V_2_0_0:
         rc = fh->f_io_selected_module.v2_0_0.
-          io_module_file_write_at(fh, offset, buf, count, datatype, status);
+          io_module_file_write(fh, buf, count, datatype, status);
         break;
 
     default:
