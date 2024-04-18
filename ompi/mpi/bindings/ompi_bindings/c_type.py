@@ -201,6 +201,16 @@ class TypeIntArray(Type):
         return f'const int {self.name}[]'
 
 
+@Type.add_type('RANGE_ARRAY')
+class TypeRangeArray(Type):
+
+    def type_text(self, enable_count=False):
+        return 'int *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        return f'int {self.name}[][3]'
+
+
 @Type.add_type('OFFSET')
 class TypeOffset(Type):
 
@@ -944,3 +954,22 @@ class TypeGroupOutStandard(Type):
     @property
     def argument(self):
         return f'(MPI_Group *) {self.name}'
+
+
+@Type.add_type('SESSION', abi_type=['ompi'])
+class TypeSession(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Session'
+
+
+@Type.add_type('SESSION', abi_type=['standard'])
+class TypeSessionStandard(Type):
+
+    # TODO: This will require some conversion code for the ABI
+    @property
+    def argument(self):
+        return f'(MPI_Session) {self.name}'
+
+    def type_text(self, enable_count=False):
+        return self.mangle_name('MPI_Session')
