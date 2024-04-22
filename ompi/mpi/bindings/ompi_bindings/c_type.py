@@ -878,6 +878,45 @@ class TypeGrequestCancelFunctionStandard(Type):
     pass
 
 
+@Type.add_type('DATAREP_CONVERSION_FUNCTION', abi_type=['ompi'])
+class TypeDatarepConversionFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Datarep_conversion_function *'
+
+
+@Type.add_type('DATAREP_CONVERSION_FUNCTION', abi_type=['standard'])
+class TypeDatarepConversionFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('DATAREP_EXTENT_FUNCTION', abi_type=['ompi'])
+class TypeDatarepExtentFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Datarep_extent_function *'
+
+
+@Type.add_type('DATAREP_EXTENT_FUNCTION', abi_type=['standard'])
+class TypeDatarepExtentFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('SESSION_ERRHANDLER_FUNCTION', abi_type=['ompi'])
+class TypeSessionErrhandlerFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Session_errhandler_function *'
+
+
+@Type.add_type('SESSION_ERRHANDLER_FUNCTION', abi_type=['standard'])
+class TypeSessionErrhandlerFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
 @Type.add_type('ERRHANDLER', abi_type=['ompi'])
 class TypeErrhandler(Type):
 
@@ -954,6 +993,26 @@ class TypeGroupOutStandard(Type):
     @property
     def argument(self):
         return f'(MPI_Group *) {self.name}'
+
+
+@Type.add_type('SESSION_OUT', abi_type=['ompi'])
+class TypeSessionOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Session *'
+
+
+@Type.add_type('SESSION_OUT', abi_type=['standard'])
+class TypeSessionOutStandard(Type):
+
+    # TODO: This will require some conversion code for the ABI
+    @property
+    def argument(self):
+        return f'(MPI_Session *) {self.name}'
+
+    def type_text(self):
+        type_name = self.mangle_name('MPI_Session')
+        return f'{type_name} *'
 
 
 @Type.add_type('SESSION', abi_type=['ompi'])
