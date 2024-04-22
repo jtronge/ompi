@@ -16,17 +16,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Session_get_nth_pset = PMPI_Session_get_nth_pset
-#endif
-#define MPI_Session_get_nth_pset PMPI_Session_get_nth_pset
-#endif
-
-static const char FUNC_NAME[] = "MPI_Session_get_nth_pset";
-
-
-int MPI_Session_get_nth_pset (MPI_Session session, MPI_Info info, int n, int *len, char *pset_name)
+PROTOTYPE ERROR_CLASS Session_get_nth_pset (SESSION session, INFO info, INT n, INT_OUT len, STRING_OUT pset_name)
 {
     int rc = MPI_SUCCESS;
 

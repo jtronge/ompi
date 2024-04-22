@@ -17,17 +17,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Session_init = PMPI_Session_init
-#endif
-#define MPI_Session_init PMPI_Session_init
-#endif
-
-static const char FUNC_NAME[] = "MPI_Session_init";
-
-
-int MPI_Session_init (MPI_Info info, MPI_Errhandler errhandler, MPI_Session *session)
+PROTOTYPE ERROR_CLASS Session_init (INFO info, ERRHANDLER errhandler, SESSION_OUT session)
 {
     int rc, flag;
     int ts_level = MPI_THREAD_SINGLE;  /* for now we default to thread single for OMPI sessions */

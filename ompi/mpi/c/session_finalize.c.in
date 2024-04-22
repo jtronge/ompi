@@ -17,17 +17,8 @@
 
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Session_finalize = PMPI_Session_finalize
-#endif
-#define MPI_Session_finalize PMPI_Session_finalize
-#endif
 
-static const char FUNC_NAME[] = "MPI_Session_finalize";
-
-
-int MPI_Session_finalize (MPI_Session *session)
+PROTOTYPE ERROR_CLASS Session_finalize (SESSION_OUT session)
 {
     int rc;
 

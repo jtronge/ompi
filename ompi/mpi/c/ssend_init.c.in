@@ -34,21 +34,11 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Send_init = PMPI_Send_init
-#endif
-#define MPI_Send_init PMPI_Send_init
-#endif
-
-static const char FUNC_NAME[] = "MPI_Send_init";
-
-
-int MPI_Send_init(const void *buf, int count, MPI_Datatype type,
-                  int dest, int tag, MPI_Comm comm,
-                  MPI_Request *request)
+PROTOTYPE ERROR_CLASS Ssend_init(BUFFER buf, INT count, DATATYPE type,
+                   INT dest, INT tag, COMM comm,
+                   REQUEST_INOUT request)
 {
-    int rc = MPI_SUCCESS;
+    int rc;
 
     MEMCHECKER(
         memchecker_datatype(type);
@@ -57,11 +47,14 @@ int MPI_Send_init(const void *buf, int count, MPI_Datatype type,
     );
 
     if ( MPI_PARAM_CHECK ) {
+        rc = MPI_SUCCESS;
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
         if (ompi_comm_invalid(comm)) {
             return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_COMM, FUNC_NAME);
         } else if (count < 0) {
             rc = MPI_ERR_COUNT;
+        } else if (MPI_DATATYPE_NULL == type || NULL == type) {
+            rc = MPI_ERR_TYPE;
         } else if (tag < 0 || tag > mca_pml.pml_max_tag) {
             rc = MPI_ERR_TAG;
         } else if (ompi_comm_peer_invalid(comm, dest) &&
@@ -69,9 +62,6 @@ int MPI_Send_init(const void *buf, int count, MPI_Datatype type,
             rc = MPI_ERR_RANK;
         } else if (request == NULL) {
             rc = MPI_ERR_REQUEST;
-        } else {
-            OMPI_CHECK_DATATYPE_FOR_SEND(rc, type, count);
-            OMPI_CHECK_USER_BUFFER(rc, buf, type, count);
         }
         OMPI_ERRHANDLER_CHECK(rc, comm, rc, FUNC_NAME);
     }
@@ -91,7 +81,8 @@ int MPI_Send_init(const void *buf, int count, MPI_Datatype type,
     /*
      * Here, we just initialize the request -- memchecker should set the buffer in MPI_Start.
      */
-    rc = MCA_PML_CALL(isend_init(buf,count,type,dest,tag,MCA_PML_BASE_SEND_STANDARD,comm,request));
+    rc = MCA_PML_CALL(isend_init(buf, count, type, dest, tag,
+                                 MCA_PML_BASE_SEND_SYNCHRONOUS, comm, request));
     OMPI_ERRHANDLER_RETURN(rc, comm, rc, FUNC_NAME);
 }
 

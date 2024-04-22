@@ -32,19 +32,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Sendrecv_replace = PMPI_Sendrecv_replace
-#endif
-#define MPI_Sendrecv_replace PMPI_Sendrecv_replace
-#endif
-
-static const char FUNC_NAME[] = "MPI_Sendrecv_replace";
-
-
-int MPI_Sendrecv_replace(void * buf, int count, MPI_Datatype datatype,
-                         int dest, int sendtag, int source, int recvtag,
-                         MPI_Comm comm, MPI_Status *status)
+PROTOTYPE ERROR_CLASS Sendrecv_replace(BUFFER_OUT buf, INT count, DATATYPE datatype,
+                         INT dest, INT sendtag, INT source, INT recvtag,
+                         COMM comm, STATUS_OUT status)
 
 {
     ompi_request_t* req;

@@ -18,17 +18,8 @@
 
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Session_create_errhandler = PMPI_Session_create_errhandler
-#endif
-#define MPI_Session_create_errhandler PMPI_Session_create_errhandler
-#endif
 
-static const char FUNC_NAME[] = "MPI_Session_create_errhandler";
-
-
-int MPI_Session_create_errhandler (MPI_Session_errhandler_function *session_errhandler_fn, MPI_Errhandler *errhandler)
+PROTOTYPE ERROR_CLASS Session_create_errhandler (SESSION_ERRHANDLER_FUNCTION session_errhandler_fn, ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
 

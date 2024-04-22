@@ -32,9 +32,9 @@
 
 
 PROTOTYPE ERROR_CLASS Register_datarep(STRING datarep,
-			 MPI_Datarep_conversion_function *read_conversion_fn,
-			 MPI_Datarep_conversion_function *write_conversion_fn,
-			 MPI_Datarep_extent_function *dtype_file_extent_fn,
+			 DATAREP_CONVERSION_FUNCTION read_conversion_fn,
+			 DATAREP_CONVERSION_FUNCTION write_conversion_fn,
+			 DATAREP_EXTENT_FUNCTION dtype_file_extent_fn,
 			 BUFFER_OUT extra_state)
 {
     int rc;

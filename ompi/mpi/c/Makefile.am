@@ -332,7 +332,7 @@ prototype_sources = \
 	reduce.c.in \
 	ireduce.c.in \
 	reduce_init.c.in \
-	# register_datarep.c.in \
+	register_datarep.c.in \
 	reduce_local.c.in \
 	reduce_scatter.c.in \
 	ireduce_scatter.c.in \
@@ -353,7 +353,24 @@ prototype_sources = \
 	scatter_init.c.in \
 	scatterv.c.in \
 	iscatterv.c.in \
-	scatterv_init.c.in
+	scatterv_init.c.in \
+	send_init.c.in \
+	sendrecv.c.in \
+	sendrecv_replace.c.in \
+	session_call_errhandler.c.in \
+	session_create_errhandler.c.in \
+	session_get_errhandler.c.in \
+	session_get_info.c.in \
+	session_get_num_pset.c.in \
+	session_get_nth_pset.c.in \
+	session_get_pset_info.c.in \
+	session_init.c.in \
+	session_finalize.c.in \
+	session_set_errhandler.c.in \
+	session_set_info.c.in \
+	ssend_init.c.in \
+	ssend.c.in
+
      	
 
 
@@ -659,7 +676,7 @@ interface_profile_sources = \
         generated_reduce.c \
         generated_ireduce.c \
         generated_reduce_init.c \
-        register_datarep.c \
+        generated_register_datarep.c \
         generated_reduce_local.c \
         generated_reduce_scatter.c \
         generated_ireduce_scatter.c \
@@ -685,24 +702,24 @@ interface_profile_sources = \
         generated_scatterv.c \
         generated_iscatterv.c \
         generated_scatterv_init.c \
-        send_init.c \
-        sendrecv.c \
-        sendrecv_replace.c \
+        generated_send_init.c \
+        generated_sendrecv.c \
+        generated_sendrecv_replace.c \
         session_c2f.c \
-        session_call_errhandler.c \
-        session_create_errhandler.c \
-        session_get_errhandler.c \
-        session_get_info.c \
-        session_get_num_psets.c \
-        session_get_nth_pset.c \
-        session_get_pset_info.c \
-        session_init.c \
+        generated_session_call_errhandler.c \
+        generated_session_create_errhandler.c \
+        generated_session_get_errhandler.c \
+        generated_session_get_info.c \
+        generated_session_get_num_psets.c \
+        generated_session_get_nth_pset.c \
+        generated_session_get_pset_info.c \
+        generated_session_init.c \
         session_f2c.c \
-        session_finalize.c \
-        session_set_errhandler.c \
-        session_set_info.c \
-        ssend_init.c \
-        ssend.c \
+        generated_session_finalize.c \
+        generated_session_set_errhandler.c \
+        generated_session_set_info.c \
+        generated_ssend_init.c \
+        generated_ssend.c \
         start.c \
         startall.c \
         status_c2f.c \
