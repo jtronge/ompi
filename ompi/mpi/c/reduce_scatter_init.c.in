@@ -11,11 +11,12 @@
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
  * Copyright (c) 2006-2012 Cisco Systems, Inc.  All rights reserved.
- * Copyright (c) 2010-2012 Oak Ridge National Labs.  All rights reserved.
  * Copyright (c) 2012-2013 Los Alamos National Security, LLC.  All rights
  *                         reserved.
- * Copyright (c) 2015-2018 Research Organization for Information Science
- *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2015-2019 Research Organization for Information Science
+ *                         and Technology (RIST).  All rights reserved.
+ * Copyright (c) 2016      IBM Corporation.  All rights reserved.
+ * Copyright (c) 2018      FUJITSU LIMITED.  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -31,28 +32,21 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/op/op.h"
+#include "ompi/mca/coll/base/coll_base_util.h"
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Reduce_scatter = PMPI_Reduce_scatter
-#endif
-#define MPI_Reduce_scatter PMPI_Reduce_scatter
-#endif
 
-static const char FUNC_NAME[] = "MPI_Reduce_scatter";
-
-
-int MPI_Reduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts[],
-                       MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Reduce_scatter_init(BUFFER sendbuf, BUFFER_OUT recvbuf, INT_ARRAY recvcounts,
+                            DATATYPE datatype, OP op, COMM comm, INFO info, REQUEST_INOUT request)
 {
     int i, err, size, count;
 
-    SPC_RECORD(OMPI_SPC_REDUCE_SCATTER, 1);
+    SPC_RECORD(OMPI_SPC_REDUCE_SCATTER_INIT, 1);
 
     MEMCHECKER(
         int rank;
+        int count;
 
         size = ompi_comm_size(comm);
         rank = ompi_comm_rank(comm);
@@ -113,21 +107,10 @@ int MPI_Reduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts[
         }
     }
 
-#if OPAL_ENABLE_FT_MPI
-    /*
-     * An early check, so as to return early if we are using a broken
-     * communicator. This is not absolutely necessary since we will
-     * check for this, and other, error conditions during the operation.
+    /* MPI standard says that reductions have to have a count of at least 1,
+     * but some benchmarks (e.g., IMB) calls this function with a count of 0.
+     * So handle that case.
      */
-    if( OPAL_UNLIKELY(!ompi_comm_iface_coll_check(comm, &err)) ) {
-        OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
-    }
-#endif
-
-    /* MPI-1, p114, says that each process must supply at least one
-       element.  But at least the Pallas benchmarks call MPI_REDUCE
-       with a count of 0.  So be sure to handle it.  Grrr... */
-
     size = ompi_comm_size(comm);
     for (count = i = 0; i < size; ++i) {
         if (0 == recvcounts[i]) {
@@ -135,15 +118,17 @@ int MPI_Reduce_scatter(const void *sendbuf, void *recvbuf, const int recvcounts[
         }
     }
     if (size == count) {
-        return MPI_SUCCESS;
+        err = ompi_request_persistent_noop_create(request);
+        OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
     }
 
     /* Invoke the coll component to perform the back-end operation */
 
-    OBJ_RETAIN(op);
-    err = comm->c_coll->coll_reduce_scatter(sendbuf, recvbuf, recvcounts,
-                                           datatype, op, comm,
-                                           comm->c_coll->coll_reduce_scatter_module);
-    OBJ_RELEASE(op);
+    err = comm->c_coll->coll_reduce_scatter_init(sendbuf, recvbuf, recvcounts,
+                                                 datatype, op, comm, info, request,
+                                                 comm->c_coll->coll_reduce_scatter_init_module);
+    if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
+        ompi_coll_base_retain_op(*request, op, datatype);
+    }
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

@@ -34,18 +34,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Reduce_scatter_block = PMPI_Reduce_scatter_block
-#endif
-#define MPI_Reduce_scatter_block PMPI_Reduce_scatter_block
-#endif
 
-static const char FUNC_NAME[] = "MPI_Reduce_scatter_block";
-
-
-int MPI_Reduce_scatter_block(const void *sendbuf, void *recvbuf, int recvcount,
-                             MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Reduce_scatter_block(BUFFER sendbuf, BUFFER_OUT recvbuf, INT recvcount,
+                             DATATYPE datatype, OP op, COMM comm)
 {
     int err;
 

@@ -30,18 +30,9 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Recv_init = PMPI_Recv_init
-#endif
-#define MPI_Recv_init PMPI_Recv_init
-#endif
 
-static const char FUNC_NAME[] = "MPI_Recv_init";
-
-
-int MPI_Recv_init(void *buf, int count, MPI_Datatype type, int source,
-                  int tag, MPI_Comm comm, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Recv_init(BUFFER_OUT buf, INT count, DATATYPE type, INT source,
+                  INT tag, COMM comm, REQUEST_INOUT request)
 {
     int rc = MPI_SUCCESS;
 

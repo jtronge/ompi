@@ -33,18 +33,8 @@
 #include "ompi/op/op.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Reduce_local = PMPI_Reduce_local
-#endif
-#define MPI_Reduce_local PMPI_Reduce_local
-#endif
-
-static const char FUNC_NAME[] = "MPI_Reduce_local";
-
-
-int MPI_Reduce_local(const void *inbuf, void *inoutbuf, int count,
-                     MPI_Datatype datatype, MPI_Op op)
+PROTOTYPE ERROR_CLASS Reduce_local(BUFFER inbuf, BUFFER_OUT inoutbuf, INT count,
+                     DATATYPE datatype, OP op)
 {
     int err;
 

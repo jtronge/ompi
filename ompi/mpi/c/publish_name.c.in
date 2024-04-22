@@ -35,18 +35,9 @@
 #include "ompi/info/info.h"
 #include "ompi/communicator/communicator.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Publish_name = PMPI_Publish_name
-#endif
-#define MPI_Publish_name PMPI_Publish_name
-#endif
 
-static const char FUNC_NAME[] = "MPI_Publish_name";
-
-
-int MPI_Publish_name(const char *service_name, MPI_Info info,
-                     const char *port_name)
+PROTOTYPE ERROR_CLASS Publish_name(STRING service_name, INFO info,
+                     STRING port_name)
 {
     int ret;
     opal_cstring_t *info_str;

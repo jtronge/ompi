@@ -36,19 +36,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Reduce_init = PMPI_Reduce_init
-#endif
-#define MPI_Reduce_init PMPI_Reduce_init
-#endif
-
-static const char FUNC_NAME[] = "MPI_Reduce_init";
-
-
-int MPI_Reduce_init(const void *sendbuf, void *recvbuf, int count,
-                    MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm,
-                    MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Reduce_init(BUFFER sendbuf, BUFFER_OUT recvbuf, INT count,
+                    DATATYPE datatype, OP op, INT root, COMM  comm,
+                    INFO info, REQUEST_INOUT request)
 {
     int err;
 

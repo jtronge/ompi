@@ -287,11 +287,11 @@ prototype_sources = \
 	group_difference.c.in \
 	group_excl.c.in \
 	group_free.c.in \
-	# group_from_session_pset.c.in \
+	group_from_session_pset.c.in \
 	group_incl.c.in \
 	group_intersection.c.in \
-	# group_range_excl.c.in \
-	# group_range_incl.c.in \
+	group_range_excl.c.in \
+	group_range_incl.c.in \
 	group_rank.c.in \
 	group_size.c.in \
 	group_translate_ranks.c.in \
@@ -323,7 +323,23 @@ prototype_sources = \
 	pack_external.c.in \
 	pack_external_size.c.in \
 	# pcontrol.c.in \
-	precv_init.c.in
+	precv_init.c.in \
+	psend_init.c.in \
+	publish_name.c.in \
+	query_thread.c.in \
+	raccumulate.c.in \
+	recv_init.c.in \
+	reduce.c.in \
+	ireduce.c.in \
+	reduce_init.c.in \
+	# register_datarep.c.in \
+	reduce_local.c.in \
+	reduce_scatter.c.in \
+	ireduce_scatter.c.in \
+	reduce_scatter_init.c.in \
+	reduce_scatter_block.c.in \
+	ireduce_scatter_block.c.in \
+	reduce_scatter_block_init.c.in 
      	
 
 
@@ -542,11 +558,11 @@ interface_profile_sources = \
         generated_group_excl.c \
         group_f2c.c \
         generated_group_free.c \
-        group_from_session_pset.c \
+        generated_group_from_session_pset.c \
         generated_group_incl.c \
         generated_group_intersection.c \
-        group_range_excl.c \
-        group_range_incl.c \
+        generated_group_range_excl.c \
+        generated_group_range_incl.c \
         generated_group_rank.c \
         generated_group_size.c \
         generated_group_translate_ranks.c \
@@ -620,23 +636,23 @@ interface_profile_sources = \
         generated_pready_range.c \
         generated_precv_init.c \
         generated_probe.c \
-        psend_init.c \
-        publish_name.c \
-        query_thread.c \
-        raccumulate.c \
-        recv_init.c \
+        generated_psend_init.c \
+        generated_publish_name.c \
+        generated_query_thread.c \
+        generated_raccumulate.c \
+        generated_recv_init.c \
         generated_recv.c \
-        reduce.c \
-        ireduce.c \
-        reduce_init.c \
+        generated_reduce.c \
+        generated_ireduce.c \
+        generated_reduce_init.c \
         register_datarep.c \
-        reduce_local.c \
-        reduce_scatter.c \
-        ireduce_scatter.c \
-        reduce_scatter_init.c \
-        reduce_scatter_block.c \
-        ireduce_scatter_block.c \
-        reduce_scatter_block_init.c \
+        generated_reduce_local.c \
+        generated_reduce_scatter.c \
+        generated_ireduce_scatter.c \
+        generated_reduce_scatter_init.c \
+        generated_reduce_scatter_block.c \
+        generated_ireduce_scatter_block.c \
+        generated_reduce_scatter_block_init.c \
         request_c2f.c \
         request_f2c.c \
         request_free.c \

@@ -17,7 +17,7 @@
 #include "ompi/instance/instance.h"
 
 
-PROTOTYPE ERROR_CLASS Group_from_session_pset (MPI_Session session, STRING pset_name, GROUP_OUT newgroup)
+PROTOTYPE ERROR_CLASS Group_from_session_pset (SESSION session, STRING pset_name, GROUP_OUT newgroup)
 {
     int rc;
 
