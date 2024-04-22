@@ -16,6 +16,7 @@
  *                         reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
+ * Copyright (c) 2018      FUJITSU LIMITED.  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -30,32 +31,23 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/mca/pml/pml.h"
+#include "ompi/request/request.h"
 #include "ompi/memchecker.h"
-#include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Rsend = PMPI_Rsend
-#endif
-#define MPI_Rsend PMPI_Rsend
-#endif
-
-static const char FUNC_NAME[] = "MPI_Rsend";
-
-
-int MPI_Rsend(const void *buf, int count, MPI_Datatype type, int dest, int tag, MPI_Comm comm)
+PROTOTYPE ERROR_CLASS Rsend_init(BUFFER buf, INT count, DATATYPE type,
+                   INT dest, INT tag, COMM comm,
+                   REQUEST_INOUT request)
 {
-    int rc = MPI_SUCCESS;
-
-    SPC_RECORD(OMPI_SPC_RSEND, 1);
+    int rc;
 
     MEMCHECKER(
         memchecker_datatype(type);
-        memchecker_call(&opal_memchecker_base_isdefined, buf, count, type);
+        memchecker_call(&opal_memchecker_base_isaddressable, buf, count, type);
         memchecker_comm(comm);
     );
 
     if ( MPI_PARAM_CHECK ) {
+        rc = MPI_SUCCESS;
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
         if (ompi_comm_invalid(comm)) {
             return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_COMM, FUNC_NAME);
@@ -68,31 +60,29 @@ int MPI_Rsend(const void *buf, int count, MPI_Datatype type, int dest, int tag, 
         } else if (ompi_comm_peer_invalid(comm, dest) &&
                    (MPI_PROC_NULL != dest)) {
             rc = MPI_ERR_RANK;
-        } else {
-            OMPI_CHECK_DATATYPE_FOR_SEND(rc, type, count);
-            OMPI_CHECK_USER_BUFFER(rc, buf, type, count);
+        } else if (request == NULL) {
+            rc = MPI_ERR_REQUEST;
         }
         OMPI_ERRHANDLER_CHECK(rc, comm, rc, FUNC_NAME);
     }
 
-#if OPAL_ENABLE_FT_MPI
-    /*
-     * An early check, so as to return early if we are communicating with
-     * a failed process. This is not absolutely necessary since we will
-     * check for this, and other, error conditions during the completion
-     * call in the PML.
-     */
-    if( OPAL_UNLIKELY(!ompi_comm_iface_p2p_check_proc(comm, dest, &rc)) ) {
+    if (MPI_PROC_NULL == dest) {
+        rc = ompi_request_persistent_noop_create(request);
         OMPI_ERRHANDLER_RETURN(rc, comm, rc, FUNC_NAME);
     }
+
+#if OPAL_ENABLE_FT_MPI
+    /*
+     * The request will be checked for process failure errors during the
+     * completion calls. So no need to check here.
+     */
 #endif
 
-    if (MPI_PROC_NULL == dest) {
-        return MPI_SUCCESS;
-    }
-
-    rc = MCA_PML_CALL(send(buf, count, type, dest, tag,
-                           MCA_PML_BASE_SEND_READY, comm));
+    /*
+     * Here, we just initialize the request -- memchecker should set the buffer in MPI_Start.
+     */
+    rc =  MCA_PML_CALL(isend_init(buf,count,type,dest,tag,
+                                  MCA_PML_BASE_SEND_READY,comm,request));
     OMPI_ERRHANDLER_RETURN(rc, comm, rc, FUNC_NAME);
 }
 

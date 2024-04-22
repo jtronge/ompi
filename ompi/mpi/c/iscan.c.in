@@ -34,23 +34,12 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Scan_init = PMPI_Scan_init
-#endif
-#define MPI_Scan_init PMPI_Scan_init
-#endif
-
-static const char FUNC_NAME[] = "MPI_Scan_init";
-
-
-int MPI_Scan_init(const void *sendbuf, void *recvbuf, int count,
-                  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm,
-                  MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Iscan(BUFFER sendbuf, BUFFER_OUT recvbuf, INT count,
+              DATATYPE datatype, OP op, COMM comm, REQUEST_INOUT request)
 {
     int err;
 
-    SPC_RECORD(OMPI_SPC_SCAN_INIT, 1);
+    SPC_RECORD(OMPI_SPC_ISCAN, 1);
 
     MEMCHECKER(
         memchecker_datatype(datatype);
@@ -96,10 +85,10 @@ int MPI_Scan_init(const void *sendbuf, void *recvbuf, int count,
 
     /* Call the coll component to actually perform the allgather */
 
-    err = comm->c_coll->coll_scan_init(sendbuf, recvbuf, count,
-                                       datatype, op, comm,
-                                       info, request,
-                                       comm->c_coll->coll_scan_init_module);
+    err = comm->c_coll->coll_iscan(sendbuf, recvbuf, count,
+                                  datatype, op, comm,
+                                  request,
+                                  comm->c_coll->coll_iscan_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         ompi_coll_base_retain_op(*request, op, datatype);
     }

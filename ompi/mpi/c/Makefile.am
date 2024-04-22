@@ -339,7 +339,21 @@ prototype_sources = \
 	reduce_scatter_init.c.in \
 	reduce_scatter_block.c.in \
 	ireduce_scatter_block.c.in \
-	reduce_scatter_block_init.c.in 
+	reduce_scatter_block_init.c.in \
+	request_free.c.in \
+	request_get_status.c.in \
+	rget.c.in \
+	rget_accumulate.c.in \
+	rput.c.in \
+	rsend_init.c.in \
+	iscan.c.in \
+	scan_init.c.in \
+	scatter.c.in \
+	iscatter.c.in \
+	scatter_init.c.in \
+	scatterv.c.in \
+	iscatterv.c.in \
+	scatterv_init.c.in
      	
 
 
@@ -655,22 +669,22 @@ interface_profile_sources = \
         generated_reduce_scatter_block_init.c \
         request_c2f.c \
         request_f2c.c \
-        request_free.c \
-        request_get_status.c \
-        rget.c \
-        rget_accumulate.c \
-        rput.c \
-        rsend_init.c \
-        rsend.c \
+        generated_request_free.c \
+        generated_request_get_status.c \
+        generated_rget.c \
+        generated_rget_accumulate.c \
+        generated_rput.c \
+        generated_rsend_init.c \
+        generated_rsend.c \
         generated_scan.c \
-        iscan.c \
-        scan_init.c \
-        scatter.c \
-        iscatter.c \
-        scatter_init.c \
-        scatterv.c \
-        iscatterv.c \
-        scatterv_init.c \
+        generated_iscan.c \
+        generated_scan_init.c \
+        generated_scatter.c \
+        generated_iscatter.c \
+        generated_scatter_init.c \
+        generated_scatterv.c \
+        generated_iscatterv.c \
+        generated_scatterv_init.c \
         send_init.c \
         sendrecv.c \
         sendrecv_replace.c \

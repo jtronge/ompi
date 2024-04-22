@@ -35,23 +35,13 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Scatter_init = PMPI_Scatter_init
-#endif
-#define MPI_Scatter_init PMPI_Scatter_init
-#endif
-
-static const char FUNC_NAME[] = "MPI_Scatter_init";
-
-
-int MPI_Scatter_init(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                     void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                     int root, MPI_Comm comm, MPI_Info info, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Iscatter(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
+                 BUFFER_OUT recvbuf, INT recvcount, DATATYPE recvtype,
+                 INT root, COMM comm, REQUEST_INOUT request)
 {
     int err;
 
-    SPC_RECORD(OMPI_SPC_SCATTER_INIT, 1);
+    SPC_RECORD(OMPI_SPC_ISCATTER, 1);
 
     MEMCHECKER(
         memchecker_comm(comm);
@@ -152,9 +142,9 @@ int MPI_Scatter_init(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_scatter_init(sendbuf, sendcount, sendtype, recvbuf,
-                                          recvcount, recvtype, root, comm, info, request,
-                                          comm->c_coll->coll_scatter_init_module);
+    err = comm->c_coll->coll_iscatter(sendbuf, sendcount, sendtype, recvbuf,
+                                     recvcount, recvtype, root, comm, request,
+                                     comm->c_coll->coll_iscatter_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         if (OMPI_COMM_IS_INTRA(comm)) {
             if (MPI_IN_PLACE == recvbuf) {

@@ -11,10 +11,11 @@
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
  * Copyright (c) 2006-2012 Cisco Systems, Inc.  All rights reserved.
- * Copyright (c) 2012-2013 Los Alamos National Security, LLC.  All rights
+ * Copyright (c) 2010-2012 Oak Ridge National Labs.  All rights reserved.
+ * Copyright (c) 2012      Los Alamos National Security, LLC.  All rights
  *                         reserved.
- * Copyright (c) 2015-2019 Research Organization for Information Science
- *                         and Technology (RIST).  All rights reserved.
+ * Copyright (c) 2015      Research Organization for Information Science
+ *                         and Technology (RIST). All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -29,27 +30,16 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/datatype/ompi_datatype.h"
-#include "ompi/mca/coll/base/coll_base_util.h"
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Iscatterv = PMPI_Iscatterv
-#endif
-#define MPI_Iscatterv PMPI_Iscatterv
-#endif
-
-static const char FUNC_NAME[] = "MPI_Iscatterv";
-
-
-int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[],
-                  MPI_Datatype sendtype, void *recvbuf, int recvcount,
-                  MPI_Datatype recvtype, int root, MPI_Comm comm, MPI_Request *request)
+PROTOTYPE ERROR_CLASS Scatterv(BUFFER sendbuf, INT_ARRAY sendcounts, INT_ARRAY displs,
+                 DATATYPE sendtype, BUFFER_OUT recvbuf, INT recvcount,
+                 DATATYPE recvtype, INT root, COMM comm)
 {
     int i, size, err;
 
-    SPC_RECORD(OMPI_SPC_ISCATTERV, 1);
+    SPC_RECORD(OMPI_SPC_SCATTERV, 1);
 
     MEMCHECKER(
         ptrdiff_t ext;
@@ -191,28 +181,20 @@ int MPI_Iscatterv(const void *sendbuf, const int sendcounts[], const int displs[
         }
     }
 
-    /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_iscatterv(sendbuf, sendcounts, displs,
-                                      sendtype, recvbuf, recvcount, recvtype, root, comm,
-                                      request, comm->c_coll->coll_iscatterv_module);
-    if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
-        if (OMPI_COMM_IS_INTRA(comm)) {
-            if (MPI_IN_PLACE == recvbuf) {
-                recvtype = NULL;
-            } else if (ompi_comm_rank(comm) != root) {
-                sendtype = NULL;
-            }
-        } else {
-            if (MPI_ROOT == root) {
-                recvtype = NULL;
-            } else if (MPI_PROC_NULL == root) {
-                sendtype = NULL;
-                recvtype = NULL;
-            } else {
-                sendtype = NULL;
-            }
-        }
-        ompi_coll_base_retain_datatypes(*request, sendtype, recvtype);
+#if OPAL_ENABLE_FT_MPI
+    /*
+     * An early check, so as to return early if we are using a broken
+     * communicator. This is not absolutely necessary since we will
+     * check for this, and other, error conditions during the operation.
+     */
+    if( OPAL_UNLIKELY(!ompi_comm_iface_coll_check(comm, &err)) ) {
+        OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
     }
+#endif
+
+    /* Invoke the coll component to perform the back-end operation */
+    err = comm->c_coll->coll_scatterv(sendbuf, sendcounts, displs,
+                                     sendtype, recvbuf, recvcount, recvtype, root, comm,
+                                     comm->c_coll->coll_scatterv_module);
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

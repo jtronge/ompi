@@ -28,17 +28,8 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Request_free = PMPI_Request_free
-#endif
-#define MPI_Request_free PMPI_Request_free
-#endif
 
-static const char FUNC_NAME[] = "MPI_Request_free";
-
-
-int MPI_Request_free(MPI_Request *request)
+PROTOTYPE ERROR_CLASS Request_free(REQUEST_INOUT request)
 {
     int rc;
 
