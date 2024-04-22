@@ -31,16 +31,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Status_set_elements_x = PMPI_Status_set_elements_x
-#endif
-#define MPI_Status_set_elements_x PMPI_Status_set_elements_x
-#endif
 
-static const char FUNC_NAME[] = "MPI_Status_set_elements_x";
-
-int MPI_Status_set_elements_x(MPI_Status *status, MPI_Datatype datatype, MPI_Count count)
+PROTOTYPE ERROR_CLASS Status_set_elements_x(STATUS_OUT status, DATATYPE datatype, PARTITIONED_COUNT count)
 {
     int rc = MPI_SUCCESS;
     size_t size;

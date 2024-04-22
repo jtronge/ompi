@@ -32,17 +32,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Start = PMPI_Start
-#endif
-#define MPI_Start PMPI_Start
-#endif
 
-static const char FUNC_NAME[] = "MPI_Start";
-
-
-int MPI_Start(MPI_Request *request)
+PROTOTYPE ERROR_CLASS Start(REQUEST_INOUT request)
 {
     int ret = OMPI_SUCCESS;
 

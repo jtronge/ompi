@@ -31,25 +31,17 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_darray = PMPI_Type_create_darray
-#endif
-#define MPI_Type_create_darray PMPI_Type_create_darray
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_create_darray";
-
-int MPI_Type_create_darray(int size,
-                           int rank,
-                           int ndims,
-                           const int gsize_array[],
-                           const int distrib_array[],
-                           const int darg_array[],
-                           const int psize_array[],
-                           int order,
-                           MPI_Datatype oldtype,
-                           MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS Type_create_darray(INT size,
+                           INT rank,
+                           INT ndims,
+                           INT_ARRAY gsize_array,
+                           INT_ARRAY distrib_array,
+                           INT_ARRAY darg_array,
+                           INT_ARRAY psize_array,
+                           INT order,
+                           DATATYPE oldtype,
+                           DATATYPE_OUT newtype)
 
 {
     int i, rc;

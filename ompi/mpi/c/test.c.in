@@ -29,17 +29,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Test = PMPI_Test
-#endif
-#define MPI_Test PMPI_Test
-#endif
-
-static const char FUNC_NAME[] = "MPI_Test";
-
-
-int MPI_Test(MPI_Request *request, int *completed, MPI_Status *status)
+PROTOTYPE ERROR_CLASS Test(REQUEST_INOUT request, INT_OUT completed, STATUS_OUT status)
 {
     int rc;
 

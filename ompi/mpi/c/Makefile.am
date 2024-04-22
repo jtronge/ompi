@@ -369,7 +369,30 @@ prototype_sources = \
 	session_set_errhandler.c.in \
 	session_set_info.c.in \
 	ssend_init.c.in \
-	ssend.c.in
+	ssend.c.in \
+	start.c.in \
+	# startall.c.in \
+	# status_c2f.c.in \
+	# status_c2f08.c.in \
+	# status_f082c.c.in \
+	# status_f082f.c.in \
+	# status_f2c.c.in \
+	# status_f2f08.c.in \
+	status_set_cancelled.c.in \
+	status_set_elements.c.in \
+	status_set_elements_x.c.in \
+	# testall.c.in \
+	# testany.c.in \
+	test.c.in \
+	test_cancelled.c.in \
+	# testsome.c.in \
+	topo_test.c.in \
+	type_commit.c.in \
+	type_contiguous.c.in \
+	type_create_darray.c.in \
+	type_create_f90_complex.c.in \
+	type_create_f90_integer.c.in \
+	type_create_f90_real.c.in
 
      	
 
@@ -720,7 +743,7 @@ interface_profile_sources = \
         generated_session_set_info.c \
         generated_ssend_init.c \
         generated_ssend.c \
-        start.c \
+        generated_start.c \
         startall.c \
         status_c2f.c \
         status_c2f08.c \
@@ -728,22 +751,22 @@ interface_profile_sources = \
         status_f082f.c \
         status_f2c.c \
         status_f2f08.c \
-        status_set_cancelled.c \
-        status_set_elements.c \
-        status_set_elements_x.c \
+        generated_status_set_cancelled.c \
+        generated_status_set_elements.c \
+        generated_status_set_elements_x.c \
         testall.c \
         testany.c \
-        test.c \
-        test_cancelled.c \
+        generated_test.c \
+        generated_test_cancelled.c \
         testsome.c \
-        topo_test.c \
+        generated_topo_test.c \
         type_c2f.c \
-        type_commit.c \
-        type_contiguous.c \
-        type_create_darray.c \
-        type_create_f90_complex.c \
-        type_create_f90_integer.c \
-        type_create_f90_real.c \
+        generated_type_commit.c \
+        generated_type_contiguous.c \
+        generated_type_create_darray.c \
+        generated_type_create_f90_complex.c \
+        generated_type_create_f90_integer.c \
+        generated_type_create_f90_real.c \
         type_create_hindexed.c \
         type_create_hvector.c \
         type_create_indexed_block.c \
