@@ -30,20 +30,12 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_indexed = PMPI_Type_indexed
-#endif
-#define MPI_Type_indexed PMPI_Type_indexed
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_indexed";
-
-int MPI_Type_indexed(int count,
-                     const int array_of_blocklengths[],
-                     const int array_of_displacements[],
-                     MPI_Datatype oldtype,
-                     MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS Type_indexed(INT count,
+                     INT_ARRAY array_of_blocklengths,
+                     INT_ARRAY array_of_displacements,
+                     DATATYPE oldtype,
+                     DATATYPE_OUT newtype)
 {
     int rc, i;
 

@@ -404,7 +404,22 @@ prototype_sources = \
 	type_delete_attr.c.in \
 	type_dup.c.in \
 	type_free.c.in \
-	type_free_keyval.c.in
+	type_free_keyval.c.in \
+	type_get_attr.c.in \
+	# type_get_contents.c.in \
+	type_get_envelope.c.in \
+	type_get_extent.c.in \
+	type_get_extent_x.c.in \
+	type_get_name.c.in \
+	type_get_true_extent.c.in \
+	type_get_true_extent_x.c.in \
+	type_indexed.c.in \
+	type_match_size.c.in \
+	type_set_attr.c.in \
+	type_set_name.c.in \
+	type_size.c.in \
+	type_size_x.c.in \
+	type_vector.c.in
 
      	
 
@@ -792,21 +807,21 @@ interface_profile_sources = \
         type_f2c.c \
         generated_type_free.c \
         generated_type_free_keyval.c \
-        type_get_attr.c \
+        generated_type_get_attr.c \
         type_get_contents.c \
-        type_get_envelope.c \
-        type_get_extent.c \
-        type_get_extent_x.c \
-        type_get_name.c \
-        type_get_true_extent.c \
-        type_get_true_extent_x.c \
-        type_indexed.c \
-        type_match_size.c \
-        type_set_attr.c \
-        type_set_name.c \
-        type_size.c \
-        type_size_x.c \
-        type_vector.c \
+        generated_type_get_envelope.c \
+        generated_type_get_extent.c \
+        generated_type_get_extent_x.c \
+        generated_type_get_name.c \
+        generated_type_get_true_extent.c \
+        generated_type_get_true_extent_x.c \
+        generated_type_indexed.c \
+        generated_type_match_size.c \
+        generated_type_set_attr.c \
+        generated_type_set_name.c \
+        generated_type_size.c \
+        generated_type_size_x.c \
+        generated_type_vector.c \
         unpack_external.c \
         unpack.c \
         unpublish_name.c \

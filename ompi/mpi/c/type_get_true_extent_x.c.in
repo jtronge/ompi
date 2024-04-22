@@ -9,6 +9,8 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
+ *                         reserved.
  * Copyright (c) 2015      Research Organization for Information Science
  *                         and Technology (RIST). All rights reserved.
  * $COPYRIGHT$
@@ -27,41 +29,33 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_get_envelope = PMPI_Type_get_envelope
-#endif
-#define MPI_Type_get_envelope PMPI_Type_get_envelope
-#endif
-
-static const char FUNC_NAME[] = "MPI_Type_get_envelope";
-
-
-int MPI_Type_get_envelope(MPI_Datatype type,
-                          int *num_integers,
-                          int *num_addresses,
-                          int *num_datatypes,
-                          int *combiner)
+PROTOTYPE ERROR_CLASS Type_get_true_extent_x(DATATYPE datatype,
+                               ELEMENT_COUNT true_lb,
+                               ELEMENT_COUNT true_extent)
 {
+   MPI_Aint atrue_lb, atrue_extent;
    int rc;
 
    MEMCHECKER(
-      memchecker_datatype(type);
+      memchecker_datatype(datatype);
    );
 
    if( MPI_PARAM_CHECK ) {
       OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-      if (NULL == type || MPI_DATATYPE_NULL == type) {
+      if (NULL == datatype || MPI_DATATYPE_NULL == datatype) {
         return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_TYPE,
                                       FUNC_NAME );
-      } else if (NULL == num_integers || NULL == num_addresses ||
-                 NULL == num_datatypes || NULL == combiner) {
+      } else if (NULL == true_lb || NULL == true_extent) {
         return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_ARG,
                                       FUNC_NAME );
       }
    }
 
-   rc = ompi_datatype_get_args( type, 0, num_integers, NULL, num_addresses, NULL,
-                           num_datatypes, NULL, combiner );
-   OMPI_ERRHANDLER_NOHANDLE_RETURN( rc, rc, FUNC_NAME );
+   rc = ompi_datatype_get_true_extent( datatype, &atrue_lb, &atrue_extent );
+   if (OMPI_SUCCESS == rc) {
+      *true_lb = (MPI_Count) atrue_lb;
+      *true_extent = (MPI_Count) atrue_extent;
+   }
+
+   OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME );
 }

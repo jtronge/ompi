@@ -1,3 +1,4 @@
+/* -*- Mode: C; c-basic-offset:4 ; indent-tabs-mode:nil -*- */
 /*
  * Copyright (c) 2004-2007 The Trustees of Indiana University and Indiana
  *                         University Research and Technology
@@ -9,6 +10,7 @@
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
+ * Copyright (c) 2009      Oak Ridge National Labs.  All rights reserved.
  * Copyright (c) 2013      Los Alamos National Security, LLC. All rights
  *                         reserved.
  * Copyright (c) 2015      Research Organization for Information Science
@@ -29,42 +31,25 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_get_true_extent_x = PMPI_Type_get_true_extent_x
-#endif
-#define MPI_Type_get_true_extent_x PMPI_Type_get_true_extent_x
-#endif
-
-static const char FUNC_NAME[] = "MPI_Type_get_true_extent_x";
-
-int MPI_Type_get_true_extent_x(MPI_Datatype datatype,
-                               MPI_Count *true_lb,
-                               MPI_Count *true_extent)
+PROTOTYPE ERROR_CLASS Type_size_x(DATATYPE type, ELEMENT_COUNT size)
 {
-   MPI_Aint atrue_lb, atrue_extent;
-   int rc;
+    size_t type_size;
+    MEMCHECKER(
+        memchecker_datatype(type);
+    );
 
-   MEMCHECKER(
-      memchecker_datatype(datatype);
-   );
+    if (MPI_PARAM_CHECK) {
+        OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
+        if (NULL == type || MPI_DATATYPE_NULL == type) {
+            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_TYPE, FUNC_NAME);
+        } else if (NULL == size) {
+            return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_ARG, FUNC_NAME);
+        }
+    }
 
-   if( MPI_PARAM_CHECK ) {
-      OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
-      if (NULL == datatype || MPI_DATATYPE_NULL == datatype) {
-        return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_TYPE,
-                                      FUNC_NAME );
-      } else if (NULL == true_lb || NULL == true_extent) {
-        return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_ARG,
-                                      FUNC_NAME );
-      }
-   }
+    opal_datatype_type_size ( &type->super, &type_size);
 
-   rc = ompi_datatype_get_true_extent( datatype, &atrue_lb, &atrue_extent );
-   if (OMPI_SUCCESS == rc) {
-      *true_lb = (MPI_Count) atrue_lb;
-      *true_extent = (MPI_Count) atrue_extent;
-   }
+    *size = (type_size > (size_t) MPI_COUNT_MAX) ? MPI_UNDEFINED : (MPI_Count) type_size;
 
-   OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME );
+    return MPI_SUCCESS;
 }

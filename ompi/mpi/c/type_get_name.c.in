@@ -32,17 +32,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_get_name = PMPI_Type_get_name
-#endif
-#define MPI_Type_get_name PMPI_Type_get_name
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_get_name";
-
-
-int MPI_Type_get_name(MPI_Datatype type, char *type_name, int *resultlen)
+PROTOTYPE ERROR_CLASS Type_get_name(DATATYPE type, STRING_OUT type_name, INT_OUT resultlen)
 {
 
     MEMCHECKER(
