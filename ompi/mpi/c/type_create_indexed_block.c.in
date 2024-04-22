@@ -30,21 +30,12 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_hvector = PMPI_Type_create_hvector
-#endif
-#define MPI_Type_create_hvector PMPI_Type_create_hvector
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_create_hvector";
-
-
-int MPI_Type_create_hvector(int count,
-                            int blocklength,
-                            MPI_Aint stride,
-                            MPI_Datatype oldtype,
-                            MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS Type_create_indexed_block(INT count,
+                                  INT blocklength,
+                                  INT_ARRAY array_of_displacements,
+                                  DATATYPE oldtype,
+                                  DATATYPE_OUT newtype)
 {
     int rc;
 
@@ -56,8 +47,8 @@ int MPI_Type_create_hvector(int count,
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
         if( count < 0 ) {
             return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_COUNT,
-                                          FUNC_NAME );
-        } else if( blocklength < 0) {
+                                          FUNC_NAME);
+        } else if( (count > 0) && (blocklength < 0 || NULL == array_of_displacements) ) {
             return OMPI_ERRHANDLER_NOHANDLE_INVOKE(MPI_ERR_ARG,
                                           FUNC_NAME );
         } else if (NULL == oldtype || MPI_DATATYPE_NULL == oldtype ||
@@ -67,15 +58,17 @@ int MPI_Type_create_hvector(int count,
         }
     }
 
-    rc = ompi_datatype_create_hvector ( count, blocklength, stride, oldtype,
-                                        newtype );
-    OMPI_ERRHANDLER_NOHANDLE_CHECK(rc, rc, FUNC_NAME );
-
+    rc = ompi_datatype_create_indexed_block( count, blocklength, array_of_displacements,
+                                             oldtype, newtype );
+    if( rc != MPI_SUCCESS ) {
+        ompi_datatype_destroy( newtype );
+        OMPI_ERRHANDLER_NOHANDLE_RETURN( rc, rc, FUNC_NAME );
+    }
     {
-        const int* a_i[2] = {&count, &blocklength};
-        MPI_Aint a_a[1] = {stride};
+        const int* a_i[3] = {&count, &blocklength, array_of_displacements};
 
-        ompi_datatype_set_args( *newtype, 2, a_i, 1, a_a, 1, &oldtype, MPI_COMBINER_HVECTOR );
+        ompi_datatype_set_args( *newtype, 2 + count, a_i, 0, NULL, 1, &oldtype,
+                                MPI_COMBINER_INDEXED_BLOCK );
     }
 
     return MPI_SUCCESS;

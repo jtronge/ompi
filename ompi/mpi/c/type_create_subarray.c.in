@@ -31,23 +31,13 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_subarray = PMPI_Type_create_subarray
-#endif
-#define MPI_Type_create_subarray PMPI_Type_create_subarray
-#endif
-
-static const char FUNC_NAME[] = "MPI_Type_create_subarray";
-
-
-int MPI_Type_create_subarray(int ndims,
-                             const int size_array[],
-                             const int subsize_array[],
-                             const int start_array[],
-                             int order,
-                             MPI_Datatype oldtype,
-                             MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS Type_create_subarray(INT ndims,
+                             INT_ARRAY size_array,
+                             INT_ARRAY subsize_array,
+                             INT_ARRAY start_array,
+                             INT order,
+                             DATATYPE oldtype,
+                             DATATYPE_OUT newtype)
 {
     int32_t i, rc;
 

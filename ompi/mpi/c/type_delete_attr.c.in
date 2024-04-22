@@ -28,17 +28,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_delete_attr = PMPI_Type_delete_attr
-#endif
-#define MPI_Type_delete_attr PMPI_Type_delete_attr
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_delete_attr";
-
-
-int MPI_Type_delete_attr (MPI_Datatype type, int type_keyval)
+PROTOTYPE ERROR_CLASS Type_delete_attr (DATATYPE type, INT type_keyval)
 {
    int ret;
 

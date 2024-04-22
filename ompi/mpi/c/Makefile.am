@@ -392,7 +392,19 @@ prototype_sources = \
 	type_create_darray.c.in \
 	type_create_f90_complex.c.in \
 	type_create_f90_integer.c.in \
-	type_create_f90_real.c.in
+	type_create_f90_real.c.in \
+	# type_create_hindexed.c.in \
+	type_create_hvector.c.in \
+	type_create_indexed_block.c.in \
+	# type_create_hindexed_block.c.in \
+	# type_create_keyval.c.in \
+	type_create_resized.c.in \
+	# type_create_struct.c.in \
+	type_create_subarray.c.in \
+	type_delete_attr.c.in \
+	type_dup.c.in \
+	type_free.c.in \
+	type_free_keyval.c.in
 
      	
 
@@ -768,18 +780,18 @@ interface_profile_sources = \
         generated_type_create_f90_integer.c \
         generated_type_create_f90_real.c \
         type_create_hindexed.c \
-        type_create_hvector.c \
-        type_create_indexed_block.c \
+        generated_type_create_hvector.c \
+        generated_type_create_indexed_block.c \
         type_create_hindexed_block.c \
         type_create_keyval.c \
-        type_create_resized.c \
+        generated_type_create_resized.c \
         type_create_struct.c \
-        type_create_subarray.c \
-        type_delete_attr.c \
-        type_dup.c \
+        generated_type_create_subarray.c \
+        generated_type_delete_attr.c \
+        generated_type_dup.c \
         type_f2c.c \
-        type_free.c \
-        type_free_keyval.c \
+        generated_type_free.c \
+        generated_type_free_keyval.c \
         type_get_attr.c \
         type_get_contents.c \
         type_get_envelope.c \

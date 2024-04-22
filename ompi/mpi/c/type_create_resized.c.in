@@ -27,20 +27,11 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_resized = PMPI_Type_create_resized
-#endif
-#define MPI_Type_create_resized PMPI_Type_create_resized
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_create_resized";
-
-
-int MPI_Type_create_resized(MPI_Datatype oldtype,
-                            MPI_Aint lb,
-                            MPI_Aint extent,
-                            MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS Type_create_resized(DATATYPE oldtype,
+                            AINT lb,
+                            AINT extent,
+                            DATATYPE_OUT newtype)
 {
    int rc;
 
