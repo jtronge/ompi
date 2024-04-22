@@ -19,20 +19,21 @@
 
 int
 ompi_coll_base_agree_noft(void *contrib,
-                         int dt_count,
+                         size_t dt_count,
                          struct ompi_datatype_t *dt,
                          struct ompi_op_t *op,
                          struct ompi_group_t **group, bool update_grp,
                          struct ompi_communicator_t* comm,
                          mca_coll_base_module_t *module)
 {
-    return comm->c_coll->coll_allreduce(MPI_IN_PLACE, contrib, dt_count, dt, op,
+    void *sendbuf = OMPI_COMM_IS_INTER(comm) ? contrib : MPI_IN_PLACE;
+    return comm->c_coll->coll_allreduce(sendbuf, contrib, dt_count, dt, op,
                                        comm, comm->c_coll->coll_allreduce_module);
 }
 
 int
 ompi_coll_base_iagree_noft(void *contrib,
-                          int dt_count,
+                          size_t dt_count,
                           struct ompi_datatype_t *dt,
                           struct ompi_op_t *op,
                           struct ompi_group_t **group, bool update_grp,
@@ -40,6 +41,7 @@ ompi_coll_base_iagree_noft(void *contrib,
                           ompi_request_t **request,
                           mca_coll_base_module_t *module)
 {
-    return comm->c_coll->coll_iallreduce(MPI_IN_PLACE, contrib, dt_count, dt, op,
+    void *sendbuf = OMPI_COMM_IS_INTER(comm) ? contrib : MPI_IN_PLACE;
+    return comm->c_coll->coll_iallreduce(sendbuf, contrib, dt_count, dt, op,
                                         comm, request, comm->c_coll->coll_iallreduce_module);
 }
