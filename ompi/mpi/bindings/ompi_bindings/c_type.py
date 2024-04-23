@@ -607,12 +607,40 @@ class TypeStausOutStandard(StandardABIType):
             return f'{type_name} {self.name}[]'
 
 
-# For now this just assumes that MPI_Fint doesn't need any conversions
+@Type.add_type('F08_STATUS')
+class TypeF08Status(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const MPI_F08_Status *'
+
+
+@Type.add_type('F08_STATUS_OUT')
+class TypeF08StatusOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_F08_Status *'
+
+
+# TODO: For now this just assumes that MPI_Fint doesn't need any conversions
 @Type.add_type('FINT')
 class TypeFint(Type):
 
     def type_text(self, enable_count=False):
         return 'MPI_Fint'
+
+
+@Type.add_type('FINT_CONST')
+class TypeFintRef(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const MPI_Fint *'
+
+
+@Type.add_type('FINT_OUT')
+class TypeFintOut(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Fint *'
 
 
 @Type.add_type('STRING')
