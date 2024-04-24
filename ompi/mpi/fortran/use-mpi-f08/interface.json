@@ -12,7 +12,7 @@
                 }
             },
             {
-                "type": "INT",
+                "type": "COUNT",
                 "name": "sendcount"
             },
             {
@@ -29,7 +29,7 @@
                 }
             },
             {
-                "type": "INT",
+                "type": "COUNT",
                 "name": "recvcount"
             },
             {
