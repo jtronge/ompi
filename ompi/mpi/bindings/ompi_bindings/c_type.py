@@ -945,6 +945,71 @@ class TypeSessionErrhandlerFunctionStandard(Type):
     pass
 
 
+@Type.add_type('TYPE_COPY_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeTypeCopyAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Type_copy_attr_function *'
+
+
+@Type.add_type('TYPE_COPY_ATTR_FUNCTION', abi_type=['standard'])
+class TypeTypeCopyAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('TYPE_DELETE_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeTypeDeleteAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Type_delete_attr_function *'
+
+
+@Type.add_type('TYPE_DELETE_ATTR_FUNCTION', abi_type=['standard'])
+class TypeTypeDeleteAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('WIN_ERRHANLDER_FUNCTION', abi_type=['ompi'])
+class TypeWinErrhandlerFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Win_errhandler_function *'
+
+
+@Type.add_type('WIN_ERRHANDLER_FUNCTION', abi_type=['standard'])
+class TypeWinErrhandlerFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('WIN_COPY_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeWinCopyAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Win_copy_attr_function *'
+
+
+@Type.add_type('WIN_COPY_ATTR_FUNCTION', abi_type=['standard'])
+class TypeWinCopyAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
+@Type.add_type('WIN_DELETE_ATTR_FUNCTION', abi_type=['ompi'])
+class TypeWinDeleteAttrFunction(Type):
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Win_delete_attr_function *'
+
+
+@Type.add_type('WIN_DELETE_ATTR_FUNCTION', abi_type=['standard'])
+class TypeWinDeleteAttrFunctionStandard(Type):
+    # TODO: This may require a special function to wrap the callback
+    pass
+
+
 @Type.add_type('ERRHANDLER', abi_type=['ompi'])
 class TypeErrhandler(Type):
 
