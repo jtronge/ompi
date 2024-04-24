@@ -33,7 +33,7 @@
 #include "ompi/memchecker.h"
 
 
-PROTOTYPE ERROR_CLASS Status_c2f(STATUS c_status, MPI_Fint *f_status)
+PROTOTYPE ERROR_CLASS Status_c2f(STATUS c_status, FINT_OUT f_status)
 {
     const int *c_ints;
     int i;

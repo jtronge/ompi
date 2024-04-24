@@ -34,7 +34,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Testsome(INT incount, MPI_Request requests[],
+PROTOTYPE ERROR_CLASS Testsome(INT incount, REQUEST_INOUT requests,
                  INT_OUT outcount, INT_OUT indices,
                  STATUS_OUT statuses)
 {

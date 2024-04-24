@@ -6,7 +6,7 @@
  * Copyright (c) 2004-2005 The University of Tennessee and The University
  *                         of Tennessee Research Foundation.  All rights
  *                         reserved.
- * Copyright (c) 2004-2005 High Performance Computing Center Stuttgart,
+ * Copyright (c) 2004-2008 High Performance Computing Center Stuttgart,
  *                         University of Stuttgart.  All rights reserved.
  * Copyright (c) 2004-2005 The Regents of the University of California.
  *                         All rights reserved.
@@ -22,6 +22,7 @@
  * $HEADER$
  */
 #include "ompi_config.h"
+#include <stdio.h>
 
 #include "ompi/mpi/c/bindings.h"
 #include "ompi/runtime/params.h"
@@ -29,47 +30,33 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/mpi/fortran/base/fint_2_int.h"
 #include "ompi/mpi/fortran/base/constants.h"
+#include "ompi/memchecker.h"
 
 
-PROTOTYPE ERROR_CLASS Status_f082c(F08_STATUS f08_status, STATUS_OUT c_status)
+PROTOTYPE ERROR_CLASS Status_f2f08(FINT_CONST f_status, F08_STATUS_OUT f08_status)
 {
-    int *c_ints;
-
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);
 
-        /* MPI-4:18.2.5 implies that if you pass in
+        /* MPI-2:4.12.5 says that if you pass in
            MPI_STATUS[ES]_IGNORE, it's erroneous */
 
-        if (NULL == f08_status ||
+        if (NULL == f_status ||
 #if OMPI_BUILD_FORTRAN_BINDINGS
             /* This section is #if'ed out if we are not building the
                fortran bindings because these macros check values
                against constants that only exist if the fortran
                bindings exist. */
-            OMPI_IS_FORTRAN_STATUS_IGNORE(f08_status) ||
-            OMPI_IS_FORTRAN_STATUSES_IGNORE(f08_status) ||
+            OMPI_IS_FORTRAN_STATUS_IGNORE(f_status) ||
+            OMPI_IS_FORTRAN_STATUSES_IGNORE(f_status) ||
 #endif
-            NULL == c_status) {
+            NULL == f08_status) {
             return OMPI_ERRHANDLER_INVOKE(MPI_COMM_WORLD,
                                           MPI_ERR_IN_STATUS, FUNC_NAME);
         }
     }
 
-    /* ***NOTE*** See huge comment in status_c2f.c (yes, I know
-                  there's a size_t member in the C MPI_Status -- go
-                  read that comment for an explanation why copying
-                  everything as a bunch of int's is ok).
-
-       We can't use OMPI_FINT_2_INT here because of some complications
-       with include files.  :-( So just do the casting manually. */
-    c_status->MPI_SOURCE = (int)f08_status->MPI_SOURCE;
-    c_status->MPI_TAG = (int)f08_status->MPI_TAG;
-    c_status->MPI_ERROR = (int)f08_status->MPI_ERROR;
-    c_ints = (int *)c_status + 3;
-    for(int i=0; i < (int)(sizeof(MPI_Status) / sizeof(int) - 3); i++) {
-        c_ints[i] = (int)f08_status->internal[i];
-    }
+    memcpy(f08_status, f_status, OMPI_FORTRAN_STATUS_SIZE*sizeof(MPI_Fint));
 
     return MPI_SUCCESS;
 }

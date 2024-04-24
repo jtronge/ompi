@@ -32,7 +32,7 @@
 #include "ompi/mpi/fortran/base/constants.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Status_c2f08(STATUS c_status, MPI_F08_status *f08_status)
+PROTOTYPE ERROR_CLASS Status_c2f08(STATUS c_status, F08_STATUS_OUT f08_status)
 {
     const int *c_ints;
     MEMCHECKER(

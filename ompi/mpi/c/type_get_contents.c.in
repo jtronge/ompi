@@ -32,8 +32,8 @@ PROTOTYPE ERROR_CLASS Type_get_contents(DATATYPE mtype,
                           INT max_addresses,
                           INT max_datatypes,
                           INT_OUT array_of_integers,
-                          MPI_Aint array_of_addresses[],
-                          MPI_Datatype array_of_datatypes[])
+                          AINT_OUT array_of_addresses,
+                          DATATYPE_OUT array_of_datatypes)
 {
     int rc, i;
     MPI_Datatype newtype;

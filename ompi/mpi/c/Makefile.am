@@ -371,21 +371,21 @@ prototype_sources = \
 	ssend_init.c.in \
 	ssend.c.in \
 	start.c.in \
-	# startall.c.in \
-	# status_c2f.c.in \
-	# status_c2f08.c.in \
-	# status_f082c.c.in \
-	# status_f082f.c.in \
-	# status_f2c.c.in \
-	# status_f2f08.c.in \
+	startall.c.in \
+	status_c2f.c.in \
+	status_c2f08.c.in \
+	status_f082c.c.in \
+	status_f082f.c.in \
+	status_f2c.c.in \
+	status_f2f08.c.in \
 	status_set_cancelled.c.in \
 	status_set_elements.c.in \
 	status_set_elements_x.c.in \
-	# testall.c.in \
-	# testany.c.in \
+	testall.c.in \
+	testany.c.in \
 	test.c.in \
 	test_cancelled.c.in \
-	# testsome.c.in \
+	testsome.c.in \
 	topo_test.c.in \
 	type_commit.c.in \
 	type_contiguous.c.in \
@@ -406,7 +406,7 @@ prototype_sources = \
 	type_free.c.in \
 	type_free_keyval.c.in \
 	type_get_attr.c.in \
-	# type_get_contents.c.in \
+	type_get_contents.c.in \
 	type_get_envelope.c.in \
 	type_get_extent.c.in \
 	type_get_extent_x.c.in \
@@ -419,7 +419,40 @@ prototype_sources = \
 	type_set_name.c.in \
 	type_size.c.in \
 	type_size_x.c.in \
-	type_vector.c.in
+	type_vector.c.in \
+	unpack_external.c.in \
+	unpack.c.in \
+	unpublish_name.c.in \
+	wait.c.in \
+	waitany.c.in \
+	get.c.in \
+	put.c.in \
+	win_allocate.c.in \
+	win_allocate_shared.c.in \
+	# win_create_errhandler.c.in \
+	# win_create_keyval.c.in \
+	win_create.c.in \
+	win_create_dynamic.c.in \
+	win_free.c.in \
+	win_get_attr.c.in \
+	win_get_errhandler.c.in \
+	win_get_group.c.in \
+	win_get_info.c.in \
+	win_get_name.c.in \
+	win_lock.c.in \
+	win_lock_all.c.in \
+	win_post.c.in \
+	win_set_attr.c.in \
+	win_set_errhandler.c.in \
+	win_set_info.c.in \
+	win_set_name.c.in \
+	win_shared_query.c.in \
+	win_sync.c.in \
+	win_start.c.in \
+	win_test.c.in \
+	win_unlock.c.in \
+	win_unlock_all.c.in \
+	win_wait.c.in
 
      	
 
@@ -771,21 +804,21 @@ interface_profile_sources = \
         generated_ssend_init.c \
         generated_ssend.c \
         generated_start.c \
-        startall.c \
-        status_c2f.c \
-        status_c2f08.c \
-        status_f082c.c \
-        status_f082f.c \
-        status_f2c.c \
-        status_f2f08.c \
+        generated_startall.c \
+        generated_status_c2f.c \
+        generated_status_c2f08.c \
+        generated_status_f082c.c \
+        generated_status_f082f.c \
+        generated_status_f2c.c \
+        generated_status_f2f08.c \
         generated_status_set_cancelled.c \
         generated_status_set_elements.c \
         generated_status_set_elements_x.c \
-        testall.c \
-        testany.c \
+        generated_testall.c \
+        generated_testany.c \
         generated_test.c \
         generated_test_cancelled.c \
-        testsome.c \
+        generated_testsome.c \
         generated_topo_test.c \
         type_c2f.c \
         generated_type_commit.c \
@@ -808,7 +841,7 @@ interface_profile_sources = \
         generated_type_free.c \
         generated_type_free_keyval.c \
         generated_type_get_attr.c \
-        type_get_contents.c \
+        generated_type_get_contents.c \
         generated_type_get_envelope.c \
         generated_type_get_extent.c \
         generated_type_get_extent_x.c \
@@ -822,28 +855,28 @@ interface_profile_sources = \
         generated_type_size.c \
         generated_type_size_x.c \
         generated_type_vector.c \
-        unpack_external.c \
-        unpack.c \
-        unpublish_name.c \
-        wait.c \
+        generated_unpack_external.c \
+        generated_unpack.c \
+        generated_unpublish_name.c \
+        generated_wait.c \
         generated_waitall.c \
-        waitany.c \
+        generated_waitany.c \
         generated_waitsome.c \
         generated_wtime.c \
         wtick.c \
         generated_accumulate.c \
-        get.c \
-        put.c \
-        win_allocate.c \
-        win_allocate_shared.c \
+        generated_get.c \
+        generated_put.c \
+        generated_win_allocate.c \
+        generated_win_allocate_shared.c \
         generated_win_attach.c \
         generated_win_c2f.c \
         generated_win_call_errhandler.c \
         generated_win_complete.c  \
         win_create_errhandler.c \
         win_create_keyval.c \
-        win_create.c \
-        win_create_dynamic.c \
+        generated_win_create.c \
+        generated_win_create_dynamic.c \
         generated_win_delete_attr.c \
         generated_win_detach.c \
         win_f2c.c \
@@ -853,27 +886,27 @@ interface_profile_sources = \
         generated_win_flush_local.c \
         generated_win_flush_local_all.c \
         generated_win_free_keyval.c \
-        win_free.c \
-        win_get_attr.c \
-        win_get_errhandler.c \
-        win_get_group.c \
-        win_get_info.c \
-        win_get_name.c  \
-        win_lock.c \
-        win_lock_all.c \
-        win_post.c \
-        win_set_attr.c \
-        win_set_errhandler.c \
-        win_set_info.c \
-        win_set_name.c \
-        win_shared_query.c \
-        win_sync.c \
-        win_start.c \
-        win_test.c \
-        win_unlock.c \
-        win_unlock_all.c \
+        generated_win_free.c \
+        generated_win_get_attr.c \
+        generated_win_get_errhandler.c \
+        generated_win_get_group.c \
+        generated_win_get_info.c \
+        generated_win_get_name.c  \
+        generated_win_lock.c \
+        generated_win_lock_all.c \
+        generated_win_post.c \
+        generated_win_set_attr.c \
+        generated_win_set_errhandler.c \
+        generated_win_set_info.c \
+        generated_win_set_name.c \
+        generated_win_shared_query.c \
+        generated_win_sync.c \
+        generated_win_start.c \
+        generated_win_test.c \
+        generated_win_unlock.c \
+        generated_win_unlock_all.c \
         generated_send.c \
-        win_wait.c
+        generated_win_wait.c
 
 # The following functions were removed from the MPI standard, but are
 # retained for ABI compliance reasons.  They are listed independently
