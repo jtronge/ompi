@@ -611,14 +611,14 @@ class TypeStausOutStandard(StandardABIType):
 class TypeF08Status(Type):
 
     def type_text(self, enable_count=False):
-        return 'const MPI_F08_Status *'
+        return 'const MPI_F08_status *'
 
 
 @Type.add_type('F08_STATUS_OUT')
 class TypeF08StatusOut(Type):
 
     def type_text(self, enable_count=False):
-        return 'MPI_F08_Status *'
+        return 'MPI_F08_status *'
 
 
 # TODO: For now this just assumes that MPI_Fint doesn't need any conversions
