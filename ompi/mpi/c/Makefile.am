@@ -397,7 +397,7 @@ prototype_sources = \
 	type_create_hvector.c.in \
 	type_create_indexed_block.c.in \
 	# type_create_hindexed_block.c.in \
-	# type_create_keyval.c.in \
+	type_create_keyval.c.in \
 	type_create_resized.c.in \
 	# type_create_struct.c.in \
 	type_create_subarray.c.in \
@@ -429,8 +429,8 @@ prototype_sources = \
 	put.c.in \
 	win_allocate.c.in \
 	win_allocate_shared.c.in \
-	# win_create_errhandler.c.in \
-	# win_create_keyval.c.in \
+	win_create_errhandler.c.in \
+	win_create_keyval.c.in \
 	win_create.c.in \
 	win_create_dynamic.c.in \
 	win_free.c.in \
@@ -831,7 +831,7 @@ interface_profile_sources = \
         generated_type_create_hvector.c \
         generated_type_create_indexed_block.c \
         type_create_hindexed_block.c \
-        type_create_keyval.c \
+        generated_type_create_keyval.c \
         generated_type_create_resized.c \
         type_create_struct.c \
         generated_type_create_subarray.c \
@@ -873,8 +873,8 @@ interface_profile_sources = \
         generated_win_c2f.c \
         generated_win_call_errhandler.c \
         generated_win_complete.c  \
-        win_create_errhandler.c \
-        win_create_keyval.c \
+        generated_win_create_errhandler.c \
+        generated_win_create_keyval.c \
         generated_win_create.c \
         generated_win_create_dynamic.c \
         generated_win_delete_attr.c \

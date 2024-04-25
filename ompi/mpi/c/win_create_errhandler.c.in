@@ -31,7 +31,7 @@
 #include "ompi/win/win.h"
 
 
-PROTOTYPE ERROR_CLASS Win_create_errhandler(MPI_Win_errhandler_function *function,
+PROTOTYPE ERROR_CLASS Win_create_errhandler(WIN_ERRHANLDER_FUNCTION function,
                               ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
