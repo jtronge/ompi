@@ -40,13 +40,16 @@
 int
 mca_coll_basic_allgatherv_inter(const void *sbuf, int scount,
                                 struct ompi_datatype_t *sdtype,
-                                void *rbuf, const int *rcounts, const int *disps,
+                                void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                                 struct ompi_datatype_t *rdtype,
                                 struct ompi_communicator_t *comm,
                                 mca_coll_base_module_t *module)
 {
     int rsize, err, i;
-    int *scounts, *sdisps;
+    size_t *scounts;
+    ptrdiff_t *sdisps;
+    ompi_count_array scounts_desc;
+    ompi_disp_array sdisps_desc;
 
     rsize = ompi_comm_remote_size(comm);
 
@@ -61,7 +64,11 @@ mca_coll_basic_allgatherv_inter(const void *sbuf, int scount,
         sdisps[i] = 0;
     }
 
-    err = comm->c_coll->coll_alltoallv(sbuf, scounts, sdisps, sdtype,
+    scounts_desc.type = OMPI_COUNT_ARRAY_TYPE_SIZE_T;
+    scounts_desc.data.size_t_array = scounts;
+    sdisps_desc.type = OMPI_DISP_ARRAY_TYPE_PTRDIFF_T;
+    sdisps_desc.data.ptrdiff_t_array = sdisps;
+    err = comm->c_coll->coll_alltoallv(sbuf, &scounts_desc, &sdisps_desc, sdtype,
                                       rbuf, rcounts, disps, rdtype, comm,
                                       comm->c_coll->coll_alltoallv_module);
 
