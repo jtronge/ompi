@@ -60,7 +60,7 @@ BEGIN_C_DECLS
                                        struct ompi_communicator_t *comm,
                                        mca_coll_base_module_t *module);
 
-    int mca_coll_basic_allgatherv_inter(const void *sbuf, int scount,
+    int mca_coll_basic_allgatherv_inter(const void *sbuf, size_t scount,
                                         struct ompi_datatype_t *sdtype,
                                         void *rbuf, ompi_count_array *rcounts,
                                         ompi_disp_array *disps,
@@ -138,7 +138,7 @@ BEGIN_C_DECLS
                                     struct ompi_communicator_t *comm,
                                     mca_coll_base_module_t *module);
 
-    int mca_coll_basic_gatherv_intra(const void *sbuf, int scount,
+    int mca_coll_basic_gatherv_intra(const void *sbuf, size_t scount,
                                      struct ompi_datatype_t *sdtype,
                                      void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                                      struct ompi_datatype_t *rdtype,
@@ -146,7 +146,7 @@ BEGIN_C_DECLS
                                      struct ompi_communicator_t *comm,
                                      mca_coll_base_module_t *module);
 
-    int mca_coll_basic_gatherv_inter(const void *sbuf, int scount,
+    int mca_coll_basic_gatherv_inter(const void *sbuf, size_t scount,
                                      struct ompi_datatype_t *sdtype,
                                      void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                                      struct ompi_datatype_t *rdtype,
@@ -212,14 +212,14 @@ BEGIN_C_DECLS
 
     int mca_coll_basic_scatterv_intra(const void *sbuf, ompi_count_array *scounts, ompi_disp_array *disps,
                                       struct ompi_datatype_t *sdtype,
-                                      void *rbuf, int rcount,
+                                      void *rbuf, size_t rcount,
                                       struct ompi_datatype_t *rdtype,
                                       int root,
                                       struct ompi_communicator_t *comm,
                                       mca_coll_base_module_t *module);
     int mca_coll_basic_scatterv_inter(const void *sbuf, ompi_count_array *scounts, ompi_disp_array *disps,
                                       struct ompi_datatype_t *sdtype,
-                                      void *rbuf, int rcount,
+                                      void *rbuf, size_t rcount,
                                       struct ompi_datatype_t *rdtype,
                                       int root,
                                       struct ompi_communicator_t *comm,

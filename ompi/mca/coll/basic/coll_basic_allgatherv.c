@@ -38,7 +38,7 @@
  *	Returns:	- MPI_SUCCESS or error code
  */
 int
-mca_coll_basic_allgatherv_inter(const void *sbuf, int scount,
+mca_coll_basic_allgatherv_inter(const void *sbuf, size_t scount,
                                 struct ompi_datatype_t *sdtype,
                                 void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                                 struct ompi_datatype_t *rdtype,
@@ -53,8 +53,8 @@ mca_coll_basic_allgatherv_inter(const void *sbuf, int scount,
 
     rsize = ompi_comm_remote_size(comm);
 
-    scounts = (int *) malloc(2 * rsize * sizeof(int));
-    sdisps = scounts + rsize;
+    scounts = (size_t *) malloc(rsize * sizeof(size_t) + rsize * sizeof(ptrdiff_t));
+    sdisps = (ptrdiff_t *) (scounts + rsize);
     if (NULL == scounts) {
         return OMPI_ERR_OUT_OF_RESOURCE;
     }

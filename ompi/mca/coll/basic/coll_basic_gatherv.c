@@ -37,7 +37,7 @@
  *	Returns:	- MPI_SUCCESS or error code
  */
 int
-mca_coll_basic_gatherv_intra(const void *sbuf, int scount,
+mca_coll_basic_gatherv_intra(const void *sbuf, size_t scount,
                              struct ompi_datatype_t *sdtype,
                              void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                              struct ompi_datatype_t *rdtype, int root,
@@ -146,7 +146,7 @@ mca_coll_basic_gatherv_intra(const void *sbuf, int scount,
  *	Returns:	- MPI_SUCCESS or error code
  */
 int
-mca_coll_basic_gatherv_inter(const void *sbuf, int scount,
+mca_coll_basic_gatherv_inter(const void *sbuf, size_t scount,
                              struct ompi_datatype_t *sdtype,
                              void *rbuf, ompi_count_array *rcounts, ompi_disp_array *disps,
                              struct ompi_datatype_t *rdtype, int root,
