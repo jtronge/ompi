@@ -26,6 +26,13 @@ typedef struct ompi_count_array {
     } data;
 } ompi_count_array;
 
+/* Initialize a bigcount variant of the count array */
+static inline void ompi_count_array_init_c(ompi_count_array *array, const size_t *data)
+{
+    array->type = OMPI_COUNT_ARRAY_TYPE_SIZE_T;
+    array->data.size_t_array = data;
+}
+
 /* Get a count in the array at index i */
 static inline size_t ompi_count_array_get(ompi_count_array *array, size_t i)
 {
