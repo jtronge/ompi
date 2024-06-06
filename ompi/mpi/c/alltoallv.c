@@ -50,8 +50,8 @@ int MPI_Alltoallv(const void *sendbuf, const int sendcounts[],
                   MPI_Datatype recvtype, MPI_Comm comm)
 {
     int i, size, err;
-    ompi_count_array sendcounts_arg, recvcounts_arg;
-    ompi_disp_array sdispls_arg, rdispls_arg;
+    ompi_count_array sendcounts_desc, recvcounts_desc;
+    ompi_disp_array sdispls_desc, rdispls_desc;
 
     SPC_RECORD(OMPI_SPC_ALLTOALLV, 1);
 
@@ -138,12 +138,12 @@ int MPI_Alltoallv(const void *sendbuf, const int sendcounts[],
 #endif
 
     /* Invoke the coll component to perform the back-end operation */
-    OMPI_COUNT_ARRAY_INIT(&sendcounts_arg, sendcounts);
-    OMPI_DISP_ARRAY_INIT(&sdispls_arg, sdispls);
-    OMPI_COUNT_ARRAY_INIT(&recvcounts_arg, recvcounts);
-    OMPI_DISP_ARRAY_INIT(&rdispls_arg, rdispls);
-    err = comm->c_coll->coll_alltoallv(sendbuf, &sendcounts_arg, &sdispls_arg, sendtype,
-                                      recvbuf, &recvcounts_arg, &rdispls_arg, recvtype,
+    OMPI_COUNT_ARRAY_INIT(&sendcounts_desc, sendcounts);
+    OMPI_DISP_ARRAY_INIT(&sdispls_desc, sdispls);
+    OMPI_COUNT_ARRAY_INIT(&recvcounts_desc, recvcounts);
+    OMPI_DISP_ARRAY_INIT(&rdispls_desc, rdispls);
+    err = comm->c_coll->coll_alltoallv(sendbuf, &sendcounts_desc, &sdispls_desc, sendtype,
+                                      recvbuf, &recvcounts_desc, &rdispls_desc, recvtype,
                                       comm, comm->c_coll->coll_alltoallv_module);
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }

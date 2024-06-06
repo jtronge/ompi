@@ -54,8 +54,8 @@ int MPI_Neighbor_alltoallv_init(const void *sendbuf, const int sendcounts[], con
 {
     int i, err;
     int indegree, outdegree;
-    ompi_count_array sendcounts_arg, recvcounts_arg;
-    ompi_disp_array sdispls_arg, rdispls_arg;
+    ompi_count_array sendcounts_desc, recvcounts_desc;
+    ompi_disp_array sdispls_desc, rdispls_desc;
 
     SPC_RECORD(OMPI_SPC_NEIGHBOR_ALLTOALLV_INIT, 1);
 
@@ -146,12 +146,12 @@ int MPI_Neighbor_alltoallv_init(const void *sendbuf, const int sendcounts[], con
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    OMPI_COUNT_ARRAY_INIT(&sendcounts_arg, sendcounts);
-    OMPI_COUNT_ARRAY_INIT(&recvcounts_arg, recvcounts);
-    OMPI_DISP_ARRAY_INIT(&sdispls_arg, sdispls);
-    OMPI_DISP_ARRAY_INIT(&rdispls_arg, rdispls);
-    err = comm->c_coll->coll_neighbor_alltoallv_init(sendbuf, &sendcounts_arg, &sdispls_arg,
-                                                     sendtype, recvbuf, &recvcounts_arg, &rdispls_arg,
+    OMPI_COUNT_ARRAY_INIT(&sendcounts_desc, sendcounts);
+    OMPI_COUNT_ARRAY_INIT(&recvcounts_desc, recvcounts);
+    OMPI_DISP_ARRAY_INIT(&sdispls_desc, sdispls);
+    OMPI_DISP_ARRAY_INIT(&rdispls_desc, rdispls);
+    err = comm->c_coll->coll_neighbor_alltoallv_init(sendbuf, &sendcounts_desc, &sdispls_desc,
+                                                     sendtype, recvbuf, &recvcounts_desc, &rdispls_desc,
                                                      recvtype, comm, info, request,
                                                      comm->c_coll->coll_neighbor_alltoallv_init_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
