@@ -122,9 +122,19 @@ mca_coll_inter_scatterv_inter(const void *sbuf, ompi_count_array *scounts,
 	}
 
     } else {
-	err = MCA_PML_CALL(send(scounts, size, MPI_INT, 0,
+    /* We must ensure that rank 0 receives a size_t array */
+    size_t *tmp_scounts_root = malloc(sizeof(size_t) * size);
+    if (NULL == tmp_scounts_root) {
+        return OMPI_ERR_OUT_OF_RESOURCE;
+    }
+    for (i = 0; i < size; ++i) {
+        tmp_scounts_root[i] = ompi_count_array_get(scounts, i);
+    }
+	err = MCA_PML_CALL(send(tmp_scounts_root, sizeof(size_t) * size, MPI_BYTE, 0,
 				MCA_COLL_BASE_TAG_SCATTERV,
 				MCA_PML_BASE_SEND_STANDARD, comm));
+    free(tmp_scounts_root);
+
 	if (OMPI_SUCCESS != err) {
 	    return err;
 	}
