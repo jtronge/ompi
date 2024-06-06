@@ -53,6 +53,8 @@ int MPI_Ineighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype se
                              MPI_Datatype recvtype, MPI_Comm comm, MPI_Request *request)
 {
     int i, size, err;
+    ompi_count_array recvcounts_arg;
+    ompi_disp_array displs_arg;
 
     SPC_RECORD(OMPI_SPC_INEIGHBOR_ALLGATHERV, 1);
 
@@ -140,8 +142,10 @@ int MPI_Ineighbor_allgatherv(const void *sendbuf, int sendcount, MPI_Datatype se
     }
 
     /* Invoke the coll component to perform the back-end operation */
+    OMPI_COUNT_ARRAY_INIT(&recvcounts_arg, recvcounts);
+    OMPI_DISP_ARRAY_INIT(&displs_arg, displs);
     err = comm->c_coll->coll_ineighbor_allgatherv(sendbuf, sendcount, sendtype,
-                                                 recvbuf, (int *) recvcounts, (int *) displs,
+                                                 recvbuf, &recvcounts_arg, &displs_arg,
                                                  recvtype, comm, request,
                                                  comm->c_coll->coll_ineighbor_allgatherv_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {

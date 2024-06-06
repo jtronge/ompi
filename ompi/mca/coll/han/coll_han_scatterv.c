@@ -257,15 +257,15 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
         }
 
         /* Up Iscatterv */
-        ompi_count_array_init_c(&up_scounts_arg, up_scounts);
-        ompi_disp_array_init_c(&up_displs_arg, up_displs);
+        OMPI_COUNT_ARRAY_INIT(&up_scounts_arg, up_scounts);
+        OMPI_DISP_ARRAY_INIT(&up_displs_arg, up_displs);
         up_comm->c_coll->coll_iscatterv((const char *) reorder_sbuf, &up_scounts_arg, &up_displs_arg, sdtype,
                                         rbuf, rcount, rdtype, root_up_rank, up_comm, &iscatterv_req,
                                         up_comm->c_coll->coll_iscatterv_module);
 
         /* Low Scatterv */
-        ompi_count_array_init_c(&low_scounts_arg, low_scounts);
-        ompi_disp_array_init_c(&low_displs_arg, low_displs);
+        OMPI_COUNT_ARRAY_INIT(&low_scounts_arg, low_scounts);
+        OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
         low_comm->c_coll->coll_scatterv(sbuf, &low_scounts_arg, &low_displs_arg, sdtype, rbuf, rcount, rdtype,
                                         root_low_rank, low_comm,
                                         low_comm->c_coll->coll_scatterv_module);
@@ -370,8 +370,8 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
     ompi_request_wait(&iscatterv_req, MPI_STATUS_IGNORE);
 
     /* Low Scatterv */
-    ompi_count_array_init_c(&low_scounts_arg, low_scounts);
-    ompi_disp_array_init_c(&low_displs_arg, low_displs);
+    OMPI_COUNT_ARRAY_INIT(&low_scounts_arg, low_scounts);
+    OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
     low_comm->c_coll->coll_scatterv((void *) tmp_buf, &low_scounts_arg, &low_displs_arg, MPI_BYTE, rbuf,
                                     rcount, rdtype, root_low_rank, low_comm,
                                     low_comm->c_coll->coll_scatterv_module);

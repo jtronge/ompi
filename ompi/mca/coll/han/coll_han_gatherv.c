@@ -153,8 +153,8 @@ int mca_coll_han_gatherv_intra(const void *sbuf, size_t scount, struct ompi_data
         }
 
         /* Low Gatherv */
-        ompi_count_array_init_c(&low_rcounts_arg, low_rcounts);
-        ompi_disp_array_init_c(&low_displs_arg, low_displs);
+        OMPI_COUNT_ARRAY_INIT(&low_rcounts_arg, low_rcounts);
+        OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
         low_comm->c_coll->coll_gatherv(sbuf, scount, sdtype, rbuf, &low_rcounts_arg, &low_displs_arg, rdtype,
                                        root_low_rank, low_comm,
                                        low_comm->c_coll->coll_gatherv_module);
@@ -236,8 +236,8 @@ int mca_coll_han_gatherv_intra(const void *sbuf, size_t scount, struct ompi_data
         }
 
         /* Up Gatherv */
-        ompi_count_array_init_c(&up_rcounts_arg, up_rcounts);
-        ompi_disp_array_init_c(&up_displs_arg, up_displs);
+        OMPI_COUNT_ARRAY_INIT(&up_rcounts_arg, up_rcounts);
+        OMPI_DISP_ARRAY_INIT(&up_displs_arg, up_displs);
         up_comm->c_coll->coll_gatherv(sbuf, 0, sdtype, tmp_rbuf, &up_rcounts_arg, &up_displs_arg, rdtype,
                                       root_up_rank, up_comm, up_comm->c_coll->coll_gatherv_module);
 
@@ -353,8 +353,8 @@ int mca_coll_han_gatherv_intra(const void *sbuf, size_t scount, struct ompi_data
                                   low_comm->c_coll->coll_gather_module);
 
     /* Low Gatherv */
-    ompi_count_array_init_c(&low_rcounts_arg, low_rcounts);
-    ompi_disp_array_init_c(&low_displs_arg, low_displs);
+    OMPI_COUNT_ARRAY_INIT(&low_rcounts_arg, low_rcounts);
+    OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
     low_comm->c_coll->coll_gatherv(sbuf, scount, sdtype, (void *) tmp_buf, &low_rcounts_arg, &low_displs_arg,
                                    MPI_BYTE, root_low_rank, low_comm,
                                    low_comm->c_coll->coll_gatherv_module);

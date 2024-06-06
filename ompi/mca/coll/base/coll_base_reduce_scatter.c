@@ -98,7 +98,7 @@ int ompi_coll_base_reduce_scatter_intra_nonoverlapping(const void *sbuf, void *r
     for (i = 1; i < size; i++) {
         displs[i] = displs[i-1] + ompi_count_array_get(rcounts, i-1);
     }
-    ompi_disp_array_init_c(&displs_arg, displs);
+    OMPI_DISP_ARRAY_INIT(&displs_arg, displs);
     if (MPI_IN_PLACE == sbuf && root == rank) {
         err =  comm->c_coll->coll_scatterv (tmprbuf, rcounts, &displs_arg, dtype,
                                            MPI_IN_PLACE, 0, MPI_DATATYPE_NULL,

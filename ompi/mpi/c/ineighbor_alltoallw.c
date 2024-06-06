@@ -54,6 +54,8 @@ int MPI_Ineighbor_alltoallw(const void *sendbuf, const int sendcounts[], const M
 {
     int i, err;
     int indegree, outdegree;
+    ompi_count_array sendcounts_arg, recvcounts_arg;
+    ompi_disp_array sdispls_arg, rdispls_arg;
 
     SPC_RECORD(OMPI_SPC_INEIGHBOR_ALLTOALLW, 1);
 
@@ -142,8 +144,12 @@ int MPI_Ineighbor_alltoallw(const void *sendbuf, const int sendcounts[], const M
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_ineighbor_alltoallw(sendbuf, sendcounts, sdispls, sendtypes,
-                                                recvbuf, recvcounts, rdispls, recvtypes, comm, request,
+    OMPI_COUNT_ARRAY_INIT(&sendcounts_arg, sendcounts);
+    OMPI_COUNT_ARRAY_INIT(&recvcounts_arg, recvcounts);
+    OMPI_DISP_ARRAY_INIT(&sdispls_arg, sdispls);
+    OMPI_DISP_ARRAY_INIT(&rdispls_arg, rdispls);
+    err = comm->c_coll->coll_ineighbor_alltoallw(sendbuf, &sendcounts_arg, &sdispls_arg, sendtypes,
+                                                recvbuf, &recvcounts_arg, &rdispls_arg, recvtypes, comm, request,
                                                 comm->c_coll->coll_ineighbor_alltoallw_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         ompi_coll_base_retain_datatypes_w(*request, sendtypes, recvtypes, true);
