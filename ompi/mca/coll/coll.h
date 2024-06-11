@@ -79,6 +79,7 @@
 #include "mpi.h"
 #include "ompi/mca/mca.h"
 #include "opal/mca/base/base.h"
+#include "ompi/mca/coll/base/base.h"
 
 #include "ompi/request/request.h"
 #include "ompi/util/count_disp_array.h"

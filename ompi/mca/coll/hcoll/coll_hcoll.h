@@ -248,7 +248,7 @@ int mca_coll_hcoll_alltoallv(const void *sbuf, ompi_count_array *scounts,
                             struct ompi_communicator_t *comm,
                             mca_coll_base_module_t *module);
 
-int mca_coll_hcoll_gatherv(const void* sbuf, int scount,
+int mca_coll_hcoll_gatherv(const void* sbuf, size_t scount,
                             struct ompi_datatype_t *sdtype,
                             void* rbuf, ompi_count_array *rcounts, ompi_disp_array *displs,
                             struct ompi_datatype_t *rdtype,
@@ -259,7 +259,7 @@ int mca_coll_hcoll_gatherv(const void* sbuf, int scount,
 
 int mca_coll_hcoll_scatterv(const void* sbuf, ompi_count_array *scounts, ompi_disp_array *displs,
                             struct ompi_datatype_t *sdtype,
-                            void* rbuf, int rcount,
+                            void* rbuf, size_t rcount,
                             struct ompi_datatype_t *rdtype,
                             int root,
                             struct ompi_communicator_t *comm,
@@ -283,7 +283,7 @@ int mca_coll_hcoll_iallgather(const void *sbuf, size_t scount,
                             ompi_request_t** request,
                             mca_coll_base_module_t *module);
 
-int mca_coll_hcoll_iallgatherv(const void *sbuf, int scount,
+int mca_coll_hcoll_iallgatherv(const void *sbuf, size_t scount,
                             struct ompi_datatype_t *sdtype,
                             void *rbuf, ompi_count_array *rcount,
                             ompi_disp_array *displs,
@@ -327,7 +327,7 @@ int mca_coll_hcoll_ialltoallv(const void *sbuf, ompi_count_array *scounts,
                             mca_coll_base_module_t *module);
 #endif
 
-int mca_coll_hcoll_igatherv(const void* sbuf, int scount,
+int mca_coll_hcoll_igatherv(const void* sbuf, size_t scount,
                             struct ompi_datatype_t *sdtype,
                             void* rbuf, ompi_count_array *rcounts, ompi_disp_array *displs,
                             struct ompi_datatype_t *rdtype,
