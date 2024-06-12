@@ -72,10 +72,9 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
     int w_rank, w_size;              /* information about the global communicator */
     int root_low_rank, root_up_rank; /* root ranks for both sub-communicators */
     int err, *vranks, low_rank, low_size, up_rank, up_size, *topo;
-    size_t *low_scounts = NULL;
-    ptrdiff_t *low_displs = NULL;
-    ompi_count_array low_scounts_arg;
-    ompi_disp_array low_displs_arg;
+    int *low_scounts = NULL, *low_displs = NULL;
+    ompi_count_array low_scounts_desc;
+    ompi_disp_array low_displs_desc;
     ompi_request_t *iscatterv_req = NULL;
 
     /* Create the subcommunicators */
@@ -140,16 +139,14 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
     /* #################### Root ########################### */
     if (root == w_rank) {
         int low_peer, up_peer, w_peer;
-        int need_bounce_buf = 0, total_up_scounts = 0;
-        size_t *up_peer_lb = NULL, *up_peer_ub = NULL;
-        size_t *up_scounts = NULL;
-        ptrdiff_t *up_displs = NULL;
-        ompi_count_array up_scounts_arg;
-        ompi_disp_array up_displs_arg;
+        int need_bounce_buf = 0, total_up_scounts = 0, *up_displs = NULL, *up_scounts = NULL,
+            *up_peer_lb = NULL, *up_peer_ub = NULL;
+        ompi_count_array up_scounts_desc;
+        ompi_disp_array up_displs_desc;
         char *reorder_sbuf = (char *) sbuf, *bounce_buf = NULL;
 
-        low_scounts = malloc(low_size * sizeof(size_t));
-        low_displs = malloc(low_size * sizeof(ptrdiff_t));
+        low_scounts = malloc(low_size * sizeof(int));
+        low_displs = malloc(low_size * sizeof(int));
         if (!low_scounts || !low_displs) {
             err = OMPI_ERR_OUT_OF_RESOURCE;
             goto root_out;
@@ -165,16 +162,15 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
             low_scounts[low_peer] = ompi_count_array_get(scounts, w_peer);
         }
 
-        up_scounts = calloc(up_size, sizeof(size_t));
-        up_displs = malloc(up_size * sizeof(ptrdiff_t));
-        up_peer_ub = calloc(up_size, sizeof(size_t));
+        up_scounts = calloc(up_size, sizeof(int));
+        up_displs = malloc(up_size * sizeof(int));
+        up_peer_ub = calloc(up_size, sizeof(int));
         if (!up_scounts || !up_displs || !up_peer_ub) {
             err = OMPI_ERR_OUT_OF_RESOURCE;
             goto root_out;
         }
 
         for (up_peer = 0; up_peer < up_size; ++up_peer) {
-            /* TODO: Should this be set to SIZE_T_MAX */
             up_displs[up_peer] = INT_MAX;
         }
 
@@ -195,15 +191,18 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
             }
 
             up_peer_ub[up_peer] = 0 < ompi_count_array_get(scounts, w_peer)
-                                          && ompi_disp_array_get(displs, w_peer) + ompi_count_array_get(scounts, w_peer) > up_peer_ub[up_peer]
-                                      ? ompi_disp_array_get(displs, w_peer) + ompi_count_array_get(scounts, w_peer)
+                                          && ompi_disp_array_get(displs, w_peer)
+                                             + ompi_count_array_get(scounts, w_peer) > up_peer_ub[up_peer]
+                                      ? ompi_disp_array_get(displs, w_peer)
+                                        + ompi_count_array_get(scounts, w_peer)
                                       : up_peer_ub[up_peer];
 
             up_scounts[up_peer] += ompi_count_array_get(scounts, w_peer);
             total_up_scounts += ompi_count_array_get(scounts, w_peer);
 
             /* Optimize for the happy path */
-            up_displs[up_peer] = 0 < ompi_count_array_get(scounts, w_peer) && ompi_disp_array_get(displs, w_peer) < up_displs[up_peer]
+            up_displs[up_peer] = 0 < ompi_count_array_get(scounts, w_peer)
+                                 && ompi_disp_array_get(displs, w_peer) < up_displs[up_peer]
                                      ? ompi_disp_array_get(displs, w_peer)
                                      : up_displs[up_peer];
         }
@@ -251,22 +250,25 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
 
                 ompi_datatype_copy_content_same_ddt(sdtype, ompi_count_array_get(scounts, w_peer),
                                                     reorder_sbuf + offset,
-                                                    (char *) sbuf + ompi_disp_array_get(displs, w_peer) * sdext);
+                                                    (char *) sbuf
+                                                        + ompi_disp_array_get(displs, w_peer) * sdext);
                 offset += sdext * ompi_count_array_get(scounts, w_peer);
             }
         }
 
         /* Up Iscatterv */
-        OMPI_COUNT_ARRAY_INIT(&up_scounts_arg, up_scounts);
-        OMPI_DISP_ARRAY_INIT(&up_displs_arg, up_displs);
-        up_comm->c_coll->coll_iscatterv((const char *) reorder_sbuf, &up_scounts_arg, &up_displs_arg, sdtype,
+        OMPI_COUNT_ARRAY_INIT(&up_scounts_desc, up_scounts);
+        OMPI_DISP_ARRAY_INIT(&up_displs_desc, up_displs);
+        up_comm->c_coll->coll_iscatterv((const char *) reorder_sbuf,
+                                        &up_scounts_desc, &up_displs_desc, sdtype,
                                         rbuf, rcount, rdtype, root_up_rank, up_comm, &iscatterv_req,
                                         up_comm->c_coll->coll_iscatterv_module);
 
         /* Low Scatterv */
-        OMPI_COUNT_ARRAY_INIT(&low_scounts_arg, low_scounts);
-        OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
-        low_comm->c_coll->coll_scatterv(sbuf, &low_scounts_arg, &low_displs_arg, sdtype, rbuf, rcount, rdtype,
+        OMPI_COUNT_ARRAY_INIT(&low_scounts_desc, low_scounts);
+        OMPI_DISP_ARRAY_INIT(&low_displs_desc, low_displs);
+        low_comm->c_coll->coll_scatterv(sbuf, &low_scounts_desc, &low_displs_desc,
+                                        sdtype, rbuf, rcount, rdtype,
                                         root_low_rank, low_comm,
                                         low_comm->c_coll->coll_scatterv_module);
 
@@ -328,6 +330,7 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
 
     uint64_t *low_data_size = NULL;
     char *tmp_buf = NULL;
+    ompi_datatype_t *temptype = MPI_BYTE;
 
     /* Allocate a temporary array to gather the data size, i.e. data type size x count,
      * in bytes from local peers */
@@ -337,42 +340,57 @@ int mca_coll_han_scatterv_intra(const void *sbuf, ompi_count_array *scounts, omp
         goto node_leader_out;
     }
 
-    size_t rsize = 0;
-    for (int i = 0; i < low_size; ++i) {
-        rsize += low_data_size[i];
-    }
-
     /* Low Gather -  Gather local peers' receive data sizes */
     low_comm->c_coll->coll_gather((const void *) &receive_size, 1, MPI_UINT64_T,
                                   (void *) low_data_size, 1, MPI_UINT64_T, root_low_rank, low_comm,
                                   low_comm->c_coll->coll_gather_module);
 
-    low_scounts = malloc(low_size * sizeof(size_t));
-    low_displs = malloc(low_size * sizeof(ptrdiff_t));
+    /* Determine if we need to create a custom datatype instead of MPI_BYTE,
+     * to avoid count(type int) overflow
+     * TODO: Remove this logic once we adopt large-count, i.e. count will become 64-bit.
+     */
+    int total_up_scount = 0;
+    size_t rsize = 0, datatype_size = 1, max_data_size = 0;
+    for (int i = 0; i < low_size; ++i) {
+        rsize += (size_t) low_data_size[i];
+        max_data_size = (size_t) low_data_size[i] > max_data_size ? (size_t) low_data_size[i]
+                                                                  : max_data_size;
+    }
+
+    if (max_data_size > (size_t) INT_MAX) {
+        datatype_size = coll_han_utils_gcd(low_data_size, low_size);
+    }
+
+    low_scounts = malloc(low_size * sizeof(int));
+    low_displs = malloc(low_size * sizeof(int));
     tmp_buf = (char *) malloc(rsize); /* tmp_buf is still valid if rsize is 0 */
     if (!tmp_buf || !low_scounts || !low_displs) {
         err = OMPI_ERR_OUT_OF_RESOURCE;
         goto node_leader_out;
     }
 
-    size_t total_up_scount = 0;
     for (int i = 0; i < low_size; ++i) {
-        low_scounts[i] = low_data_size[i];
+        low_scounts[i] = (int) ((size_t) low_data_size[i] / datatype_size);
         low_displs[i] = i > 0 ? low_displs[i - 1] + low_scounts[i - 1] : 0;
         total_up_scount += low_scounts[i];
     }
 
+    if (1 < datatype_size) {
+        coll_han_utils_create_contiguous_datatype(datatype_size, MPI_BYTE, &temptype);
+        ompi_datatype_commit(&temptype);
+    }
+
     /* Up Iscatterv */
     up_comm->c_coll->coll_iscatterv(NULL, NULL, NULL, NULL, (void *) tmp_buf, total_up_scount,
-                                    MPI_BYTE, root_up_rank, up_comm, &iscatterv_req,
+                                    temptype, root_up_rank, up_comm, &iscatterv_req,
                                     up_comm->c_coll->coll_iscatterv_module);
 
     ompi_request_wait(&iscatterv_req, MPI_STATUS_IGNORE);
 
     /* Low Scatterv */
-    OMPI_COUNT_ARRAY_INIT(&low_scounts_arg, low_scounts);
-    OMPI_DISP_ARRAY_INIT(&low_displs_arg, low_displs);
-    low_comm->c_coll->coll_scatterv((void *) tmp_buf, &low_scounts_arg, &low_displs_arg, MPI_BYTE, rbuf,
+    OMPI_COUNT_ARRAY_INIT(&low_scounts_desc, low_scounts);
+    OMPI_DISP_ARRAY_INIT(&low_displs_desc, low_displs);
+    low_comm->c_coll->coll_scatterv((void *) tmp_buf, &low_scounts_desc, &low_displs_desc, temptype, rbuf,
                                     rcount, rdtype, root_low_rank, low_comm,
                                     low_comm->c_coll->coll_scatterv_module);
 
@@ -388,6 +406,9 @@ node_leader_out:
     }
     if (tmp_buf) {
         free(tmp_buf);
+    }
+    if (MPI_BYTE != temptype) {
+        ompi_datatype_destroy(&temptype);
     }
 
     return err;
