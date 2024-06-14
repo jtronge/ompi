@@ -64,10 +64,8 @@ mca_coll_basic_allgatherv_inter(const void *sbuf, size_t scount,
         sdisps[i] = 0;
     }
 
-    scounts_desc.type = OMPI_COUNT_ARRAY_TYPE_SIZE_T;
-    scounts_desc.data.size_t_array = scounts;
-    sdisps_desc.type = OMPI_DISP_ARRAY_TYPE_PTRDIFF_T;
-    sdisps_desc.data.ptrdiff_t_array = sdisps;
+    OMPI_COUNT_ARRAY_INIT(&scounts_desc, scounts);
+    OMPI_DISP_ARRAY_INIT(&sdisps_desc, sdisps);
     err = comm->c_coll->coll_alltoallv(sbuf, &scounts_desc, &sdisps_desc, sdtype,
                                       rbuf, rcounts, disps, rdtype, comm,
                                       comm->c_coll->coll_alltoallv_module);

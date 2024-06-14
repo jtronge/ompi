@@ -338,8 +338,7 @@ mca_coll_basic_reduce_scatter_intra(const void *sbuf, void *rbuf, ompi_count_arr
 
         /* scatter */
         if (MPI_SUCCESS == err) {
-            disps_desc.type = OMPI_DISP_ARRAY_TYPE_PTRDIFF_T;
-            disps_desc.data.ptrdiff_t_array = disps;
+            OMPI_DISP_ARRAY_INIT(&disps_desc, disps);
             err = comm->c_coll->coll_scatterv(recv_buf, rcounts, &disps_desc, dtype,
                                              rbuf, ompi_count_array_get(rcounts, rank), dtype, 0,
                                              comm, comm->c_coll->coll_scatterv_module);
@@ -474,8 +473,7 @@ mca_coll_basic_reduce_scatter_inter(const void *sbuf, void *rbuf, ompi_count_arr
     }
 
     /* Now do a scatterv on the local communicator */
-    disps_desc.type = OMPI_DISP_ARRAY_TYPE_PTRDIFF_T;
-    disps_desc.data.ptrdiff_t_array = disps;
+    OMPI_DISP_ARRAY_INIT(&disps_desc, disps);
     err = comm->c_local_comm->c_coll->coll_scatterv(lbuf, rcounts, &disps_desc, dtype,
                                                    rbuf, ompi_count_array_get(rcounts, rank), dtype, 0,
                                                    comm->c_local_comm,
