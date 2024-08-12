@@ -229,7 +229,7 @@ def print_c_source_header(out):
     out.dump('#include "ompi/errhandler/errhandler.h"')
     out.dump('#include "ompi/datatype/ompi_datatype.h"')
     out.dump('#include "ts.h"')
-    out.dump('#include "array.h"')
+    out.dump('#include "bigcount.h"')
 
 
 def print_binding(prototype, lang, out, bigcount=False, template=None):
