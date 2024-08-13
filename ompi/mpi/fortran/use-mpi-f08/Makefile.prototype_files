@@ -153,6 +153,10 @@ ready_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_shared_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_all_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_at_all_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_at_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_shared_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/waitall.c.in \

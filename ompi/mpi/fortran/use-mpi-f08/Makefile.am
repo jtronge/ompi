@@ -200,10 +200,6 @@ mpi_api_files = \
         file_get_size_f08.F90 \
         file_get_type_extent_f08.F90 \
         file_get_view_f08.F90 \
-        file_iwrite_at_f08.F90 \
-        file_iwrite_f08.F90 \
-        file_iwrite_at_all_f08.F90 \
-        file_iwrite_shared_f08.F90 \
         file_open_f08.F90 \
         file_preallocate_f08.F90 \
         file_read_all_begin_f08.F90 \
