@@ -202,18 +202,6 @@ mpi_api_files = \
         file_get_view_f08.F90 \
         file_open_f08.F90 \
         file_preallocate_f08.F90 \
-        file_read_all_begin_f08.F90 \
-        file_read_all_end_f08.F90 \
-        file_read_all_f08.F90 \
-        file_read_at_all_begin_f08.F90 \
-        file_read_at_all_end_f08.F90 \
-        file_read_at_all_f08.F90 \
-        file_read_at_f08.F90 \
-        file_read_f08.F90 \
-        file_read_ordered_begin_f08.F90 \
-        file_read_ordered_end_f08.F90 \
-        file_read_ordered_f08.F90 \
-        file_read_shared_f08.F90 \
         file_seek_f08.F90 \
         file_seek_shared_f08.F90 \
         file_set_atomicity_f08.F90 \

@@ -20,16 +20,8 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/file/file.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/mpif-h/status-conversion.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-void ompi_file_read_at_all_end_ts(MPI_Fint *fh, CFI_cdesc_t *x,
-                                  MPI_Fint *status, MPI_Fint *ierr)
+PROTOTYPE VOID file_read_at_all_end(FILE fh, BUFFER_ASYNC x,
+                                    STATUS_OUT status)
 {
     int c_ierr;
     MPI_File c_fh = PMPI_File_f2c(*fh);
