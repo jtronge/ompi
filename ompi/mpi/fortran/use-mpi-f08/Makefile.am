@@ -127,8 +127,6 @@ mpi_api_files = \
         barrier_f08.F90 \
         barrier_init_f08.F90 \
         bcast_init_f08.F90 \
-        bsend_init_f08.F90 \
-        buffer_attach_f08.F90 \
         buffer_detach_f08.F90 \
         cancel_f08.F90 \
         cart_coords_f08.F90 \
@@ -177,7 +175,6 @@ mpi_api_files = \
         comm_split_f08.F90 \
         comm_split_type_f08.F90 \
         comm_test_inter_f08.F90 \
-        compare_and_swap_f08.F90 \
         dist_graph_create_adjacent_f08.F90 \
         dist_graph_create_f08.F90 \
         dist_graph_neighbors_count_f08.F90 \
@@ -186,10 +183,8 @@ mpi_api_files = \
         errhandler_free_f08.F90 \
         error_class_f08.F90 \
         error_string_f08.F90 \
-        exscan_f08.F90 \
         exscan_init_f08.F90 \
         f_sync_reg_f08.F90 \
-        fetch_and_op_f08.F90 \
         file_call_errhandler_f08.F90 \
         file_close_f08.F90 \
         file_create_errhandler_f08.F90 \
@@ -205,15 +200,9 @@ mpi_api_files = \
         file_get_size_f08.F90 \
         file_get_type_extent_f08.F90 \
         file_get_view_f08.F90 \
-        file_iread_at_f08.F90 \
-        file_iread_f08.F90 \
-        file_iread_at_all_f08.F90 \
-        file_iread_all_f08.F90 \
-        file_iread_shared_f08.F90 \
         file_iwrite_at_f08.F90 \
         file_iwrite_f08.F90 \
         file_iwrite_at_all_f08.F90 \
-        file_iwrite_all_f08.F90 \
         file_iwrite_shared_f08.F90 \
         file_open_f08.F90 \
         file_preallocate_f08.F90 \

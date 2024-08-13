@@ -139,10 +139,20 @@ ready_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallw_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bcast_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_init_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_attach_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/exscan_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/fetch_and_op_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/isend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/irecv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_all_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_at_all_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_at_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_shared_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iwrite_all_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/waitall.c.in \

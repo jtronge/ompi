@@ -19,30 +19,6 @@
 ! and the name for tools ("MPI_Init_f08") and the back-end implementation
 ! name (e.g., "MPI_Init_f08").
 
-interface  MPI_Bsend_init
-subroutine MPI_Bsend_init_f08(buf,count,datatype,dest,tag,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count, dest, tag
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Bsend_init_f08
-end interface  MPI_Bsend_init
-
-interface  MPI_Buffer_attach
-subroutine MPI_Buffer_attach_f08(buffer,size,ierror)
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buffer
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buffer
-   INTEGER, INTENT(IN) :: size
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Buffer_attach_f08
-end interface  MPI_Buffer_attach
-
 interface  MPI_Buffer_detach
 subroutine MPI_Buffer_detach_f08(buffer_addr,size,ierror)
    USE, INTRINSIC ::  ISO_C_BINDING, ONLY : C_PTR
@@ -1217,21 +1193,6 @@ subroutine MPI_Bcast_init_f08(buffer,count,datatype,root,comm,info,request,ierro
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Bcast_init_f08
 end interface  MPI_Bcast_init
-
-interface  MPI_Exscan
-subroutine MPI_Exscan_f08(sendbuf,recvbuf,count,datatype,op,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Op), INTENT(IN) :: op
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Exscan_f08
-end interface  MPI_Exscan
 
 interface  MPI_Iexscan
 subroutine MPI_Iexscan_f08(sendbuf,recvbuf,count,datatype,op,comm,request,ierror)
@@ -3211,39 +3172,6 @@ subroutine MPI_Rput_f08(origin_addr,origin_count,origin_datatype,target_rank, &
 end subroutine MPI_Rput_f08
 end interface  MPI_Rput
 
-interface  MPI_Fetch_and_op
-subroutine MPI_Fetch_and_op_f08(origin_addr,result_addr,datatype,target_rank, &
-                                target_disp,op,win,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Win, MPI_ADDRESS_KIND
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ origin_addr,result_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: origin_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: result_addr
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   INTEGER, INTENT(IN) :: target_rank
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: target_disp
-   TYPE(MPI_Op), INTENT(IN) :: op
-   TYPE(MPI_Win), INTENT(IN) :: win
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Fetch_and_op_f08
-end interface  MPI_Fetch_and_op
-
-interface  MPI_Compare_and_swap
-subroutine MPI_Compare_and_swap_f08(origin_addr,compare_addr,result_addr,datatype, &
-                                    target_rank,target_disp,win,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Win, MPI_ADDRESS_KIND
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ origin_addr,compare_addr,result_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: origin_addr,compare_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: result_addr
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   INTEGER, INTENT(IN) :: target_rank
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: target_disp
-   TYPE(MPI_Win), INTENT(IN) :: win
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Compare_and_swap_f08
-end interface  MPI_Compare_and_swap
-
 interface  MPI_Win_complete
 subroutine MPI_Win_complete_f08(win,ierror)
    use :: mpi_f08_types, only : MPI_Info, MPI_Comm, MPI_Win, MPI_ADDRESS_KIND
@@ -3667,78 +3595,6 @@ subroutine MPI_File_get_view_f08(fh,disp,etype,filetype,datarep,ierror)
 end subroutine MPI_File_get_view_f08
 end interface  MPI_File_get_view
 
-interface  MPI_File_iread
-subroutine MPI_File_iread_f08(fh,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iread_f08
-end interface  MPI_File_iread
-
-interface  MPI_File_iread_at
-subroutine MPI_File_iread_at_f08(fh,offset,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request, MPI_OFFSET_KIND
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   INTEGER(MPI_OFFSET_KIND), INTENT(IN) :: offset
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iread_at_f08
-end interface  MPI_File_iread_at
-
-interface  MPI_File_iread_all
-subroutine MPI_File_iread_all_f08(fh,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iread_all_f08
-end interface  MPI_File_iread_all
-
-interface  MPI_File_iread_at_all
-subroutine MPI_File_iread_at_all_f08(fh,offset,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request, MPI_OFFSET_KIND
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   INTEGER(MPI_OFFSET_KIND), INTENT(IN) :: offset
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iread_at_all_f08
-end interface  MPI_File_iread_at_all
-
-interface  MPI_File_iread_shared
-subroutine MPI_File_iread_shared_f08(fh,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iread_shared_f08
-end interface  MPI_File_iread_shared
-
 interface  MPI_File_iwrite
 subroutine MPI_File_iwrite_f08(fh,buf,count,datatype,request,ierror)
    use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request
@@ -3767,20 +3623,6 @@ subroutine MPI_File_iwrite_at_f08(fh,offset,buf,count,datatype,request,ierror)
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_File_iwrite_at_f08
 end interface  MPI_File_iwrite_at
-
-interface  MPI_File_iwrite_all
-subroutine MPI_File_iwrite_all_f08(fh,buf,count,datatype,request,ierror)
-   use :: mpi_f08_types, only : MPI_File, MPI_Datatype, MPI_Request
-   implicit none
-   TYPE(MPI_File), INTENT(IN) :: fh
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_File_iwrite_all_f08
-end interface  MPI_File_iwrite_all
 
 interface  MPI_File_iwrite_at_all
 subroutine MPI_File_iwrite_at_all_f08(fh,offset,buf,count,datatype,request,ierror)

@@ -22,18 +22,9 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/win/win.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Compare_and_swap";
-
-void ompi_compare_and_swap_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2, CFI_cdesc_t *x3,
-                              MPI_Fint *datatype, MPI_Fint *target_rank, MPI_Aint *target_disp,
-                              MPI_Fint *win, MPI_Fint *ierr)
+PROTOTYPE VOID compare_and_swap(BUFFER x1, BUFFER x2, BUFFER_ASYNC x3,
+                                DATATYPE datatype, RANK target_rank, AINT target_disp,
+                                WIN win)
 {
     int c_ierr;
     MPI_Datatype c_datatype = PMPI_Type_f2c(*datatype);

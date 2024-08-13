@@ -473,3 +473,17 @@ class File(FortranType):
 
     def c_parameter(self):
         return f'MPI_Fint *{self.name}'
+
+
+@FortranType.add('OFFSET')
+class Offset(FortranType):
+    """MPI_Offset type."""
+
+    def declare(self):
+        return f'INTEGER(MPI_OFFSET_KIND), INTENT(IN) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_OFFSET_KIND')]
+
+    def c_parameter(self):
+        return f'MPI_Offset *{self.name}'

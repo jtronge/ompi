@@ -19,24 +19,14 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/file/file.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_File_iread_shared";
-
-void ompi_file_iread_shared_ts(MPI_Fint *fh, CFI_cdesc_t *x, MPI_Fint *count,
-                               MPI_Fint *datatype, MPI_Fint *request,
-                               MPI_Fint *ierr)
+PROTOTYPE VOID file_iread_shared(FILE fh, BUFFER_ASYNC x, COUNT count,
+                                 DATATYPE datatype, REQUEST_OUT request)
 {
     int c_ierr;
     MPI_File c_fh = PMPI_File_f2c(*fh);
     MPI_Datatype c_datatype, c_type = PMPI_Type_f2c(*datatype);
     void *buf = OMPI_CFI_BASE_ADDR(x);
-    int c_count =  OMPI_FINT_2_INT(*count);
+    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
     MPI_Request c_request;
 
     OMPI_CFI_2_C(x, c_count, c_type, c_datatype, c_ierr);
@@ -46,11 +36,11 @@ void ompi_file_iread_shared_ts(MPI_Fint *fh, CFI_cdesc_t *x, MPI_Fint *count,
         return;
     }
 
-    c_ierr = PMPI_File_iread_shared(c_fh,
-                                    OMPI_F2C_BOTTOM(buf),
-                                    c_count,
-                                    c_datatype,
-                                    &c_request);
+    c_ierr = @INNER_CALL@(c_fh,
+                          OMPI_F2C_BOTTOM(buf),
+                          c_count,
+                          c_datatype,
+                          &c_request);
     if (c_datatype != c_type) {
         ompi_datatype_destroy(&c_datatype);
     }

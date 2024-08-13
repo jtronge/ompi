@@ -19,15 +19,7 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-
-static const char FUNC_NAME[] = "MPI_Buffer_attach";
-
-void ompi_buffer_attach_ts(CFI_cdesc_t *x, MPI_Fint *size, MPI_Fint *ierr)
+PROTOTYPE VOID buffer_attach(BUFFER_ASYNC x, COUNT size)
 {
     int c_ierr;
     if (OMPI_CFI_IS_CONTIGUOUS(x)) {

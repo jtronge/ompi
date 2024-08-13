@@ -19,18 +19,8 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Exscan";
-
-void ompi_exscan_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2, MPI_Fint *count,
-                    MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm,
-                    MPI_Fint *ierr)
+PROTOTYPE VOID exscan(BUFFER x1, BUFFER_OUT x2, COUNT count,
+                      DATATYPE datatype, OP op, COMM comm)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
@@ -57,8 +47,8 @@ void ompi_exscan_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2, MPI_Fint *count,
     sendbuf = (char *) OMPI_F2C_BOTTOM (sendbuf);
     recvbuf = (char *) OMPI_F2C_BOTTOM (recvbuf);
 
-    c_ierr = PMPI_Exscan(sendbuf, recvbuf,
-                        OMPI_FINT_2_INT(*count),
-                        c_type, c_op, c_comm);
+    c_ierr = @INNER_CALL@(sendbuf, recvbuf,
+                          (@COUNT_TYPE@) *count,
+                          c_type, c_op, c_comm);
     if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
 }
