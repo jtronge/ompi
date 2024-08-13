@@ -222,17 +222,6 @@ mpi_api_files = \
         file_set_size_f08.F90 \
         file_set_view_f08.F90 \
         file_sync_f08.F90 \
-        file_write_all_begin_f08.F90 \
-        file_write_all_end_f08.F90 \
-        file_write_all_f08.F90 \
-        file_write_at_all_begin_f08.F90 \
-        file_write_at_all_end_f08.F90 \
-        file_write_at_all_f08.F90 \
-        file_write_at_f08.F90 \
-        file_write_ordered_begin_f08.F90 \
-        file_write_ordered_end_f08.F90 \
-        file_write_ordered_f08.F90 \
-        file_write_shared_f08.F90 \
         finalized_f08.F90 \
         finalize_f08.F90 \
         free_mem_f08.F90 \
