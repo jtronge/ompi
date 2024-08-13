@@ -266,9 +266,7 @@ def generate_code(args, out):
         print_binding(template.prototype, args.lang, out, template=template)
         if util.prototype_has_bigcount(template.prototype):
             out.dump()
-            out.dump('#if OMPI_BIGCOUNT')
             print_binding(template.prototype, args.lang, bigcount=True, out=out, template=template)
-            out.dump('#endif /* OMPI_BIGCOUNT */')
 
 
 def generate_interface(args, out):
@@ -285,7 +283,5 @@ def generate_interface(args, out):
             out.dump()
             binding_c = FortranBinding(template.prototype, out=out, template=template,
                                        bigcount=True)
-            out.dump('#if OMPI_BIGCOUNT')
             binding_c.print_interface()
-            out.dump('#endif /* OMPI_BIGCOUNT */')
         out.dump(f'end interface {ext_name}')

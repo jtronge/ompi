@@ -300,12 +300,10 @@ def ompi_abi(base_name, template, out):
     template.print_body(func_name=base_name, out=out)
     # Check if we need to generate the bigcount interface
     if util.prototype_has_bigcount(template.prototype):
-        out.dump('#if OMPI_BIGCOUNT')
         base_name_c = f'{base_name}_c'
         print_profiling_header(base_name_c, out)
         out.dump(template.prototype.signature(base_name_c, abi_type='ompi', enable_count=True))
         template.print_body(func_name=base_name_c, out=out)
-        out.dump('#endif /* OMPI_BIGCOUNT */')
 
 
 ABI_INTERNAL_HEADER = 'ompi/mpi/c/abi.h'
