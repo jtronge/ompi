@@ -34,8 +34,7 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Startall(INT count, REQUEST_INOUT requests)
+PROTOTYPE ERROR_CLASS startall(INT count, REQUEST_INOUT requests)
 {
     int i, j;
     int ret = OMPI_SUCCESS;

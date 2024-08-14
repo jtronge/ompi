@@ -17,7 +17,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-PROTOTYPE ERROR_CLASS Session_init (INFO info, ERRHANDLER errhandler, SESSION_OUT session)
+PROTOTYPE ERROR_CLASS session_init (INFO info, ERRHANDLER errhandler, SESSION_OUT session)
 {
     int rc, flag;
     int ts_level = MPI_THREAD_SINGLE;  /* for now we default to thread single for OMPI sessions */

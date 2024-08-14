@@ -23,9 +23,8 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Bcast_init(BUFFER_OUT buffer, INT count, DATATYPE datatype,
-                   INT root, COMM comm, INFO info, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS bcast_init(BUFFER_OUT buffer, COUNT count, DATATYPE datatype,
+                                 INT root, COMM comm, INFO info, REQUEST_INOUT request)
 {
     int err;
 

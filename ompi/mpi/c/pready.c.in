@@ -33,7 +33,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Pready(INT partition, REQUEST request)
+PROTOTYPE ERROR_CLASS pready(INT partition, REQUEST request)
 {
     int rc;
 

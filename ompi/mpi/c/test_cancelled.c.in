@@ -29,7 +29,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Test_cancelled(STATUS status, INT_OUT flag)
+PROTOTYPE ERROR_CLASS test_cancelled(STATUS status, INT_OUT flag)
 {
     int rc = MPI_SUCCESS;
 

@@ -35,8 +35,8 @@
 #include "ompi/file/file.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS File_set_view(FILE fh, OFFSET disp, DATATYPE etype,
-                      DATATYPE filetype, STRING datarep, INFO info)
+PROTOTYPE ERROR_CLASS file_set_view(FILE fh, OFFSET disp, DATATYPE etype,
+                                    DATATYPE filetype, STRING datarep, INFO info)
 {
     int rc;
 

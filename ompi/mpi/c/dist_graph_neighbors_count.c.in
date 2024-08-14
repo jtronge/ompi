@@ -27,8 +27,10 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/mca/topo/base/base.h"
 
-PROTOTYPE ERROR_CLASS Dist_graph_neighbors_count(COMM comm, INT_OUT inneighbors,
-                                   INT_OUT outneighbors, INT_OUT weighted)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS dist_graph_neighbors_count(COMM comm, INT_OUT inneighbors,
+                                                 INT_OUT outneighbors, INT_OUT weighted)
 {
     int err;
 

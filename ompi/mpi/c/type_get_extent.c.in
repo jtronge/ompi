@@ -29,8 +29,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Type_get_extent(DATATYPE type, AINT_OUT lb, AINT_OUT extent)
+PROTOTYPE ERROR_CLASS type_get_extent(DATATYPE type, AINT_OUT lb, AINT_OUT extent)
 {
   int rc;
 

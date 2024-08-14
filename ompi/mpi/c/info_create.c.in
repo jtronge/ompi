@@ -29,7 +29,6 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-
 /**
  * Create a new info object
  *
@@ -42,7 +41,7 @@
  * When an MPI_Info object is not being used, it should be freed using
  * MPI_Info_free
  */
-PROTOTYPE ERROR_CLASS Info_create(INFO_OUT info)
+PROTOTYPE ERROR_CLASS info_create(INFO_OUT info)
 {
     if (MPI_PARAM_CHECK) {
         if (NULL == info) {

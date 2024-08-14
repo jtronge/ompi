@@ -30,12 +30,11 @@
 #include "ompi/mca/io/base/base.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS Register_datarep(STRING datarep,
-			 DATAREP_CONVERSION_FUNCTION read_conversion_fn,
-			 DATAREP_CONVERSION_FUNCTION write_conversion_fn,
-			 DATAREP_EXTENT_FUNCTION dtype_file_extent_fn,
-			 BUFFER_OUT extra_state)
+PROTOTYPE ERROR_CLASS register_datarep(STRING datarep,
+                                       DATAREP_CONVERSION_FUNCTION read_conversion_fn,
+                                       DATAREP_CONVERSION_FUNCTION write_conversion_fn,
+                                       DATAREP_EXTENT_FUNCTION dtype_file_extent_fn,
+                                       BUFFER_OUT extra_state)
 {
     int rc;
 

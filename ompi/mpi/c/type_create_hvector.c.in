@@ -30,11 +30,13 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Type_create_hvector(INT count,
-                            INT blocklength,
-                            AINT stride,
-                            DATATYPE oldtype,
-                            DATATYPE_OUT newtype)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS type_create_hvector(INT count,
+                                          INT blocklength,
+                                          AINT stride,
+                                          DATATYPE oldtype,
+                                          DATATYPE_OUT newtype)
 {
     int rc;
 

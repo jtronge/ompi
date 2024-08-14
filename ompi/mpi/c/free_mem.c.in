@@ -29,8 +29,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "opal/mca/mpool/mpool.h"
 
-
-PROTOTYPE ERROR_CLASS Free_mem(BUFFER_OUT baseptr)
+PROTOTYPE ERROR_CLASS free_mem(BUFFER_OUT baseptr)
 {
     /* Per these threads:
 

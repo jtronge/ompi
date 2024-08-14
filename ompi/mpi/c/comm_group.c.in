@@ -27,7 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Comm_group(COMM comm, GROUP_OUT group) 
+PROTOTYPE ERROR_CLASS comm_group(COMM comm, GROUP_OUT group) 
 {
 
     int rc;

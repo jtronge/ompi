@@ -22,8 +22,9 @@
 #include "ompi/win/win.h"
 #include "ompi/mca/osc/osc.h"
 
+/* TODO: Does this need a bigcount variant? */
 
-PROTOTYPE ERROR_CLASS Win_shared_query(WIN win, INT rank, AINT_OUT size, INT_OUT disp_unit, BUFFER_OUT baseptr)
+PROTOTYPE ERROR_CLASS win_shared_query(WIN win, INT rank, AINT_OUT size, INT_OUT disp_unit, BUFFER_OUT baseptr)
 {
     int rc;
     size_t tsize;

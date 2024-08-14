@@ -34,9 +34,8 @@
 #include "ompi/mca/io/base/io_base_request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS File_iread_at_all(FILE fh, OFFSET offset, BUFFER_OUT buf,
-                          INT count, DATATYPE datatype, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS file_iread_at_all(FILE fh, OFFSET offset, BUFFER_OUT buf,
+                                        COUNT count, DATATYPE datatype, REQUEST_INOUT request)
 {
     int rc;
 

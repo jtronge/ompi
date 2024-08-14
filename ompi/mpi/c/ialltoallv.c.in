@@ -34,11 +34,10 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Ialltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts, DISP_ARRAY sdispls,
-                   DATATYPE sendtype, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
-                   DISP_ARRAY rdispls, DATATYPE recvtype, COMM comm,
-                   REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS ialltoallv(BUFFER sendbuf, COUNT_ARRAY sendcounts, DISP_ARRAY sdispls,
+                                 DATATYPE sendtype, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
+                                 DISP_ARRAY rdispls, DATATYPE recvtype, COMM comm,
+                                 REQUEST_INOUT request)
 {
     int i, size, err;
     ompi_count_array_t sendcounts_desc, recvcounts_desc;

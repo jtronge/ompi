@@ -29,9 +29,9 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/attribute/attribute.h"
 
-PROTOTYPE ERROR_CLASS Win_create_keyval(WIN_COPY_ATTR_FUNCTION win_copy_attr_fn,
-                          WIN_DELETE_ATTR_FUNCTION win_delete_attr_fn,
-                          INT_OUT win_keyval, BUFFER_OUT extra_state)
+PROTOTYPE ERROR_CLASS win_create_keyval(WIN_COPY_ATTR_FUNCTION win_copy_attr_fn,
+                                        WIN_DELETE_ATTR_FUNCTION win_delete_attr_fn,
+                                        INT_OUT win_keyval, BUFFER_OUT extra_state)
 {
     int ret;
     ompi_attribute_fn_ptr_union_t copy_fn;

@@ -48,7 +48,6 @@ struct timespec ompi_wtime_time_origin = {.tv_sec = 0};
 extern struct timespec ompi_wtime_time_origin;
 #endif
 
-
 PROTOTYPE DOUBLE wtime()
 {
     double wtime;

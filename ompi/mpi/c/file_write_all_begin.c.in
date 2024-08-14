@@ -33,7 +33,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS File_write_all_begin(FILE fh, BUFFER buf, INT count,
+PROTOTYPE ERROR_CLASS file_write_all_begin(FILE fh, BUFFER buf, INT count,
                              DATATYPE datatype)
 {
     int rc;

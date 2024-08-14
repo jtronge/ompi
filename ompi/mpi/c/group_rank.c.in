@@ -27,8 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-
-PROTOTYPE ERROR_CLASS Group_rank(GROUP group, INT_OUT rank)
+PROTOTYPE ERROR_CLASS group_rank(GROUP group, INT_OUT rank)
 {
     /* error checking */
     if( MPI_PARAM_CHECK ) {

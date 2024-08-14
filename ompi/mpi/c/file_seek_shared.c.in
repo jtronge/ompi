@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_seek_shared(FILE fh, OFFSET offset, INT whence)
+PROTOTYPE ERROR_CLASS file_seek_shared(FILE fh, OFFSET offset, INT whence)
 {
     int rc;
 

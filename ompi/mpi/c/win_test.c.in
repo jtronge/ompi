@@ -27,7 +27,7 @@
 #include "ompi/win/win.h"
 #include "ompi/mca/osc/osc.h"
 
-PROTOTYPE ERROR_CLASS Win_test(WIN win, INT_OUT flag)
+PROTOTYPE ERROR_CLASS win_test(WIN win, INT_OUT flag)
 {
     int rc;
 

@@ -35,10 +35,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Ireduce_scatter_block(BUFFER sendbuf, BUFFER_OUT recvbuf, INT recvcount,
-                              DATATYPE datatype, OP op,
-                              COMM comm, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS ireduce_scatter_block(BUFFER sendbuf, BUFFER_OUT recvbuf, COUNT recvcount,
+                                            DATATYPE datatype, OP op,
+                                            COMM comm, REQUEST_INOUT request)
 {
     int err;
 

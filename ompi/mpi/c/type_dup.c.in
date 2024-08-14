@@ -28,8 +28,7 @@
 #include "ompi/attribute/attribute.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Type_dup (DATATYPE type,
-                  DATATYPE_OUT newtype)
+PROTOTYPE ERROR_CLASS type_dup (DATATYPE type, DATATYPE_OUT newtype)
 {
    int ret;
 

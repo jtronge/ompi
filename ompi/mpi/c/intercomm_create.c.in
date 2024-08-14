@@ -36,10 +36,9 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Intercomm_create(COMM local_comm, INT local_leader,
-                         COMM bridge_comm, INT remote_leader,
-                         INT tag, COMM_OUT newintercomm)
+PROTOTYPE ERROR_CLASS intercomm_create(COMM local_comm, INT local_leader,
+                                       COMM bridge_comm, INT remote_leader,
+                                       INT tag, COMM_OUT newintercomm)
 {
     int rc;
 

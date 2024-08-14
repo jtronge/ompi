@@ -34,8 +34,10 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Win_allocate_shared(AINT size, INT disp_unit, INFO info,
-                            COMM comm, BUFFER_OUT baseptr, WIN_OUT win)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS win_allocate_shared(AINT size, INT disp_unit, INFO info,
+                                          COMM comm, BUFFER_OUT baseptr, WIN_OUT win)
 {
     int ret = MPI_SUCCESS;
 

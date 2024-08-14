@@ -27,7 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-PROTOTYPE ERROR_CLASS Group_size(GROUP group, INT_OUT size)
+PROTOTYPE ERROR_CLASS group_size(GROUP group, INT_OUT size)
 {
     /* error checking */
     if( MPI_PARAM_CHECK ) {

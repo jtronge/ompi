@@ -30,8 +30,8 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS File_read_at_all_begin(FILE fh, OFFSET offset, BUFFER_OUT buf,
-                               INT count, DATATYPE datatype)
+PROTOTYPE ERROR_CLASS file_read_at_all_begin(FILE fh, OFFSET offset, BUFFER_OUT buf,
+                                             COUNT count, DATATYPE datatype)
 {
     int rc;
 

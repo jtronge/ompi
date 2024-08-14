@@ -32,8 +32,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Get_elements_x(STATUS status, DATATYPE datatype, ELEMENT_COUNT count)
+PROTOTYPE ERROR_CLASS get_elements_x(STATUS status, DATATYPE datatype, ELEMENT_COUNT count)
 {
     size_t internal_count;
     int ret;

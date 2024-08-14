@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_remote_group(COMM comm, GROUP_OUT group)
+PROTOTYPE ERROR_CLASS comm_remote_group(COMM comm, GROUP_OUT group)
 {
     MEMCHECKER(
         memchecker_comm(comm);

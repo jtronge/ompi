@@ -30,9 +30,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_create_errhandler (FILE_ERRHANDLER_FUNCTION function,
-                                ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS file_create_errhandler (FILE_ERRHANDLER_FUNCTION function,
+                                              ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
 

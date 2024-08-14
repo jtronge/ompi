@@ -30,8 +30,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/dpm/dpm.h"
 
-
-PROTOTYPE ERROR_CLASS Close_port(STRING port_name)
+PROTOTYPE ERROR_CLASS close_port(STRING port_name)
 {
     int ret;
 

@@ -31,8 +31,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_write_ordered_end(FILE fh, BUFFER buf, STATUS_OUT status)
+PROTOTYPE ERROR_CLASS file_write_ordered_end(FILE fh, BUFFER buf, STATUS_OUT status)
 {
     int rc;
 

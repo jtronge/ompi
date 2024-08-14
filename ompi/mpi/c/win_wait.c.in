@@ -27,8 +27,7 @@
 #include "ompi/win/win.h"
 #include "ompi/mca/osc/osc.h"
 
-
-PROTOTYPE ERROR_CLASS Win_wait(WIN win)
+PROTOTYPE ERROR_CLASS win_wait(WIN win)
 {
     int rc;
 

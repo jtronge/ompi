@@ -37,9 +37,8 @@
 #include "ompi/dpm/dpm.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_accept(STRING port_name, INFO info, INT root,
-                    COMM comm, COMM_OUT newcomm)
+PROTOTYPE ERROR_CLASS comm_accept(STRING port_name, INFO info, INT root,
+                                  COMM comm, COMM_OUT newcomm)
 {
     int rank, rc;
     bool send_first=false; /* we receive first */

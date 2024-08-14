@@ -32,7 +32,7 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Win_create_dynamic(INFO info, COMM comm, WIN_OUT win)
+PROTOTYPE ERROR_CLASS win_create_dynamic(INFO info, COMM comm, WIN_OUT win)
 {
     int ret = MPI_SUCCESS;
 

@@ -27,8 +27,7 @@
 #include "ompi/runtime/mpiruntime.h"
 #include "opal/mca/threads/threads.h"
 
-
-PROTOTYPE ERROR_CLASS Is_thread_main(INT_OUT flag)
+PROTOTYPE ERROR_CLASS is_thread_main(INT_OUT flag)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

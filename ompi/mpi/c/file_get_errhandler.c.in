@@ -32,8 +32,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_get_errhandler(FILE file, ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS file_get_errhandler(FILE file, ERRHANDLER_OUT errhandler)
 {
   int ret = MPI_SUCCESS;
 

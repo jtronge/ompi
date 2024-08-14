@@ -32,8 +32,7 @@
 #include "ompi/mca/io/io.h"
 #include "ompi/mca/io/base/base.h"
 
-
-PROTOTYPE ERROR_CLASS File_delete(STRING filename, INFO info)
+PROTOTYPE ERROR_CLASS file_delete(STRING filename, INFO info)
 {
     int rc;
 

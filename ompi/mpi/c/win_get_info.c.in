@@ -22,7 +22,7 @@
 #include "opal/util/info.h"
 #include "opal/util/info_subscriber.h"
 
-PROTOTYPE ERROR_CLASS Win_get_info(WIN win, INFO_OUT info_used)
+PROTOTYPE ERROR_CLASS win_get_info(WIN win, INFO_OUT info_used)
 {
     int ret;
 

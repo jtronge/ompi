@@ -36,9 +36,10 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
+/* TODO:BIGCOUNT */
 
-PROTOTYPE ERROR_CLASS Reduce_scatter_init(BUFFER sendbuf, BUFFER_OUT recvbuf, INT_ARRAY recvcounts,
-                            DATATYPE datatype, OP op, COMM comm, INFO info, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS reduce_scatter_init(BUFFER sendbuf, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
+                                          DATATYPE datatype, OP op, COMM comm, INFO info, REQUEST_INOUT request)
 {
     int i, err, size, count;
     ompi_count_array_t recvcounts_desc;

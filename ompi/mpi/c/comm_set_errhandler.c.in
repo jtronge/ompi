@@ -29,7 +29,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Comm_set_errhandler(COMM comm, ERRHANDLER errhandler)
+PROTOTYPE ERROR_CLASS comm_set_errhandler(COMM comm, ERRHANDLER errhandler)
 {
     MPI_Errhandler tmp;
 

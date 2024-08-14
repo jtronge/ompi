@@ -26,8 +26,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-
-PROTOTYPE ERROR_CLASS Win_get_group(WIN win, GROUP_OUT group)
+PROTOTYPE ERROR_CLASS win_get_group(WIN win, GROUP_OUT group)
 {
     int ret;
 

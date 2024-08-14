@@ -30,8 +30,7 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Win_flush_all(WIN win)
+PROTOTYPE ERROR_CLASS win_flush_all(WIN win)
 {
     int ret = MPI_SUCCESS;
 

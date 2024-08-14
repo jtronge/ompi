@@ -36,9 +36,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/info/info.h"
 
-
-PROTOTYPE ERROR_CLASS Unpublish_name(STRING service_name, INFO info,
-                       STRING port_name)
+PROTOTYPE ERROR_CLASS unpublish_name(STRING service_name, INFO info,
+                                     STRING port_name)
 {
     int ret;
     opal_cstring_t *info_str;

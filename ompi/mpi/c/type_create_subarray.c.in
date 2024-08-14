@@ -31,13 +31,15 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Type_create_subarray(INT ndims,
-                             INT_ARRAY size_array,
-                             INT_ARRAY subsize_array,
-                             INT_ARRAY start_array,
-                             INT order,
-                             DATATYPE oldtype,
-                             DATATYPE_OUT newtype)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS type_create_subarray(INT ndims,
+                                           INT_ARRAY size_array,
+                                           INT_ARRAY subsize_array,
+                                           INT_ARRAY start_array,
+                                           INT order,
+                                           DATATYPE oldtype,
+                                           DATATYPE_OUT newtype)
 {
     int32_t i, rc;
 

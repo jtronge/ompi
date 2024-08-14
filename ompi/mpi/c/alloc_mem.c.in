@@ -34,7 +34,7 @@
 #include "ompi/info/info.h"
 #include "opal/mca/mpool/mpool.h"
 
-PROTOTYPE ERROR_CLASS Alloc_mem(AINT size, INFO info, BUFFER_OUT baseptr)
+PROTOTYPE ERROR_CLASS alloc_mem(AINT size, INFO info, BUFFER_OUT baseptr)
 {
     opal_cstring_t *info_str = NULL;
     const char *mpool_hints = NULL;

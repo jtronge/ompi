@@ -27,8 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/op/op.h"
 
-
-PROTOTYPE ERROR_CLASS Op_create(USER_FUNCTION function, INT commute, OP_OUT op)
+PROTOTYPE ERROR_CLASS op_create(USER_FUNCTION function, INT commute, OP_OUT op)
 {
     int err = MPI_SUCCESS;
 

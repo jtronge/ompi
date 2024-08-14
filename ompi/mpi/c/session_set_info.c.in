@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-PROTOTYPE ERROR_CLASS Session_set_info (SESSION session, INFO info)
+PROTOTYPE ERROR_CLASS session_set_info (SESSION session, INFO info)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

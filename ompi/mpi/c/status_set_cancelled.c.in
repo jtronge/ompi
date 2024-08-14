@@ -26,7 +26,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Status_set_cancelled(STATUS_OUT status, INT flag)
+PROTOTYPE ERROR_CLASS status_set_cancelled(STATUS_OUT status, INT flag)
 {
     MEMCHECKER(
         if(status != MPI_STATUSES_IGNORE) {

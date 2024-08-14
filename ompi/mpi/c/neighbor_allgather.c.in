@@ -37,10 +37,9 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Neighbor_allgather(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
-                           BUFFER_OUT recvbuf, INT recvcount, DATATYPE recvtype,
-                           COMM comm)
+PROTOTYPE ERROR_CLASS neighbor_allgather(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
+                                         BUFFER_OUT recvbuf, COUNT recvcount, DATATYPE recvtype,
+                                         COMM comm)
 {
     int err;
 

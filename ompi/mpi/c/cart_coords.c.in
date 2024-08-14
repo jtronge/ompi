@@ -31,8 +31,7 @@
 #include "ompi/group/group.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Cart_coords(COMM comm, INT rank, INT maxdims, INT_OUT coords)
+PROTOTYPE ERROR_CLASS cart_coords(COMM comm, INT rank, INT maxdims, INT_OUT coords)
 {
     int err;
 

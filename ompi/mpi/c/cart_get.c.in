@@ -30,9 +30,8 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Cart_get(COMM comm, INT maxdims, INT_OUT dims,
-                INT_OUT periods, INT_OUT coords)
+PROTOTYPE ERROR_CLASS cart_get(COMM comm, INT maxdims, INT_OUT dims,
+                               INT_OUT periods, INT_OUT coords)
 {
     int err;
 

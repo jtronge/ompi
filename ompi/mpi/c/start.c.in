@@ -32,8 +32,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Start(REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS start(REQUEST_INOUT request)
 {
     int ret = OMPI_SUCCESS;
 

@@ -30,8 +30,7 @@
 #include "ompi/win/win.h"
 #include "ompi/mca/osc/osc.h"
 
-
-PROTOTYPE ERROR_CLASS Win_unlock(INT rank, WIN win)
+PROTOTYPE ERROR_CLASS win_unlock(INT rank, WIN win)
 {
     int rc;
 

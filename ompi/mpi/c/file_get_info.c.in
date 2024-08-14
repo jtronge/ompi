@@ -31,8 +31,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_get_info(FILE fh, INFO_OUT info_used)
+PROTOTYPE ERROR_CLASS file_get_info(FILE fh, INFO_OUT info_used)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

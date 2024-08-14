@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_get_position(FILE fh, OFFSET_OUT offset)
+PROTOTYPE ERROR_CLASS file_get_position(FILE fh, OFFSET_OUT offset)
 {
     int rc;
 

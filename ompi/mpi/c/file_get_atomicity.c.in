@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_get_atomicity(FILE fh, INT_OUT flag)
+PROTOTYPE ERROR_CLASS file_get_atomicity(FILE fh, INT_OUT flag)
 {
     int rc;
 

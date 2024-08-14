@@ -31,7 +31,6 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-
 /* static functions */
 static int assignnodes(int ndim, int nfactor, int *pfacts,int **pdims);
 static int getfactors(int num, int *nfators, int **factors);
@@ -152,7 +151,7 @@ static int getfactors(int num, int *nfactors, int **factors) {
  * This is a utility function, no need to have anything in the lower
  * layer for this at all
  */
-PROTOTYPE ERROR_CLASS Dims_create(INT nnodes, INT ndims, INT_OUT dims)
+PROTOTYPE ERROR_CLASS dims_create(INT nnodes, INT ndims, INT_OUT dims)
 {
     int i;
     int freeprocs;

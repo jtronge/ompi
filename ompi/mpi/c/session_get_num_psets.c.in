@@ -16,8 +16,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-
-PROTOTYPE ERROR_CLASS Session_get_num_psets (SESSION session, INFO info, INT_OUT npset_names)
+PROTOTYPE ERROR_CLASS session_get_num_psets (SESSION session, INFO info, INT_OUT npset_names)
 {
     int rc;
 

@@ -26,7 +26,7 @@
 #include "ompi/attribute/attribute.h"
 #include "ompi/communicator/communicator.h"
 
-PROTOTYPE ERROR_CLASS Keyval_free(INT_OUT keyval)
+PROTOTYPE ERROR_CLASS keyval_free(INT_OUT keyval)
 {
     int ret;
 

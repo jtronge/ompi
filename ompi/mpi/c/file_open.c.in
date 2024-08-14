@@ -36,7 +36,6 @@
 #include "ompi/mca/io/base/base.h"
 #include "ompi/memchecker.h"
 
-
 extern opal_mutex_t ompi_mpi_file_bootstrap_mutex;
 
 PROTOTYPE ERROR_CLASS file_open(COMM comm, STRING filename, INT amode,

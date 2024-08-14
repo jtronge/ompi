@@ -32,8 +32,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Type_get_name(DATATYPE type, STRING_OUT type_name, INT_OUT resultlen)
+PROTOTYPE ERROR_CLASS type_get_name(DATATYPE type, STRING_OUT type_name, INT_OUT resultlen)
 {
 
     MEMCHECKER(

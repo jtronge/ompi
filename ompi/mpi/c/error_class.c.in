@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/errhandler/errcode.h"
 
-
-PROTOTYPE ERROR_CLASS Error_class(INT errorcode, INT_OUT errorclass)
+PROTOTYPE ERROR_CLASS error_class(INT errorcode, INT_OUT errorclass)
 {
     int ret;
 

@@ -28,8 +28,7 @@
 #include "ompi/info/info.h"
 #include "ompi/dpm/dpm.h"
 
-
-PROTOTYPE ERROR_CLASS Open_port(INFO info, STRING_OUT port_name)
+PROTOTYPE ERROR_CLASS open_port(INFO info, STRING_OUT port_name)
 {
     int rc;
 

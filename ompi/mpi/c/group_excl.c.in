@@ -30,8 +30,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/communicator/communicator.h"
 
-PROTOTYPE ERROR_CLASS Group_excl(GROUP group, INT n, INT_ARRAY ranks,
-                   GROUP_OUT new_group)
+PROTOTYPE ERROR_CLASS group_excl(GROUP group, INT n, INT_ARRAY ranks,
+                                 GROUP_OUT new_group)
 {
     ompi_group_t *group_pointer = (ompi_group_t *)group;
     int i, err, group_size;

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-PROTOTYPE ERROR_CLASS Session_get_pset_info (SESSION session, STRING pset_name, INFO_OUT info_used)
+PROTOTYPE ERROR_CLASS session_get_pset_info (SESSION session, STRING pset_name, INFO_OUT info_used)
 {
     int rc;
 

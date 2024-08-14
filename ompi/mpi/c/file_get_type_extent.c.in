@@ -29,9 +29,10 @@
 #include "ompi/file/file.h"
 #include "ompi/memchecker.h"
 
+/* TODO: Does this need a bigcount variant? */
 
-PROTOTYPE ERROR_CLASS File_get_type_extent(FILE fh, DATATYPE datatype,
-                             AINT_OUT extent)
+PROTOTYPE ERROR_CLASS file_get_type_extent(FILE fh, DATATYPE datatype,
+                                           AINT_OUT extent)
 {
     int rc;
 

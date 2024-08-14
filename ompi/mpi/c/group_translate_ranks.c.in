@@ -30,9 +30,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/group/group.h"
 
-
-PROTOTYPE ERROR_CLASS Group_translate_ranks(GROUP group1, INT n_ranks, INT_ARRAY ranks1,
-                              GROUP group2, INT_OUT ranks2)
+PROTOTYPE ERROR_CLASS group_translate_ranks(GROUP group1, INT n_ranks, INT_ARRAY ranks1,
+                                            GROUP group2, INT_OUT ranks2)
 {
     int err;
 

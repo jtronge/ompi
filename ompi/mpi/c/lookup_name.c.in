@@ -36,8 +36,7 @@
 #include "ompi/info/info.h"
 #include "ompi/communicator/communicator.h"
 
-
-PROTOTYPE ERROR_CLASS Lookup_name(STRING service_name, INFO info, STRING_OUT port_name)
+PROTOTYPE ERROR_CLASS lookup_name(STRING service_name, INFO info, STRING_OUT port_name)
 {
     int flag=0, ret;
     pmix_status_t rc;

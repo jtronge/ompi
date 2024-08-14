@@ -27,8 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_remote_size(COMM comm, INT_OUT size)
+PROTOTYPE ERROR_CLASS comm_remote_size(COMM comm, INT_OUT size)
 {
     MEMCHECKER(
         memchecker_comm(comm);

@@ -31,9 +31,10 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
+/* TODO: Does this need a bigcount variant? */
 
-PROTOTYPE ERROR_CLASS Win_create(BUFFER_OUT base, AINT size, INT disp_unit,
-                   INFO info, COMM comm, WIN_OUT win)
+PROTOTYPE ERROR_CLASS win_create(BUFFER_OUT base, AINT size, INT disp_unit,
+                                 INFO info, COMM comm, WIN_OUT win)
 {
     int ret = MPI_SUCCESS;
 

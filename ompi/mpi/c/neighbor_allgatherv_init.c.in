@@ -38,11 +38,10 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Neighbor_allgatherv_init(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
-                                 BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISP_ARRAY displs,
-                                 DATATYPE recvtype, COMM comm,
-                                 INFO info, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS neighbor_allgatherv_init(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
+                                               BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts, DISP_ARRAY displs,
+                                               DATATYPE recvtype, COMM comm,
+                                               INFO info, REQUEST_INOUT request)
 {
     int i, size, err;
     ompi_count_array_t recvcounts_desc;

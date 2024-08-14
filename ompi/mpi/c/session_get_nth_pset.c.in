@@ -16,7 +16,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-PROTOTYPE ERROR_CLASS Session_get_nth_pset (SESSION session, INFO info, INT n, INT_OUT len, STRING_OUT pset_name)
+PROTOTYPE ERROR_CLASS session_get_nth_pset (SESSION session, INFO info, INT n, INT_OUT len, STRING_OUT pset_name)
 {
     int rc = MPI_SUCCESS;
 

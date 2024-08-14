@@ -36,10 +36,9 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Neighbor_alltoall(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
-                          BUFFER_OUT recvbuf, INT recvcount, DATATYPE recvtype,
-                          COMM comm)
+PROTOTYPE ERROR_CLASS neighbor_alltoall(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
+                                        BUFFER_OUT recvbuf, COUNT recvcount, DATATYPE recvtype,
+                                        COMM comm)
 {
     size_t sendtype_size, recvtype_size;
     int err;

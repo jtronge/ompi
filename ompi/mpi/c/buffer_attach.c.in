@@ -27,7 +27,7 @@
 #include "ompi/mca/pml/pml.h"
 #include "ompi/mca/pml/base/pml_base_bsend.h"
 
-PROTOTYPE ERROR_CLASS Buffer_attach(BUFFER_OUT buffer, INT size)
+PROTOTYPE ERROR_CLASS buffer_attach(BUFFER_OUT buffer, INT size)
 {
     int ret = OMPI_SUCCESS;
 

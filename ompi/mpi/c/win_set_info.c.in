@@ -19,8 +19,7 @@
 #include "ompi/communicator/communicator.h"
 #include "opal/util/info_subscriber.h"
 
-
-PROTOTYPE ERROR_CLASS Win_set_info(WIN win, INFO info)
+PROTOTYPE ERROR_CLASS win_set_info(WIN win, INFO info)
 {
     int ret;
 

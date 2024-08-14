@@ -37,8 +37,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-
-PROTOTYPE ERROR_CLASS Type_create_f90_real(INT p, INT r, DATATYPE_OUT newtype)
+PROTOTYPE ERROR_CLASS type_create_f90_real(INT p, INT r, DATATYPE_OUT newtype)
 {
     uint64_t key;
     int p_key, r_key;

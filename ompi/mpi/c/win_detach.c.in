@@ -30,8 +30,7 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Win_detach(WIN win, BUFFER base)
+PROTOTYPE ERROR_CLASS win_detach(WIN win, BUFFER base)
 {
     int ret = MPI_SUCCESS;
 

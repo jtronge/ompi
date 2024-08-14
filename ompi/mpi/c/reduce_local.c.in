@@ -33,8 +33,8 @@
 #include "ompi/op/op.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Reduce_local(BUFFER inbuf, BUFFER_OUT inoutbuf, INT count,
-                     DATATYPE datatype, OP op)
+PROTOTYPE ERROR_CLASS reduce_local(BUFFER inbuf, BUFFER_OUT inoutbuf, COUNT count,
+                                   DATATYPE datatype, OP op)
 {
     int err;
 

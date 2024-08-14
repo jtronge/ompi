@@ -35,7 +35,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Testany(INT count, REQUEST_INOUT requests, INT_OUT indx, INT_OUT completed, STATUS_OUT status)
+PROTOTYPE ERROR_CLASS testany(INT count, REQUEST_INOUT requests, INT_OUT indx, INT_OUT completed, STATUS_OUT status)
 {
     SPC_RECORD(OMPI_SPC_TESTANY, 1);
 

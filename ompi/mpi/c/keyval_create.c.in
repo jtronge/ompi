@@ -29,9 +29,9 @@
 #include "ompi/attribute/attribute.h"
 #include "ompi/communicator/communicator.h"
 
-PROTOTYPE ERROR_CLASS Keyval_create(COPY_FUNCTION copy_attr_fn,
-                      DELETE_FUNCTION delete_attr_fn,
-                      INT_OUT keyval, BUFFER_OUT extra_state)
+PROTOTYPE ERROR_CLASS keyval_create(COPY_FUNCTION copy_attr_fn,
+                                    DELETE_FUNCTION delete_attr_fn,
+                                    INT_OUT keyval, BUFFER_OUT extra_state)
 {
     int ret;
     ompi_attribute_fn_ptr_union_t copy_fn;

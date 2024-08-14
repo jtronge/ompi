@@ -30,8 +30,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/instance/instance.h"
 
-
-PROTOTYPE ERROR_CLASS Session_set_errhandler(SESSION session, ERRHANDLER errhandler)
+PROTOTYPE ERROR_CLASS session_set_errhandler(SESSION session, ERRHANDLER errhandler)
 {
     MPI_Errhandler tmp;
 

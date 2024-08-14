@@ -33,7 +33,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Parrived(REQUEST request, INT partition, INT_OUT flag)
+PROTOTYPE ERROR_CLASS parrived(REQUEST request, INT partition, INT_OUT flag)
 {
     int rc;
 

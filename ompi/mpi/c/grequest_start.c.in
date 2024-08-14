@@ -27,11 +27,10 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/request/grequest.h"
 
-
-PROTOTYPE ERROR_CLASS Grequest_start(GREQUEST_QUERY_FUNCTION query_fn,
-                       GREQUEST_FREE_FUNCTION free_fn,
-                       GREQUEST_CANCEL_FUNCTION cancel_fn,
-                       BUFFER_OUT extra_state, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS grequest_start(GREQUEST_QUERY_FUNCTION query_fn,
+                                     GREQUEST_FREE_FUNCTION free_fn,
+                                     GREQUEST_CANCEL_FUNCTION cancel_fn,
+                                     BUFFER_OUT extra_state, REQUEST_INOUT request)
 {
     int rc;
 

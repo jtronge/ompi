@@ -30,8 +30,7 @@
 #include "ompi/mpi/fortran/base/fint_2_int.h"
 #include "ompi/mpi/fortran/base/constants.h"
 
-
-PROTOTYPE ERROR_CLASS Status_f082c(F08_STATUS f08_status, STATUS_OUT c_status)
+PROTOTYPE ERROR_CLASS status_f082c(F08_STATUS f08_status, STATUS_OUT c_status)
 {
     int *c_ints;
 

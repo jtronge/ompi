@@ -2190,7 +2190,7 @@ OMPI_DECLSPEC  int MPI_Rput(const void *origin_addr, int origin_count, MPI_Datat
                             int target_rank, MPI_Aint target_disp, int target_cout,
                             MPI_Datatype target_datatype, MPI_Win win, MPI_Request *request);
 OMPI_DECLSPEC  int MPI_Rput_c(const void *origin_addr, MPI_Count origin_count, MPI_Datatype origin_datatype,
-                              int target_rank, MPI_Aint target_disp, int target_cout,
+                              int target_rank, MPI_Aint target_disp, MPI_Count target_cout,
                               MPI_Datatype target_datatype, MPI_Win win, MPI_Request *request);
 OMPI_DECLSPEC  int MPI_Rsend(const void *ibuf, int count, MPI_Datatype datatype, int dest,
                              int tag, MPI_Comm comm);
@@ -3305,7 +3305,7 @@ OMPI_DECLSPEC  int PMPI_Rput(const void *origin_addr, int origin_count, MPI_Data
                              int target_rank, MPI_Aint target_disp, int target_cout,
                              MPI_Datatype target_datatype, MPI_Win win, MPI_Request *request);
 OMPI_DECLSPEC  int PMPI_Rput_c(const void *origin_addr, MPI_Count origin_count, MPI_Datatype origin_datatype,
-                               int target_rank, MPI_Aint target_disp, int target_cout,
+                               int target_rank, MPI_Aint target_disp, MPI_Count target_cout,
                                MPI_Datatype target_datatype, MPI_Win win, MPI_Request *request);
 OMPI_DECLSPEC  int PMPI_Rsend(const void *ibuf, int count, MPI_Datatype datatype, int dest,
                               int tag, MPI_Comm comm);

@@ -44,7 +44,7 @@
  * This function returns the number of elements in the list
  * containing the key-value pairs
  */
-PROTOTYPE ERROR_CLASS Info_get_nkeys(INFO info, INT_OUT nkeys)
+PROTOTYPE ERROR_CLASS info_get_nkeys(INFO info, INT_OUT nkeys)
 {
     int err;
 

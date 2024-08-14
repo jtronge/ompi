@@ -33,8 +33,7 @@
 #include "ompi/win/win.h"
 #include "ompi/instance/instance.h"
 
-
-PROTOTYPE ERROR_CLASS Win_get_errhandler(WIN win, ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS win_get_errhandler(WIN win, ERRHANDLER_OUT errhandler)
 {
     int ret = MPI_SUCCESS;
 

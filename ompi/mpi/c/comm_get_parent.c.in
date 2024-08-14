@@ -25,8 +25,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_get_parent(COMM_OUT parent)
+PROTOTYPE ERROR_CLASS comm_get_parent(COMM_OUT parent)
 {
     if ( MPI_PARAM_CHECK ) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

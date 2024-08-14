@@ -54,8 +54,8 @@
  *   In C and C++, 'valuelen' should be one less than the allocated space
  *   to allow for for the null terminator.
  */
-PROTOTYPE ERROR_CLASS Info_get(INFO info, STRING key, INT valuelen,
-                 STRING_OUT value, INT_OUT flag)
+PROTOTYPE ERROR_CLASS info_get(INFO info, STRING key, INT valuelen,
+                               STRING_OUT value, INT_OUT flag)
 {
     int err;
     int key_length;

@@ -27,13 +27,15 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Type_get_contents(DATATYPE mtype,
-                          INT max_integers,
-                          INT max_addresses,
-                          INT max_datatypes,
-                          INT_OUT array_of_integers,
-                          AINT_OUT array_of_addresses,
-                          DATATYPE_OUT array_of_datatypes)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS type_get_contents(DATATYPE mtype,
+                                        INT max_integers,
+                                        INT max_addresses,
+                                        INT max_datatypes,
+                                        INT_OUT array_of_integers,
+                                        AINT_OUT array_of_addresses,
+                                        DATATYPE_OUT array_of_datatypes)
 {
     int rc, i;
     MPI_Datatype newtype;

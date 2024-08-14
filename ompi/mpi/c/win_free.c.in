@@ -26,8 +26,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-
-PROTOTYPE ERROR_CLASS Win_free(WIN_OUT win)
+PROTOTYPE ERROR_CLASS win_free(WIN_OUT win)
 {
     int ret;
 

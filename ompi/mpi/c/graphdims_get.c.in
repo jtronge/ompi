@@ -29,8 +29,7 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Graphdims_get(COMM comm, INT_OUT nnodes, INT_OUT nedges)
+PROTOTYPE ERROR_CLASS graphdims_get(COMM comm, INT_OUT nnodes, INT_OUT nedges)
 {
     int err;
 

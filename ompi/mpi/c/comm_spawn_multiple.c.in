@@ -39,11 +39,12 @@
 #include "ompi/dpm/dpm.h"
 #include "ompi/memchecker.h"
 
+/* TODO: Does this need a bigcount version? */
 
-PROTOTYPE ERROR_CLASS Comm_spawn_multiple(INT count, STRING_ARRAY array_of_commands, ARGV array_of_argv,
-                            INT_ARRAY array_of_maxprocs, INFO_ARRAY array_of_info,
-                            INT root, COMM comm, COMM_OUT intercomm,
-                            INT_OUT array_of_errcodes)
+PROTOTYPE ERROR_CLASS comm_spawn_multiple(INT count, STRING_ARRAY array_of_commands, ARGV array_of_argv,
+                                          INT_ARRAY array_of_maxprocs, INFO_ARRAY array_of_info,
+                                          INT root, COMM comm, COMM_OUT intercomm,
+                                          INT_OUT array_of_errcodes)
 {
     int i=0, rc=0, rank=0, size=0, flag;
     ompi_communicator_t *newcomp=MPI_COMM_NULL;

@@ -35,9 +35,8 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Iallreduce(BUFFER sendbuf, BUFFER_OUT recvbuf, INT count,
-                   DATATYPE datatype, OP op, COMM comm, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS iallreduce(BUFFER sendbuf, BUFFER_OUT recvbuf, COUNT count,
+                                 DATATYPE datatype, OP op, COMM comm, REQUEST_INOUT request)
 {
     int err;
 

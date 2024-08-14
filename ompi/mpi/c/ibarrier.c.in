@@ -29,8 +29,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Ibarrier(COMM comm, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS ibarrier(COMM comm, REQUEST_INOUT request)
 {
     int err = MPI_SUCCESS;
 

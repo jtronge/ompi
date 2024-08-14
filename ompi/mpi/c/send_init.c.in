@@ -34,10 +34,9 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Send_init(BUFFER buf, INT count, DATATYPE type,
-                  INT dest, INT tag, COMM comm,
-                  REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS send_init(BUFFER buf, COUNT count, DATATYPE type,
+                                INT dest, INT tag, COMM comm,
+                                REQUEST_INOUT request)
 {
     int rc = MPI_SUCCESS;
 

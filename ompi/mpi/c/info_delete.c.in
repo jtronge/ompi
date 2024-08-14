@@ -45,7 +45,7 @@
  * @retval MPI_ERR_INFO
  * @retval MPI_ERR_INFO_KEYY
  */
-PROTOTYPE ERROR_CLASS Info_delete(INFO info, STRING key)
+PROTOTYPE ERROR_CLASS info_delete(INFO info, STRING key)
 {
     int key_length;
     int err;

@@ -30,8 +30,8 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Graph_neighbors(COMM comm, INT rank, INT maxneighbors,
-                        INT_OUT neighbors)
+PROTOTYPE ERROR_CLASS graph_neighbors(COMM comm, INT rank, INT maxneighbors,
+                                      INT_OUT neighbors)
 {
     int err;
 

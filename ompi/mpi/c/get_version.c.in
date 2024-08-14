@@ -27,8 +27,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-
-PROTOTYPE ERROR_CLASS Get_version(INT_OUT version, INT_OUT subversion)
+PROTOTYPE ERROR_CLASS get_version(INT_OUT version, INT_OUT subversion)
 {
     if (MPI_PARAM_CHECK) {
         /* Per MPI-2:3.1, this function can be invoked before

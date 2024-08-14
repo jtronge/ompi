@@ -39,10 +39,9 @@
 #include "ompi/dpm/dpm.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_spawn(STRING command, STRING_ARRAY argv, INT maxprocs, INFO info,
-		   INT root, COMM comm, COMM_OUT intercomm,
-		   INT_OUT array_of_errcodes)
+PROTOTYPE ERROR_CLASS comm_spawn(STRING command, STRING_ARRAY argv, INT maxprocs, INFO info,
+                                 INT root, COMM comm, COMM_OUT intercomm,
+                                 INT_OUT array_of_errcodes)
 {
     int rank, rc=OMPI_SUCCESS, i, flag;
     bool send_first = false; /* we wait to be contacted */

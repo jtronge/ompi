@@ -32,10 +32,10 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Get(BUFFER_OUT origin_addr, INT origin_count,
-            DATATYPE origin_datatype, INT target_rank,
-            AINT target_disp, INT target_count,
-            DATATYPE target_datatype, WIN win)
+PROTOTYPE ERROR_CLASS get(BUFFER_OUT origin_addr, COUNT origin_count,
+                          DATATYPE origin_datatype, INT target_rank,
+                          AINT target_disp, COUNT target_count,
+                          DATATYPE target_datatype, WIN win)
 {
     int rc;
 

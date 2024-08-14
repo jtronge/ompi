@@ -28,7 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-PROTOTYPE ERROR_CLASS File_get_amode(FILE fh, INT_OUT amode)
+PROTOTYPE ERROR_CLASS file_get_amode(FILE fh, INT_OUT amode)
 {
     int rc;
 

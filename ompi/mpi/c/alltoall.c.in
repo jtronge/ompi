@@ -36,10 +36,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Alltoall(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
-                 BUFFER_OUT recvbuf, INT recvcount, DATATYPE recvtype,
-                 COMM comm)
+PROTOTYPE ERROR_CLASS alltoall(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
+                               BUFFER_OUT recvbuf, COUNT recvcount, DATATYPE recvtype,
+                               COMM comm)
 {
     int err;
     size_t recvtype_size;

@@ -21,8 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-PROTOTYPE ERROR_CLASS Comm_set_info(COMM comm, INFO info)
+PROTOTYPE ERROR_CLASS comm_set_info(COMM comm, INFO info)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

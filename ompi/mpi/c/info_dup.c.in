@@ -44,7 +44,7 @@
  *   When an info object is no longer being used, it should be freed with
  *   'MPI_Info_free'.
  */
-PROTOTYPE ERROR_CLASS Info_dup(INFO info, INFO_OUT newinfo)
+PROTOTYPE ERROR_CLASS info_dup(INFO info, INFO_OUT newinfo)
 {
     int err;
 

@@ -30,8 +30,8 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Graph_get(COMM comm, INT maxindx, INT maxedges,
-                  INT_OUT indx, INT_OUT edges)
+PROTOTYPE ERROR_CLASS graph_get(COMM comm, INT maxindx, INT maxedges,
+                                INT_OUT indx, INT_OUT edges)
 {
     int err;
 

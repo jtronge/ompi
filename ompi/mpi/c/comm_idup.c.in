@@ -31,8 +31,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_idup(COMM comm, COMM_OUT newcomm, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS comm_idup(COMM comm, COMM_OUT newcomm, REQUEST_INOUT request)
 {
     int rc;
 

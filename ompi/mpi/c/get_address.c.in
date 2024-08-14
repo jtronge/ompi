@@ -27,7 +27,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-PROTOTYPE ERROR_CLASS Get_address(BUFFER location, AINT_OUT address)
+PROTOTYPE ERROR_CLASS get_address(BUFFER location, AINT_OUT address)
 {
     if( MPI_PARAM_CHECK ) {
       OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

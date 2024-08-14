@@ -81,11 +81,10 @@ static int ompi_isendrecv_complete_func (ompi_comm_request_t *request)
     return OMPI_SUCCESS;
 }
 
-
-PROTOTYPE ERROR_CLASS Isendrecv(BUFFER sendbuf, INT sendcount, DATATYPE sendtype,
-                 INT dest, INT sendtag, BUFFER_OUT recvbuf, INT recvcount,
-                 DATATYPE recvtype, INT source, INT recvtag,
-                 COMM comm,  REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS isendrecv(BUFFER sendbuf, COUNT sendcount, DATATYPE sendtype,
+                                INT dest, INT sendtag, BUFFER_OUT recvbuf, COUNT recvcount,
+                                DATATYPE recvtype, INT source, INT recvtag,
+                                COMM comm,  REQUEST_INOUT request)
 {
     ompi_isendrecv_context_t *context = NULL;
     ompi_comm_request_t *crequest;

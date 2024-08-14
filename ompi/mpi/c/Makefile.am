@@ -460,11 +460,11 @@ prototype_sources = \
 	win_test.c.in \
 	win_unlock.c.in \
 	win_unlock_all.c.in \
+	ineighbor_alltoallw.c.in \
+	neighbor_alltoallw.c.in \
+	neighbor_alltoallw_init.c.in \
 	win_wait.c.in
 
-# neighbor_alltoallw.c.in \
-# ineighbor_alltoallw.c.in \
-# neighbor_alltoallw_init.c.in \
 # pcontrol.c.in \
 # type_create_hindexed.c.in \
 # type_create_hindexed_block.c.in \
@@ -742,7 +742,7 @@ interface_profile_sources = \
         generated_ineighbor_alltoallv.c \
         generated_neighbor_alltoallv_init.c \
         neighbor_alltoallw.c \
-        ineighbor_alltoallw.c \
+        generated_ineighbor_alltoallw.c \
         neighbor_alltoallw_init.c \
         generated_keyval_create.c \
         generated_keyval_free.c \

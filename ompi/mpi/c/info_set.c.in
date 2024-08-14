@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /**
  *   MPI_Info_set - Set a (key, value) pair in an 'MPI_Info' object
  *
@@ -56,7 +55,7 @@
  *   key or value is greater than the allowed maxima, MPI_ERR_INFO_KEY
  *   and MPI_ERR_INFO_VALUE are raised
  */
-PROTOTYPE ERROR_CLASS Info_set(INFO info, STRING key, STRING value)
+PROTOTYPE ERROR_CLASS info_set(INFO info, STRING key, STRING value)
 {
     int err;
     int key_length;

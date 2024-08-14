@@ -30,8 +30,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-
-PROTOTYPE ERROR_CLASS Win_set_errhandler(WIN win, ERRHANDLER errhandler)
+PROTOTYPE ERROR_CLASS win_set_errhandler(WIN win, ERRHANDLER errhandler)
 {
     MPI_Errhandler tmp;
 

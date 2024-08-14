@@ -30,7 +30,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-PROTOTYPE ERROR_CLASS Win_set_name(WIN win, STRING win_name)
+PROTOTYPE ERROR_CLASS win_set_name(WIN win, STRING win_name)
 {
     int ret;
 

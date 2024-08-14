@@ -33,8 +33,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/instance/instance.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_get_errhandler(COMM comm, ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS comm_get_errhandler(COMM comm, ERRHANDLER_OUT errhandler)
 {
     int ret = MPI_SUCCESS;
 

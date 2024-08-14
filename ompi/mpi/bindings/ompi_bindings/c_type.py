@@ -177,6 +177,16 @@ class TypeAintOut(Type):
         return 'MPI_Aint *'
 
 
+@Type.add_type('AINT_ARRAY')
+class TypeAintArray(Type):
+
+    def type_text(self, enable_count=False):
+        return 'const MPI_Aint *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        return f'const MPI_Aint {self.name}[]'
+
+
 @Type.add_type('INT_OUT')
 class TypeIntOut(Type):
 

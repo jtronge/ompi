@@ -30,8 +30,7 @@
 #include "ompi/mpi/fortran/base/fint_2_int.h"
 #include "ompi/mpi/fortran/base/constants.h"
 
-
-PROTOTYPE ERROR_CLASS Status_f082f(F08_STATUS f08_status, FINT_OUT f_status)
+PROTOTYPE ERROR_CLASS status_f082f(F08_STATUS f08_status, FINT_OUT f_status)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

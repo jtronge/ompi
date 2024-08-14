@@ -35,9 +35,8 @@
 #include "ompi/info/info.h"
 #include "ompi/communicator/communicator.h"
 
-
-PROTOTYPE ERROR_CLASS Publish_name(STRING service_name, INFO info,
-                     STRING port_name)
+PROTOTYPE ERROR_CLASS publish_name(STRING service_name, INFO info,
+                                   STRING port_name)
 {
     int ret;
     opal_cstring_t *info_str;

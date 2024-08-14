@@ -28,9 +28,8 @@
 #include "ompi/attribute/attribute.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_get_attr(COMM comm, INT comm_keyval,
-                      BUFFER_OUT attribute_val, INT_OUT flag)
+PROTOTYPE ERROR_CLASS comm_get_attr(COMM comm, INT comm_keyval,
+                                    BUFFER_OUT attribute_val, INT_OUT flag)
 {
     int ret;
 

@@ -32,7 +32,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/errhandler/errcode.h"
 
-PROTOTYPE ERROR_CLASS Error_string(INT errorcode, STRING_OUT string, INT_OUT resultlen)
+PROTOTYPE ERROR_CLASS error_string(INT errorcode, STRING_OUT string,
+                                   INT_OUT resultlen)
 {
     int ret;
     char *tmpstring;

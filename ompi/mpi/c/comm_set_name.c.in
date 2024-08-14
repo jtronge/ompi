@@ -33,7 +33,7 @@
 #include "ompi/totalview.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Comm_set_name(COMM comm, STRING name)
+PROTOTYPE ERROR_CLASS comm_set_name(COMM comm, STRING name)
 {
     int rc;
 

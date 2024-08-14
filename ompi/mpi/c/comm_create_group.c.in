@@ -31,8 +31,7 @@
 #include "ompi/mca/pml/pml.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_create_group (COMM comm, GROUP group, INT tag, COMM_OUT newcomm)
+PROTOTYPE ERROR_CLASS comm_create_group (COMM comm, GROUP group, INT tag, COMM_OUT newcomm)
 {
     int rc;
 

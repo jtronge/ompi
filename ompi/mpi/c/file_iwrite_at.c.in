@@ -35,10 +35,9 @@
 #include "ompi/mca/io/base/io_base_request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS File_iwrite_at(FILE fh, OFFSET offset, BUFFER buf,
-                       INT count, DATATYPE datatype,
-                       REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS file_iwrite_at(FILE fh, OFFSET offset, BUFFER buf,
+                                     COUNT count, DATATYPE datatype,
+                                     REQUEST_INOUT request)
 {
     int rc;
 

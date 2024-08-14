@@ -33,9 +33,7 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-
-PROTOTYPE ERROR_CLASS Type_create_f90_integer(INT r, DATATYPE_OUT newtype)
-
+PROTOTYPE ERROR_CLASS type_create_f90_integer(INT r, DATATYPE_OUT newtype)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

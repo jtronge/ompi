@@ -28,8 +28,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/datatype/ompi_datatype_internal.h"
 
-
-PROTOTYPE ERROR_CLASS Type_match_size(INT typeclass, INT size, DATATYPE_OUT type)
+PROTOTYPE ERROR_CLASS type_match_size(INT typeclass, INT size, DATATYPE_OUT type)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

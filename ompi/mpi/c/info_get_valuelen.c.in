@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /**
  *   MPI_Info_get_valuelen - Get the length of a value for a given key in an 'M
  *
@@ -52,8 +51,8 @@
  *   character.  If the 'key' is not found on 'info', 'valuelen' is left
  *   alone.
  */
-PROTOTYPE ERROR_CLASS Info_get_valuelen(INFO info, STRING key, INT_OUT valuelen,
-                          INT_OUT flag)
+PROTOTYPE ERROR_CLASS info_get_valuelen(INFO info, STRING key, INT_OUT valuelen,
+                                        INT_OUT flag)
 {
     int key_length;
     int err;

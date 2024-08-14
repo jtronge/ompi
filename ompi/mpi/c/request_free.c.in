@@ -28,8 +28,7 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Request_free(REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS request_free(REQUEST_INOUT request)
 {
     int rc;
 

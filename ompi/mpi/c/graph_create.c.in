@@ -33,9 +33,10 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/memchecker.h"
 
+/* TODO: Does this need a bigcount variant? */
 
-PROTOTYPE ERROR_CLASS Graph_create(COMM old_comm, INT nnodes, INT_ARRAY indx,
-                     INT_ARRAY edges, INT reorder, COMM_OUT comm_graph)
+PROTOTYPE ERROR_CLASS graph_create(COMM old_comm, INT nnodes, INT_ARRAY indx,
+                                   INT_ARRAY edges, INT reorder, COMM_OUT comm_graph)
 {
     mca_topo_base_module_t* topo;
     int err;

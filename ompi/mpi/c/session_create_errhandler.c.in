@@ -18,8 +18,7 @@
 
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Session_create_errhandler (SESSION_ERRHANDLER_FUNCTION session_errhandler_fn, ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS session_create_errhandler (SESSION_ERRHANDLER_FUNCTION session_errhandler_fn, ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
 

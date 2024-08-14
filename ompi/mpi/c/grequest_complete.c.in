@@ -28,8 +28,7 @@
 #include "ompi/request/grequest.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Grequest_complete(REQUEST request)
+PROTOTYPE ERROR_CLASS grequest_complete(REQUEST request)
 {
     int rc = MPI_SUCCESS;
 

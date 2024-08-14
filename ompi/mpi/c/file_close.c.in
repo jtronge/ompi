@@ -25,8 +25,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_close(FILE_OUT fh)
+PROTOTYPE ERROR_CLASS file_close(FILE_OUT fh)
 {
     int rc;
 

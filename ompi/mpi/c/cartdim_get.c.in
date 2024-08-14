@@ -29,8 +29,7 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Cartdim_get(COMM comm, INT_OUT ndims)
+PROTOTYPE ERROR_CLASS cartdim_get(COMM comm, INT_OUT ndims)
 {
     int err;
 

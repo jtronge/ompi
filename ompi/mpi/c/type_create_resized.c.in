@@ -27,11 +27,10 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Type_create_resized(DATATYPE oldtype,
-                            AINT lb,
-                            AINT extent,
-                            DATATYPE_OUT newtype)
+PROTOTYPE ERROR_CLASS type_create_resized(DATATYPE oldtype,
+                                          AINT lb,
+                                          AINT extent,
+                                          DATATYPE_OUT newtype)
 {
    int rc;
 

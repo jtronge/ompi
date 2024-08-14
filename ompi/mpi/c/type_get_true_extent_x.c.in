@@ -29,9 +29,9 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Type_get_true_extent_x(DATATYPE datatype,
-                               ELEMENT_COUNT true_lb,
-                               ELEMENT_COUNT true_extent)
+PROTOTYPE ERROR_CLASS type_get_true_extent_x(DATATYPE datatype,
+                                             ELEMENT_COUNT true_lb,
+                                             ELEMENT_COUNT true_extent)
 {
    MPI_Aint atrue_lb, atrue_extent;
    int rc;

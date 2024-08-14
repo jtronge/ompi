@@ -33,9 +33,9 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS Iscatterv(BUFFER sendbuf, INT_ARRAY sendcounts, INT_ARRAY displs,
-                  DATATYPE sendtype, BUFFER_OUT recvbuf, INT recvcount,
-                  DATATYPE recvtype, INT root, COMM comm, REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS iscatterv(BUFFER sendbuf, COUNT_ARRAY sendcounts, DISP_ARRAY displs,
+                                DATATYPE sendtype, BUFFER_OUT recvbuf, COUNT recvcount,
+                                DATATYPE recvtype, INT root, COMM comm, REQUEST_INOUT request)
 {
     int i, size, err;
     ompi_count_array_t sendcounts_desc;

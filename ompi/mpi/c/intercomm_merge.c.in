@@ -37,9 +37,8 @@
 #include "ompi/proc/proc.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Intercomm_merge(COMM intercomm, INT high,
-                        COMM_OUT newcomm)
+PROTOTYPE ERROR_CLASS intercomm_merge(COMM intercomm, INT high,
+                                      COMM_OUT newcomm)
 {
     ompi_communicator_t *newcomp = MPI_COMM_NULL;
     ompi_proc_t **procs=NULL;

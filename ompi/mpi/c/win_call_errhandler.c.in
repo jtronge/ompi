@@ -26,8 +26,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-
-PROTOTYPE ERROR_CLASS Win_call_errhandler(WIN win, INT errorcode)
+PROTOTYPE ERROR_CLASS win_call_errhandler(WIN win, INT errorcode)
 {
     if (MPI_PARAM_CHECK) {
         OMPI_ERR_INIT_FINALIZE(FUNC_NAME);

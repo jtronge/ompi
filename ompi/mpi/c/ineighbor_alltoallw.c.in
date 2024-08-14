@@ -37,14 +37,15 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/runtime/ompi_spc.h"
 
-
-PROTOTYPE ERROR_CLASS Ineighbor_alltoallw(BUFFER sendbuf, INT_ARRAY sendcounts, const MPI_Aint sdispls[],
-                            const MPI_Datatype sendtypes[], BUFFER_OUT recvbuf, INT_ARRAY recvcounts,
-                            const MPI_Aint rdispls[], const MPI_Datatype recvtypes[], COMM comm,
-                            REQUEST_INOUT request)
+PROTOTYPE ERROR_CLASS ineighbor_alltoallw(BUFFER sendbuf, COUNT_ARRAY sendcounts, AINT_ARRAY sdispls,
+                                          DATATYPE_ARRAY sendtypes, BUFFER_OUT recvbuf, COUNT_ARRAY recvcounts,
+                                          AINT_ARRAY rdispls, DATATYPE_ARRAY recvtypes, COMM comm,
+                                          REQUEST_INOUT request)
 {
     int i, err;
     int indegree, outdegree;
+    ompi_count_array_t sendcounts_desc, recvcounts_desc;
+    ompi_disp_array_t sdispls_desc, rdispls_desc;
 
     SPC_RECORD(OMPI_SPC_INEIGHBOR_ALLTOALLW, 1);
 
@@ -133,8 +134,12 @@ PROTOTYPE ERROR_CLASS Ineighbor_alltoallw(BUFFER sendbuf, INT_ARRAY sendcounts, 
     }
 
     /* Invoke the coll component to perform the back-end operation */
-    err = comm->c_coll->coll_ineighbor_alltoallw(sendbuf, sendcounts, sdispls, sendtypes,
-                                                recvbuf, recvcounts, rdispls, recvtypes, comm, request,
+    OMPI_COUNT_ARRAY_INIT(&sendcounts_desc, sendcounts);
+    OMPI_DISP_ARRAY_INIT(&sdispls_desc, sdispls);
+    OMPI_COUNT_ARRAY_INIT(&recvcounts_desc, recvcounts);
+    OMPI_DISP_ARRAY_INIT(&rdispls_desc, rdispls);
+    err = comm->c_coll->coll_ineighbor_alltoallw(sendbuf, sendcounts_desc, sdispls_desc, sendtypes,
+                                                recvbuf, recvcounts_desc, rdispls_desc, recvtypes, comm, request,
                                                 comm->c_coll->coll_ineighbor_alltoallw_module);
     if (OPAL_LIKELY(OMPI_SUCCESS == err)) {
         ompi_coll_base_retain_datatypes_w(*request, sendtypes, recvtypes, true);

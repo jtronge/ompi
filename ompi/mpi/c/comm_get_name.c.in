@@ -33,8 +33,7 @@
 #include "ompi/totalview.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_get_name(COMM comm, STRING_OUT name, INT_OUT length)
+PROTOTYPE ERROR_CLASS comm_get_name(COMM comm, STRING_OUT name, INT_OUT length)
 {
     MEMCHECKER(
         memchecker_comm(comm);

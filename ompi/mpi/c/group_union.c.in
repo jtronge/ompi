@@ -28,8 +28,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/communicator/communicator.h"
 
-
-PROTOTYPE ERROR_CLASS Group_union(GROUP group1, GROUP group2, GROUP_OUT new_group)
+PROTOTYPE ERROR_CLASS group_union(GROUP group1, GROUP group2, GROUP_OUT new_group)
 {
     int err;
 

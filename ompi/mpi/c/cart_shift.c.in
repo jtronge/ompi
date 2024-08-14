@@ -29,9 +29,8 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Cart_shift(COMM comm, INT direction, INT disp,
-                   INT_OUT rank_source, INT_OUT rank_dest)
+PROTOTYPE ERROR_CLASS cart_shift(COMM comm, INT direction, INT disp,
+                                 INT_OUT rank_source, INT_OUT rank_dest)
 {
     int err;
 

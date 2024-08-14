@@ -27,7 +27,7 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/win/win.h"
 
-PROTOTYPE ERROR_CLASS Win_get_name(WIN win, STRING_OUT win_name, INT_OUT resultlen)
+PROTOTYPE ERROR_CLASS win_get_name(WIN win, STRING_OUT win_name, INT_OUT resultlen)
 {
     int ret;
 

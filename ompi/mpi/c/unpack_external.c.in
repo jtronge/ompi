@@ -31,9 +31,11 @@
 #include "opal/datatype/opal_convertor.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS Unpack_external (STRING datarep, BUFFER inbuf, AINT insize,
-                         AINT_OUT position, BUFFER_OUT outbuf, INT outcount,
-                         DATATYPE datatype)
+/* TODO: Does this need a bigcount variant? */
+
+PROTOTYPE ERROR_CLASS unpack_external (STRING datarep, BUFFER inbuf, AINT insize,
+                                       AINT_OUT position, BUFFER_OUT outbuf, INT outcount,
+                                       DATATYPE datatype)
 {
     int rc = MPI_SUCCESS;
 

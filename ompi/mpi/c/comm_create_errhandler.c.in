@@ -29,8 +29,8 @@
 #include "ompi/communicator/communicator.h"
 #include "ompi/errhandler/errhandler.h"
 
-PROTOTYPE ERROR_CLASS Comm_create_errhandler(COMM_ERRHANDLER_FUNCTION function,
-                               ERRHANDLER_OUT errhandler)
+PROTOTYPE ERROR_CLASS comm_create_errhandler(COMM_ERRHANDLER_FUNCTION function,
+                                             ERRHANDLER_OUT errhandler)
 {
     int err = MPI_SUCCESS;
 

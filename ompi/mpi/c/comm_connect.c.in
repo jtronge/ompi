@@ -37,9 +37,8 @@
 #include "ompi/dpm/dpm.h"
 #include "ompi/memchecker.h"
 
-
-PROTOTYPE ERROR_CLASS Comm_connect(STRING port_name, INFO info, INT root,
-                     COMM comm, COMM_OUT newcomm)
+PROTOTYPE ERROR_CLASS comm_connect(STRING port_name, INFO info, INT root,
+                                   COMM comm, COMM_OUT newcomm)
 {
     int rank, rc;
     bool send_first=true;   /* yes, we are the active part in this game */

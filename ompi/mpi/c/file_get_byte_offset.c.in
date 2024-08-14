@@ -28,9 +28,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/file/file.h"
 
-
-PROTOTYPE ERROR_CLASS File_get_byte_offset(FILE fh, OFFSET offset,
-                             OFFSET_OUT disp)
+PROTOTYPE ERROR_CLASS file_get_byte_offset(FILE fh, OFFSET offset,
+                                           OFFSET_OUT disp)
 {
     int rc;
 

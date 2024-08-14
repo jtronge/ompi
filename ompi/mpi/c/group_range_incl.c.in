@@ -28,9 +28,8 @@
 #include "ompi/errhandler/errhandler.h"
 #include "ompi/communicator/communicator.h"
 
-
-PROTOTYPE ERROR_CLASS Group_range_incl(GROUP group, INT n_triplets, RANGE_ARRAY ranges,
-                         GROUP_OUT new_group)
+PROTOTYPE ERROR_CLASS group_range_incl(GROUP group, INT n_triplets, RANGE_ARRAY ranges,
+                                       GROUP_OUT new_group)
 {
     int err, i,indx;
     int group_size;
