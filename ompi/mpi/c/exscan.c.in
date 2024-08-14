@@ -33,7 +33,7 @@
 #include "ompi/memchecker.h"
 #include "ompi/runtime/ompi_spc.h"
 
-PROTOTYPE ERROR_CLASS exscan(BUFFER sendbuf, BUFFER_OUT recvbuf, INT count,
+PROTOTYPE ERROR_CLASS exscan(BUFFER sendbuf, BUFFER_OUT recvbuf, COUNT count,
                              DATATYPE datatype, OP op, COMM comm)
 {
     int err;
