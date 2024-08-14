@@ -527,7 +527,7 @@ if OMPI_GENERATE_BINDINGS
 
 include Makefile.prototype_files
 
-api_f08_generated.F90: $(prototype_files)
+api_f08_generated.F90: $(incomplete_prototype_files) $(complete_prototype_files)
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
@@ -535,7 +535,7 @@ api_f08_generated.F90: $(prototype_files)
 	    fortran \
 	    code \
 	    --lang fortran \
-	    --prototype-files $(ready_prototype_files)
+	    --prototype-files $(complete_prototype_files)
 
 EXTRA_DIST = $(extra_dist_prototype_files)
 
