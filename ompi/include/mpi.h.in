@@ -1793,6 +1793,8 @@ OMPI_DECLSPEC  int MPI_File_write_ordered_begin_c(MPI_File fh, const void *buf, 
 OMPI_DECLSPEC  int MPI_File_write_ordered_end(MPI_File fh, const void *buf, MPI_Status *status);
 OMPI_DECLSPEC  int MPI_File_get_type_extent(MPI_File fh, MPI_Datatype datatype,
                                             MPI_Aint *extent);
+OMPI_DECLSPEC  int MPI_File_get_type_extent_c(MPI_File fh, MPI_Datatype datatype,
+                                              MPI_Count *extent);
 OMPI_DECLSPEC  int MPI_File_set_atomicity(MPI_File fh, int flag);
 OMPI_DECLSPEC  int MPI_File_get_atomicity(MPI_File fh, int *flag);
 OMPI_DECLSPEC  int MPI_File_sync(MPI_File fh);
@@ -2067,6 +2069,7 @@ OMPI_DECLSPEC  int MPI_Neighbor_alltoallw_init_c(const void *sendbuf, const MPI_
 OMPI_DECLSPEC  MPI_Fint MPI_Op_c2f(MPI_Op op);
 OMPI_DECLSPEC  int MPI_Op_commutative(MPI_Op op, int *commute);
 OMPI_DECLSPEC  int MPI_Op_create(MPI_User_function *function, int commute, MPI_Op *op);
+OMPI_DECLSPEC  int MPI_Op_create_c(MPI_User_function_c *function, int commute, MPI_Op *op);
 OMPI_DECLSPEC  int MPI_Open_port(MPI_Info info, char *port_name);
 OMPI_DECLSPEC  MPI_Op MPI_Op_f2c(MPI_Fint op);
 OMPI_DECLSPEC  int MPI_Op_free(MPI_Op *op);
@@ -2079,7 +2082,7 @@ OMPI_DECLSPEC  int MPI_Pack_external_c(const char datarep[], const void *inbuf, 
 OMPI_DECLSPEC  int MPI_Pack_external_size(const char datarep[], int incount,
                                           MPI_Datatype datatype, MPI_Aint *size);
 OMPI_DECLSPEC  int MPI_Pack_external_size_c(const char datarep[], MPI_Count incount,
-                                            MPI_Datatype datatype, MPI_Aint *size);
+                                            MPI_Datatype datatype, MPI_Count *size);
 OMPI_DECLSPEC  int MPI_Pack(const void *inbuf, int incount, MPI_Datatype datatype,
                             void *outbuf, int outsize, int *position, MPI_Comm comm);
 OMPI_DECLSPEC  int MPI_Pack_c(const void *inbuf, MPI_Count incount, MPI_Datatype datatype,
@@ -2414,6 +2417,8 @@ OMPI_DECLSPEC  int MPI_Type_get_envelope_c(MPI_Datatype type, MPI_Count *num_int
 					 MPI_Count *num_datatypes, int *combiner);
 OMPI_DECLSPEC  int MPI_Type_get_extent(MPI_Datatype type, MPI_Aint *lb,
                                        MPI_Aint *extent);
+OMPI_DECLSPEC  int MPI_Type_get_extent_c(MPI_Datatype type, MPI_Count *lb,
+                                         MPI_Count *extent);
 OMPI_DECLSPEC  int MPI_Type_get_extent_x(MPI_Datatype type, MPI_Count *lb,
                                          MPI_Count *extent);
 OMPI_DECLSPEC  int MPI_Type_get_name(MPI_Datatype type, char *type_name,
@@ -2449,8 +2454,8 @@ OMPI_DECLSPEC  int MPI_Unpublish_name(const char *service_name, MPI_Info info, c
 OMPI_DECLSPEC  int MPI_Unpack_external (const char datarep[], const void *inbuf, MPI_Aint insize,
                                         MPI_Aint *position, void *outbuf, int outcount,
                                         MPI_Datatype datatype);
-OMPI_DECLSPEC  int MPI_Unpack_external_c (const char datarep[], const void *inbuf, MPI_Aint insize,
-                                          MPI_Aint *position, void *outbuf, MPI_Count outcount,
+OMPI_DECLSPEC  int MPI_Unpack_external_c (const char datarep[], const void *inbuf, MPI_Count insize,
+                                          MPI_Count *position, void *outbuf, MPI_Count outcount,
                                           MPI_Datatype datatype);
 OMPI_DECLSPEC  int MPI_Waitall(int count, MPI_Request array_of_requests[],
                                MPI_Status *array_of_statuses);
@@ -2462,14 +2467,20 @@ OMPI_DECLSPEC  int MPI_Waitsome(int incount, MPI_Request array_of_requests[],
                                 MPI_Status array_of_statuses[]);
 OMPI_DECLSPEC  int MPI_Win_allocate(MPI_Aint size, int disp_unit, MPI_Info info,
                                     MPI_Comm comm, void *baseptr, MPI_Win *win);
+OMPI_DECLSPEC  int MPI_Win_allocate_c(MPI_Aint size, MPI_Aint disp_unit, MPI_Info info,
+                                      MPI_Comm comm, void *baseptr, MPI_Win *win);
 OMPI_DECLSPEC  int MPI_Win_allocate_shared(MPI_Aint size, int disp_unit, MPI_Info info,
                                            MPI_Comm comm, void *baseptr, MPI_Win *win);
+OMPI_DECLSPEC  int MPI_Win_allocate_shared_c(MPI_Aint size, MPI_Aint disp_unit, MPI_Info info,
+                                             MPI_Comm comm, void *baseptr, MPI_Win *win);
 OMPI_DECLSPEC  int MPI_Win_attach(MPI_Win win, void *base, MPI_Aint size);
 OMPI_DECLSPEC  MPI_Fint MPI_Win_c2f(MPI_Win win);
 OMPI_DECLSPEC  int MPI_Win_call_errhandler(MPI_Win win, int errorcode);
 OMPI_DECLSPEC  int MPI_Win_complete(MPI_Win win);
 OMPI_DECLSPEC  int MPI_Win_create(void *base, MPI_Aint size, int disp_unit,
                                   MPI_Info info, MPI_Comm comm, MPI_Win *win);
+OMPI_DECLSPEC  int MPI_Win_create_c(void *base, MPI_Aint size, MPI_Aint disp_unit,
+                                    MPI_Info info, MPI_Comm comm, MPI_Win *win);
 OMPI_DECLSPEC  int MPI_Win_create_dynamic(MPI_Info info, MPI_Comm comm, MPI_Win *win);
 OMPI_DECLSPEC  int MPI_Win_create_errhandler(MPI_Win_errhandler_function *function,
                                              MPI_Errhandler *errhandler);
@@ -2913,6 +2924,8 @@ OMPI_DECLSPEC  int PMPI_File_write_ordered_begin_c(MPI_File fh, const void *buf,
 OMPI_DECLSPEC  int PMPI_File_write_ordered_end(MPI_File fh, const void *buf, MPI_Status *status);
 OMPI_DECLSPEC  int PMPI_File_get_type_extent(MPI_File fh, MPI_Datatype datatype,
                                              MPI_Aint *extent);
+OMPI_DECLSPEC  int PMPI_File_get_type_extent_c(MPI_File fh, MPI_Datatype datatype,
+                                               MPI_Count *extent);
 OMPI_DECLSPEC  int PMPI_File_set_atomicity(MPI_File fh, int flag);
 OMPI_DECLSPEC  int PMPI_File_get_atomicity(MPI_File fh, int *flag);
 OMPI_DECLSPEC  int PMPI_File_sync(MPI_File fh);
@@ -3187,6 +3200,7 @@ OMPI_DECLSPEC  int PMPI_Neighbor_alltoallw_init_c(const void *sendbuf, const MPI
 OMPI_DECLSPEC  MPI_Fint PMPI_Op_c2f(MPI_Op op);
 OMPI_DECLSPEC  int PMPI_Op_commutative(MPI_Op op, int *commute);
 OMPI_DECLSPEC  int PMPI_Op_create(MPI_User_function *function, int commute, MPI_Op *op);
+OMPI_DECLSPEC  int PMPI_Op_create_c(MPI_User_function_c *function, int commute, MPI_Op *op);
 OMPI_DECLSPEC  int PMPI_Open_port(MPI_Info info, char *port_name);
 OMPI_DECLSPEC  MPI_Op PMPI_Op_f2c(MPI_Fint op);
 OMPI_DECLSPEC  int PMPI_Op_free(MPI_Op *op);
@@ -3199,7 +3213,7 @@ OMPI_DECLSPEC  int PMPI_Pack_external_c(const char datarep[], const void *inbuf,
 OMPI_DECLSPEC  int PMPI_Pack_external_size(const char datarep[], int incount,
                                            MPI_Datatype datatype, MPI_Aint *size);
 OMPI_DECLSPEC  int PMPI_Pack_external_size_c(const char datarep[], MPI_Count incount,
-                                             MPI_Datatype datatype, MPI_Aint *size);
+                                             MPI_Datatype datatype, MPI_Count *size);
 OMPI_DECLSPEC  int PMPI_Pack(const void *inbuf, int incount, MPI_Datatype datatype,
                              void *outbuf, int outsize, int *position, MPI_Comm comm);
 OMPI_DECLSPEC  int PMPI_Pack_c(const void *inbuf, MPI_Count incount, MPI_Datatype datatype,
@@ -3534,6 +3548,8 @@ OMPI_DECLSPEC  int PMPI_Type_get_envelope_c(MPI_Datatype type, MPI_Count *num_in
         				  MPI_Count *num_datatypes, int *combiner);
 OMPI_DECLSPEC  int PMPI_Type_get_extent(MPI_Datatype type, MPI_Aint *lb,
                                         MPI_Aint *extent);
+OMPI_DECLSPEC  int PMPI_Type_get_extent_c(MPI_Datatype type, MPI_Count *lb,
+                                          MPI_Count *extent);
 OMPI_DECLSPEC  int PMPI_Type_get_extent_x(MPI_Datatype type, MPI_Count *lb,
                                           MPI_Count *extent);
 OMPI_DECLSPEC  int PMPI_Type_get_name(MPI_Datatype type, char *type_name,
@@ -3569,8 +3585,8 @@ OMPI_DECLSPEC  int PMPI_Unpublish_name(const char *service_name, MPI_Info info, 
 OMPI_DECLSPEC  int PMPI_Unpack_external (const char datarep[], const void *inbuf, MPI_Aint insize,
                                          MPI_Aint *position, void *outbuf, int outcount,
                                          MPI_Datatype datatype);
-OMPI_DECLSPEC  int PMPI_Unpack_external_c (const char datarep[], const void *inbuf, MPI_Aint insize,
-                                           MPI_Aint *position, void *outbuf, MPI_Count outcount,
+OMPI_DECLSPEC  int PMPI_Unpack_external_c (const char datarep[], const void *inbuf, MPI_Count insize,
+                                           MPI_Count *position, void *outbuf, MPI_Count outcount,
                                            MPI_Datatype datatype);
 OMPI_DECLSPEC  int PMPI_Waitall(int count, MPI_Request array_of_requests[],
                                 MPI_Status *array_of_statuses);
@@ -3582,14 +3598,20 @@ OMPI_DECLSPEC  int PMPI_Waitsome(int incount, MPI_Request array_of_requests[],
                                  MPI_Status array_of_statuses[]);
 OMPI_DECLSPEC  int PMPI_Win_allocate(MPI_Aint size, int disp_unit, MPI_Info info,
                                      MPI_Comm comm, void *baseptr, MPI_Win *win);
+OMPI_DECLSPEC  int PMPI_Win_allocate_c(MPI_Aint size, MPI_Aint disp_unit, MPI_Info info,
+                                       MPI_Comm comm, void *baseptr, MPI_Win *win);
 OMPI_DECLSPEC  int PMPI_Win_allocate_shared(MPI_Aint size, int disp_unit, MPI_Info info,
                                             MPI_Comm comm, void *baseptr, MPI_Win *win);
+OMPI_DECLSPEC  int PMPI_Win_allocate_shared_c(MPI_Aint size, MPI_Aint disp_unit, MPI_Info info,
+                                              MPI_Comm comm, void *baseptr, MPI_Win *win);
 OMPI_DECLSPEC  int PMPI_Win_attach(MPI_Win win, void *base, MPI_Aint size);
 OMPI_DECLSPEC  MPI_Fint PMPI_Win_c2f(MPI_Win win);
 OMPI_DECLSPEC  int PMPI_Win_call_errhandler(MPI_Win win, int errorcode);
 OMPI_DECLSPEC  int PMPI_Win_complete(MPI_Win win);
 OMPI_DECLSPEC  int PMPI_Win_create(void *base, MPI_Aint size, int disp_unit,
                                    MPI_Info info, MPI_Comm comm, MPI_Win *win);
+OMPI_DECLSPEC  int PMPI_Win_create_c(void *base, MPI_Aint size, MPI_Aint disp_unit,
+                                     MPI_Info info, MPI_Comm comm, MPI_Win *win);
 OMPI_DECLSPEC  int PMPI_Win_create_dynamic(MPI_Info info, MPI_Comm comm, MPI_Win *win);
 OMPI_DECLSPEC  int PMPI_Win_create_errhandler(MPI_Win_errhandler_function *function,
                                               MPI_Errhandler *errhandler);

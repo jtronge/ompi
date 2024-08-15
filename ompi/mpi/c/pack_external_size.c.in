@@ -34,10 +34,11 @@
 
 /* TODO: Does this need a bigcount variant? */
 
-PROTOTYPE ERROR_CLASS pack_external_size(STRING datarep, INT incount,
-                                         DATATYPE datatype, AINT_OUT size)
+PROTOTYPE ERROR_CLASS pack_external_size(STRING datarep, COUNT incount,
+                                         DATATYPE datatype, AINT_COUNT_OUT size)
 {
     int rc = MPI_SUCCESS;
+    MPI_Aint tmp_size = 0;
 
     MEMCHECKER(
         memchecker_datatype(datatype);
@@ -52,8 +53,10 @@ PROTOTYPE ERROR_CLASS pack_external_size(STRING datarep, INT incount,
         }
     }
 
-    rc = ompi_datatype_pack_external_size(datarep, incount,
-                                          datatype, size);
+    /* TODO:BIGCOUNT: Update when the ompi_datatype code is updated for bigcount */
+    rc = ompi_datatype_pack_external_size(datarep, (int) incount,
+                                          datatype, &tmp_size);
+    *size = tmp_size;
 
     OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME);
 }

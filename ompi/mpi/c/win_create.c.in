@@ -31,9 +31,7 @@
 #include "ompi/win/win.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS win_create(BUFFER_OUT base, AINT size, INT disp_unit,
+PROTOTYPE ERROR_CLASS win_create(BUFFER_OUT base, AINT size, DISP disp_unit,
                                  INFO info, COMM comm, WIN_OUT win)
 {
     int ret = MPI_SUCCESS;
@@ -68,6 +66,7 @@ PROTOTYPE ERROR_CLASS win_create(BUFFER_OUT base, AINT size, INT disp_unit,
     }
 
     /* create window and return */
+    /* TODO:BIGCOUNT: Need to update internal function with ptrdiff_t */
     ret = ompi_win_create(base, (size_t)size, disp_unit, comm,
                           &(info->super), win);
     if (OMPI_SUCCESS != ret) {

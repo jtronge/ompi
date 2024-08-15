@@ -126,7 +126,18 @@ def abi_internal_name(extname):
     return f'{extname}_ABI_INTERNAL'
 
 
+BIGCOUNT_TYPE_NAMES = [
+    'COUNT',
+    'COUNT_ARRAY',
+    'DISP',
+    'DISP_ARRAY',
+    'COUNT_OUT',
+    'AINT_COUNT',
+    'AINT_COUNT_OUT',
+    'USER_FUNCTION',
+]
+
+
 def prototype_has_bigcount(prototype):
     """Should this prototype have a bigcount version?"""
-    return any(param.type_name in ('COUNT', 'COUNT_ARRAY', 'DISP', 'DISP_ARRAY', 'COUNT_OUT')
-               for param in prototype.params)
+    return any(param.type_name in BIGCOUNT_TYPE_NAMES for param in prototype.params)

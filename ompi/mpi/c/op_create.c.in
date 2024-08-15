@@ -46,6 +46,7 @@ PROTOTYPE ERROR_CLASS op_create(USER_FUNCTION function, INT commute, OP_OUT op)
 
     /* Create and cache the op.  Sets a refcount of 1. */
 
+    /* TODO:BIGCOUNT: Update internally to handle bigcount variant of user function */
     *op = ompi_op_create_user(OPAL_INT_TO_BOOL(commute),
                               (ompi_op_fortran_handler_fn_t *) function);
     if (NULL == *op) {

@@ -141,8 +141,19 @@ class TypePartitionedCount(Type):
         return 'MPI_Count'
 
 
+@Type.add_type('DISP')
+class TypeDisp(Type):
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Aint' if enable_count else 'int'
+
+
 @Type.add_type('DISP_ARRAY')
-class TypeDisplArray(Type):
+class TypeDispArray(Type):
 
     @property
     def is_count(self):
@@ -199,6 +210,7 @@ class TypeIntOut(Type):
         else:
             return f'int {self.name}[]'
 
+
 @Type.add_type('COUNT_OUT')
 class TypeCountOut(Type):
 
@@ -208,6 +220,29 @@ class TypeCountOut(Type):
 
     def type_text(self, enable_count=False):
         return 'MPI_Count *' if enable_count else 'int *'
+
+
+@Type.add_type('AINT_COUNT')
+class TypeAintCountOut(Type):
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count' if enable_count else 'MPI_Aint'
+
+
+@Type.add_type('AINT_COUNT_OUT')
+class TypeAintCountOut(Type):
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count *' if enable_count else 'MPI_Aint *'
+
 
 @Type.add_type('INT_ARRAY')
 class TypeIntArray(Type):
@@ -867,8 +902,12 @@ class TypeDeleteFunctionStandard(Type):
 @Type.add_type('USER_FUNCTION', abi_type=['ompi'])
 class TypeUserFunction(Type):
 
+    @property
+    def is_count(self):
+        return True
+
     def type_text(self, enable_count=False):
-        return 'MPI_User_function *'
+        return 'MPI_User_function_c *' if enable_count else 'MPI_User_function *'
 
 
 @Type.add_type('USER_FUNCTION', abi_type=['standard'])
