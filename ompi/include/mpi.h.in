@@ -499,6 +499,8 @@ typedef struct ompi_f08_status_public_t ompi_f08_status_public_t;
 typedef int (MPI_Datarep_extent_function)(MPI_Datatype, MPI_Aint *, void *);
 typedef int (MPI_Datarep_conversion_function)(void *, MPI_Datatype,
                                               int, void *, MPI_Offset, void *);
+typedef int (MPI_Datarep_conversion_function_c)(void *, MPI_Datatype,
+                                              MPI_Count, void *, MPI_Offset, void *);
 typedef void (MPI_Comm_errhandler_function)(MPI_Comm *, int *, ...);
 typedef void (MPI_Session_errhandler_function) (MPI_Session *, int *, ...);
 
@@ -509,6 +511,7 @@ typedef void (MPI_Session_errhandler_function) (MPI_Session *, int *, ...);
 typedef void (ompi_file_errhandler_function)(MPI_File *, int *, ...);
 typedef void (MPI_Win_errhandler_function)(MPI_Win *, int *, ...);
 typedef void (MPI_User_function)(void *, void *, int *, MPI_Datatype *);
+typedef void (MPI_User_function_c)(void *, void *, MPI_Count *, MPI_Datatype *);
 typedef int (MPI_Comm_copy_attr_function)(MPI_Comm, int, void *,
                                             void *, void *, int *);
 typedef int (MPI_Comm_delete_attr_function)(MPI_Comm, int, void *, void *);
@@ -994,6 +997,7 @@ enum {
    must be able to be present, and therefore has to be in this
    conditional block in mpi.h. */
 #define MPI_CONVERSION_FN_NULL ((MPI_Datarep_conversion_function*) 0)
+#define MPI_CONVERSION_FN_NULL_C ((MPI_Datarep_conversion_function_c*) 0)
 #endif
 
 OMPI_DECLSPEC int OMPI_C_MPI_TYPE_NULL_DELETE_FN( MPI_Datatype datatype,
@@ -1896,6 +1900,8 @@ OMPI_DECLSPEC  int MPI_Group_union(MPI_Group group1, MPI_Group group2,
                                    MPI_Group *newgroup);
 OMPI_DECLSPEC  int MPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest,
                               int tag, MPI_Comm comm, MPI_Request *request);
+OMPI_DECLSPEC  int MPI_Ibsend_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest,
+                              int tag, MPI_Comm comm, MPI_Request *request);
 OMPI_DECLSPEC  int MPI_Improbe(int source, int tag, MPI_Comm comm,
                                int *flag, MPI_Message *message,
                                MPI_Status *status);
@@ -2403,6 +2409,9 @@ OMPI_DECLSPEC  int MPI_Type_get_contents(MPI_Datatype mtype, int max_integers,
 OMPI_DECLSPEC  int MPI_Type_get_envelope(MPI_Datatype type, int *num_integers,
                                          int *num_addresses, int *num_datatypes,
                                          int *combiner);
+OMPI_DECLSPEC  int MPI_Type_get_envelope_c(MPI_Datatype type, MPI_Count *num_integers,
+                                         MPI_Count *num_addresses, MPI_Count *num_large_counts,
+					 MPI_Count *num_datatypes, int *combiner);
 OMPI_DECLSPEC  int MPI_Type_get_extent(MPI_Datatype type, MPI_Aint *lb,
                                        MPI_Aint *extent);
 OMPI_DECLSPEC  int MPI_Type_get_extent_x(MPI_Datatype type, MPI_Count *lb,
@@ -3011,6 +3020,8 @@ OMPI_DECLSPEC  int PMPI_Group_union(MPI_Group group1, MPI_Group group2,
                                     MPI_Group *newgroup);
 OMPI_DECLSPEC  int PMPI_Ibsend(const void *buf, int count, MPI_Datatype datatype, int dest,
                                int tag, MPI_Comm comm, MPI_Request *request);
+OMPI_DECLSPEC  int PMPI_Ibsend_c(const void *buf, MPI_Count count, MPI_Datatype datatype, int dest,
+                               int tag, MPI_Comm comm, MPI_Request *request);
 OMPI_DECLSPEC  int PMPI_Improbe(int source, int tag, MPI_Comm comm,
                                 int *flag, MPI_Message *message,
                                 MPI_Status *status);
@@ -3518,6 +3529,9 @@ OMPI_DECLSPEC  int PMPI_Type_get_contents(MPI_Datatype mtype, int max_integers,
 OMPI_DECLSPEC  int PMPI_Type_get_envelope(MPI_Datatype type, int *num_integers,
                                           int *num_addresses, int *num_datatypes,
                                           int *combiner);
+OMPI_DECLSPEC  int PMPI_Type_get_envelope_c(MPI_Datatype type, MPI_Count *num_integers,
+                                          MPI_Count *num_addresses, MPI_Count *num_large_counts, 
+        				  MPI_Count *num_datatypes, int *combiner);
 OMPI_DECLSPEC  int PMPI_Type_get_extent(MPI_Datatype type, MPI_Aint *lb,
                                         MPI_Aint *extent);
 OMPI_DECLSPEC  int PMPI_Type_get_extent_x(MPI_Datatype type, MPI_Count *lb,

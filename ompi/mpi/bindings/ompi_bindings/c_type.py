@@ -199,6 +199,15 @@ class TypeIntOut(Type):
         else:
             return f'int {self.name}[]'
 
+@Type.add_type('COUNT_OUT')
+class TypeCountOut(Type):
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count *' if enable_count else 'int *'
 
 @Type.add_type('INT_ARRAY')
 class TypeIntArray(Type):

@@ -128,5 +128,5 @@ def abi_internal_name(extname):
 
 def prototype_has_bigcount(prototype):
     """Should this prototype have a bigcount version?"""
-    return any(param.type_name in ('COUNT', 'COUNT_ARRAY', 'DISP', 'DISP_ARRAY')
+    return any(param.type_name in ('COUNT', 'COUNT_ARRAY', 'DISP', 'DISP_ARRAY', 'COUNT_OUT')
                for param in prototype.params)
