@@ -30,11 +30,9 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS type_create_indexed_block(INT count,
-                                                INT blocklength,
-                                                INT_ARRAY array_of_displacements,
+PROTOTYPE ERROR_CLASS type_create_indexed_block(COUNT count,
+                                                COUNT blocklength,
+                                                COUNT_ARRAY array_of_displacements,
                                                 DATATYPE oldtype,
                                                 DATATYPE_OUT newtype)
 {

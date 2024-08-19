@@ -29,10 +29,8 @@
 #include "opal/datatype/opal_convertor.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS pack_size(INT incount, DATATYPE datatype, COMM comm,
-                                INT_OUT size)
+PROTOTYPE ERROR_CLASS pack_size(COUNT incount, DATATYPE datatype, COMM comm,
+                                COUNT_OUT size)
 {
     opal_convertor_t local_convertor;
     size_t length;

@@ -34,7 +34,7 @@
 #include "ompi/request/request.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS ssend_init(BUFFER buf, INT count, DATATYPE type,
+PROTOTYPE ERROR_CLASS ssend_init(BUFFER buf, COUNT count, DATATYPE type,
                    INT dest, INT tag, COMM comm,
                    REQUEST_INOUT request)
 {

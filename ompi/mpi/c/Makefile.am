@@ -404,6 +404,7 @@ prototype_sources = \
 	type_create_f90_integer.c.in \
 	type_create_f90_real.c.in \
 	type_create_hvector.c.in \
+	type_create_hindexed_block.c.in \
 	type_create_indexed_block.c.in \
 	type_create_keyval.c.in \
 	type_create_resized.c.in \
@@ -415,7 +416,6 @@ prototype_sources = \
 	type_free_keyval.c.in \
 	type_get_attr.c.in \
 	type_get_contents.c.in \
-	type_get_envelope.c.in \
 	type_get_extent.c.in \
 	type_get_extent_x.c.in \
 	type_get_name.c.in \
@@ -467,7 +467,6 @@ prototype_sources = \
 
 # pcontrol.c.in \
 # type_create_hindexed.c.in \
-# type_create_hindexed_block.c.in \
 # type_create_struct.c.in
 
 # Include template files in case someone wants to update them
@@ -741,9 +740,9 @@ interface_profile_sources = \
         generated_neighbor_alltoallv.c \
         generated_ineighbor_alltoallv.c \
         generated_neighbor_alltoallv_init.c \
+        generated_neighbor_alltoallw_init.c \
         neighbor_alltoallw.c \
         generated_ineighbor_alltoallw.c \
-        neighbor_alltoallw_init.c \
         generated_keyval_create.c \
         generated_keyval_free.c \
         generated_op_c2f.c \
@@ -842,8 +841,8 @@ interface_profile_sources = \
         generated_type_create_f90_real.c \
         type_create_hindexed.c \
         generated_type_create_hvector.c \
+        generated_type_create_hindexed_block.c \
         generated_type_create_indexed_block.c \
-        type_create_hindexed_block.c \
         generated_type_create_keyval.c \
         generated_type_create_resized.c \
         type_create_struct.c \
@@ -855,7 +854,8 @@ interface_profile_sources = \
         generated_type_free_keyval.c \
         generated_type_get_attr.c \
         generated_type_get_contents.c \
-        generated_type_get_envelope.c \
+        type_get_envelope.c \
+        type_get_envelope_c.c \
         generated_type_get_extent.c \
         generated_type_get_extent_x.c \
         generated_type_get_name.c \

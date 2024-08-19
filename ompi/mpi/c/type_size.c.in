@@ -31,7 +31,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS type_size(DATATYPE type, INT_OUT size)
+PROTOTYPE ERROR_CLASS type_size(DATATYPE type, COUNT_OUT size)
 {
     size_t type_size;
     MEMCHECKER(

@@ -124,6 +124,20 @@ class TypeCountArray(Type):
         count_type = 'MPI_Count' if enable_count else 'int'
         return f'const {count_type} {self.name}[]'
 
+@Type.add_type('COUNT_AINT_ARRAY')
+class TypeCountAintArray(Type):
+    """Array of counts (either MPI_Aint or MPI_Count)."""
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Count *' if enable_count else 'MPI_Aint *'
+
+    def parameter(self, enable_count=False, **kwargs):
+        count_type = 'MPI_Count' if enable_count else 'MPI_Aint'
+        return f'const {count_type} {self.name}[]'
 
 @Type.add_type('ELEMENT_COUNT')
 class ElementCountType(Type):

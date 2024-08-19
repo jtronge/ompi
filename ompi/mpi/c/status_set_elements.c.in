@@ -31,9 +31,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS status_set_elements(STATUS_OUT status, DATATYPE datatype, INT count)
+PROTOTYPE ERROR_CLASS status_set_elements(STATUS_OUT status, DATATYPE datatype, COUNT count)
 {
     int rc = MPI_SUCCESS;
     size_t size;
