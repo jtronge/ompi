@@ -29,7 +29,7 @@
 
 PROTOTYPE ERROR_CLASS type_create_resized(DATATYPE oldtype,
                                           AINT lb,
-                                          COUNT extent,
+                                          AINT_COUNT extent,
                                           DATATYPE_OUT newtype)
 {
    int rc;
