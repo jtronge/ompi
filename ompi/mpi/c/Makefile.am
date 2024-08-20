@@ -406,6 +406,7 @@ prototype_sources = \
 	type_create_hvector.c.in \
 	type_create_hindexed_block.c.in \
 	type_create_indexed_block.c.in \
+	type_create_indexed.c.in \
 	type_create_keyval.c.in \
 	type_create_resized.c.in \
 	type_create_subarray.c.in \
@@ -415,7 +416,6 @@ prototype_sources = \
 	type_free.c.in \
 	type_free_keyval.c.in \
 	type_get_attr.c.in \
-	type_get_contents.c.in \
 	type_get_extent.c.in \
 	type_get_extent_x.c.in \
 	type_get_name.c.in \
@@ -839,7 +839,7 @@ interface_profile_sources = \
         generated_type_create_f90_complex.c \
         generated_type_create_f90_integer.c \
         generated_type_create_f90_real.c \
-        type_create_hindexed.c \
+        generated_type_create_hindexed.c \
         generated_type_create_hvector.c \
         generated_type_create_hindexed_block.c \
         generated_type_create_indexed_block.c \
@@ -853,7 +853,8 @@ interface_profile_sources = \
         generated_type_free.c \
         generated_type_free_keyval.c \
         generated_type_get_attr.c \
-        generated_type_get_contents.c \
+	type_get_contents.c \
+	type_get_contents_c.c \
         type_get_envelope.c \
         type_get_envelope_c.c \
         generated_type_get_extent.c \

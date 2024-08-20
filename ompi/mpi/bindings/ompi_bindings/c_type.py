@@ -267,6 +267,15 @@ class TypeIntArray(Type):
     def parameter(self, enable_count=False, **kwargs):
         return f'const int {self.name}[]'
 
+@Type.add_type('INT_AINT_OUT')
+class TypeIntAintOut(Type):
+
+    @property
+    def is_count(self):
+        return True
+
+    def type_text(self, enable_count=False):
+        return 'MPI_Aint *' if enable_count else 'int *'
 
 @Type.add_type('RANGE_ARRAY')
 class TypeRangeArray(Type):
@@ -998,9 +1007,12 @@ class TypeGrequestCancelFunctionStandard(Type):
 @Type.add_type('DATAREP_CONVERSION_FUNCTION', abi_type=['ompi'])
 class TypeDatarepConversionFunction(Type):
 
-    def type_text(self, enable_count=False):
-        return 'MPI_Datarep_conversion_function *'
+    @property
+    def is_count(self):
+        return True
 
+    def type_text(self, enable_count=False):
+        return 'MPI_Datarep_conversion_function_c *' if enable_count else 'MPI_Datarep_conversion_function *'
 
 @Type.add_type('DATAREP_CONVERSION_FUNCTION', abi_type=['standard'])
 class TypeDatarepConversionFunctionStandard(Type):

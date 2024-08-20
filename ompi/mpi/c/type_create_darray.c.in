@@ -31,12 +31,10 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS type_create_darray(INT size,
                                          INT rank,
                                          INT ndims,
-                                         INT_ARRAY gsize_array,
+                                         COUNT_ARRAY gsize_array,
                                          INT_ARRAY distrib_array,
                                          INT_ARRAY darg_array,
                                          INT_ARRAY psize_array,

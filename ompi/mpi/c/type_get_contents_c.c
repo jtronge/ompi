@@ -27,15 +27,25 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
+#if OMPI_BUILD_MPI_PROFILING
+#if OPAL_HAVE_WEAK_SYMBOLS
+#pragma weak MPI_Type_get_contents_c = PMPI_Type_get_contents_c
+#endif
+#define MPI_Type_get_contents_c PMPI_Type_get_contents_c
+#endif
 
-PROTOTYPE ERROR_CLASS type_get_contents(DATATYPE mtype,
-                                        INT max_integers,
-                                        INT max_addresses,
-                                        INT max_datatypes,
-                                        INT_OUT array_of_integers,
-                                        AINT_OUT array_of_addresses,
-                                        DATATYPE_OUT array_of_datatypes)
+static const char FUNC_NAME[] = "MPI_Type_get_contents_c";
+
+
+int MPI_Type_get_contents_c(MPI_Datatype mtype,
+                            MPI_Count max_integers,
+                            MPI_Count max_addresses,
+                            MPI_Count max_large_counts,
+                            MPI_Count  max_datatypes,
+                            int array_of_integers[],
+                            MPI_Aint array_of_addresses[],
+                            MPI_Count  array_of_large_counts[],
+                            MPI_Datatype array_of_datatypes[])
 {
     int rc, i;
     MPI_Datatype newtype;

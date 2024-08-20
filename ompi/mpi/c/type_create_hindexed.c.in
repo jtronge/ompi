@@ -30,21 +30,12 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_hindexed = PMPI_Type_create_hindexed
-#endif
-#define MPI_Type_create_hindexed PMPI_Type_create_hindexed
-#endif
 
-static const char FUNC_NAME[] = "MPI_Type_create_hindexed";
-
-
-int MPI_Type_create_hindexed(int count,
-                             const int array_of_blocklengths[],
-                             const MPI_Aint array_of_displacements[],
-                             MPI_Datatype oldtype,
-                             MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS type_create_hindexed(COUNT count,
+                                           COUNT_ARRAY array_of_blocklengths,
+                                           COUNT_AINT_ARRAY array_of_displacements,
+                                           DATATYPE oldtype,
+                                           DATATYPE_OUT newtype)
 {
     int rc, i;
 

@@ -30,10 +30,11 @@
 #include "opal/datatype/opal_convertor.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS unpack(BUFFER inbuf, INT insize, INT_OUT position,
-                             BUFFER_OUT outbuf, INT outcount, DATATYPE datatype,
+PROTOTYPE ERROR_CLASS unpack(BUFFER inbuf, 
+		             COUNT insize, 
+ 		             COUNT_OUT position,
+                             BUFFER_OUT outbuf, 
+			     COUNT outcount, DATATYPE datatype,
                              COMM comm)
 {
     int rc = MPI_SUCCESS;
