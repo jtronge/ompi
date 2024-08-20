@@ -36,7 +36,6 @@ PROTOTYPE ERROR_CLASS unpack_external (STRING datarep, BUFFER inbuf, AINT_COUNT 
                                        DATATYPE datatype)
 {
     int rc = MPI_SUCCESS;
-    MPI_Aint tmp_position = 0;
 
     MEMCHECKER(
         memchecker_datatype(datatype);
@@ -59,9 +58,7 @@ PROTOTYPE ERROR_CLASS unpack_external (STRING datarep, BUFFER inbuf, AINT_COUNT 
     /* TODO:BIGCOUNT: Update once ompi_datatype_unpack_external() is updated with a bigcount variant */
 
     rc = ompi_datatype_unpack_external(datarep, inbuf, (MPI_Aint) insize,
-                                       &tmp_position, outbuf, (int) outcount,
+                                       position, outbuf, (int) outcount,
                                        datatype);
-    *position = tmp_position;
-
     OMPI_ERRHANDLER_NOHANDLE_RETURN(rc, rc, FUNC_NAME);
 }
