@@ -57,8 +57,8 @@ PROTOTYPE ERROR_CLASS register_datarep(STRING datarep,
     }
 
     /* Call the back-end io component function */
-    rc = mca_io_base_register_datarep(datarep, read_conversion_fn,
-                                      write_conversion_fn,
+    rc = mca_io_base_register_datarep(datarep, (MPI_Datarep_conversion_function *) read_conversion_fn,
+                                      (MPI_Datarep_conversion_function *) write_conversion_fn,
                                       dtype_file_extent_fn,
                                       extra_state);
 
