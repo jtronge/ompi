@@ -32,8 +32,6 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Should this function have a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS cart_map(COMM comm, INT ndims, COUNT_ARRAY dims,
                                COUNT_ARRAY periods, INT_OUT newrank)
 {

@@ -31,8 +31,6 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/mca/topo/base/base.h"
 
-/* TODO: Does this need a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS dist_graph_create_adjacent(COMM comm_old,
                                                  INT indegree, INT_ARRAY sources,
                                                  INT_ARRAY sourceweights, INT outdegree,

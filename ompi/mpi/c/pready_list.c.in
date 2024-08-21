@@ -33,8 +33,6 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-/* TODO: Does this need a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS pready_list(INT length, INT_OUT partitions, REQUEST request)
 {
     int rc = OMPI_SUCCESS;

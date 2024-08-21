@@ -32,8 +32,6 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/runtime/ompi_spc.h"
 
-/* TODO: Does target_disp need to change here for the bigcount variant */
-
 PROTOTYPE ERROR_CLASS rget(BUFFER_OUT origin_addr, COUNT origin_count,
                            DATATYPE origin_datatype, INT target_rank,
                            AINT target_disp, COUNT target_count,

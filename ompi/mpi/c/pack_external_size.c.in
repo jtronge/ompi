@@ -32,8 +32,6 @@
 #include "opal/datatype/opal_convertor.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS pack_external_size(STRING datarep, COUNT incount,
                                          DATATYPE datatype, AINT_COUNT_OUT size)
 {

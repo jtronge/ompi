@@ -29,8 +29,6 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
 PROTOTYPE ERROR_CLASS graph_neighbors_count(COMM comm, INT rank, INT_OUT nneighbors)
 {
     int err;
