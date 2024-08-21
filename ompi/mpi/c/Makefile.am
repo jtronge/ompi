@@ -741,7 +741,7 @@ interface_profile_sources = \
         generated_ineighbor_alltoallv.c \
         generated_neighbor_alltoallv_init.c \
         generated_neighbor_alltoallw_init.c \
-        neighbor_alltoallw.c \
+        generated_neighbor_alltoallw.c \
         generated_ineighbor_alltoallw.c \
         generated_keyval_create.c \
         generated_keyval_free.c \

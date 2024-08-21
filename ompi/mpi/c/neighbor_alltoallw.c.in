@@ -152,3 +152,4 @@ PROTOTYPE ERROR_CLASS neighbor_alltoallw(BUFFER sendbuf, COUNT_ARRAY sendcounts,
     OMPI_ERRHANDLER_RETURN(err, comm, err, FUNC_NAME);
 }
 
+
