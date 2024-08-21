@@ -406,10 +406,10 @@ prototype_sources = \
 	type_create_hvector.c.in \
 	type_create_hindexed_block.c.in \
 	type_create_indexed_block.c.in \
-	type_create_indexed.c.in \
 	type_create_keyval.c.in \
 	type_create_resized.c.in \
 	type_create_subarray.c.in \
+        type_create_struct.c.in \
 	type_delete_attr.c.in \
 	type_dup.c.in \
 	type_f2c.c.in \
@@ -464,10 +464,6 @@ prototype_sources = \
 	neighbor_alltoallw.c.in \
 	neighbor_alltoallw_init.c.in \
 	win_wait.c.in
-
-# pcontrol.c.in \
-# type_create_hindexed.c.in \
-# type_create_struct.c.in
 
 # Include template files in case someone wants to update them
 EXTRA_DIST = $(prototype_sources)
@@ -845,7 +841,7 @@ interface_profile_sources = \
         generated_type_create_indexed_block.c \
         generated_type_create_keyval.c \
         generated_type_create_resized.c \
-        type_create_struct.c \
+        generated_type_create_struct.c \
         generated_type_create_subarray.c \
         generated_type_delete_attr.c \
         generated_type_dup.c \

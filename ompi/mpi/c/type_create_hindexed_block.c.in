@@ -25,7 +25,7 @@
 
 PROTOTYPE ERROR_CLASS type_create_hindexed_block(COUNT count,
                                                  COUNT blocklength,
-                                                 COUNT_AINT_ARRAY array_of_displacements,
+                                                 AINT_COUNT_ARRAY array_of_displacements,
                                                  DATATYPE oldtype,
                                                  DATATYPE_OUT newtype)
 {

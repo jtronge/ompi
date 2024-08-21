@@ -30,8 +30,8 @@
 #include "ompi/memchecker.h"
 
 PROTOTYPE ERROR_CLASS type_get_true_extent(DATATYPE datatype,
-                                           AINT_OUT true_lb,
-                                           AINT_OUT true_extent)
+                                           AINT_COUNT_OUT true_lb,
+                                           AINT_COUNT_OUT true_extent)
 {
    int rc;
 

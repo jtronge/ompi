@@ -30,21 +30,11 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-#if OMPI_BUILD_MPI_PROFILING
-#if OPAL_HAVE_WEAK_SYMBOLS
-#pragma weak MPI_Type_create_struct = PMPI_Type_create_struct
-#endif
-#define MPI_Type_create_struct PMPI_Type_create_struct
-#endif
-
-static const char FUNC_NAME[] = "MPI_Type_create_struct";
-
-
-int MPI_Type_create_struct(int count,
-                           const int array_of_blocklengths[],
-                           const MPI_Aint array_of_displacements[],
-                           const MPI_Datatype array_of_types[],
-                           MPI_Datatype *newtype)
+PROTOTYPE ERROR_CLASS type_create_struct(COUNT count,
+                                         COUNT_ARRAY array_of_blocklengths,
+                                         AINT_COUNT_ARRAY array_of_displacements,
+                                         DATATYPE_ARRAY array_of_types,
+                                         DATATYPE_OUT newtype)
 {
     int i, rc;
 

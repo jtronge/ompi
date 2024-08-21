@@ -2078,7 +2078,7 @@ OMPI_DECLSPEC  int MPI_Pack_external(const char datarep[], const void *inbuf, in
                                      MPI_Aint outsize, MPI_Aint *position);
 OMPI_DECLSPEC  int MPI_Pack_external_c(const char datarep[], const void *inbuf, MPI_Count incount,
                                        MPI_Datatype datatype, void *outbuf,
-                                       MPI_Aint outsize, MPI_Aint *position);
+                                       MPI_Count outsize, MPI_Count *position);
 OMPI_DECLSPEC  int MPI_Pack_external_size(const char datarep[], int incount,
                                           MPI_Datatype datatype, MPI_Aint *size);
 OMPI_DECLSPEC  int MPI_Pack_external_size_c(const char datarep[], MPI_Count incount,
@@ -2385,7 +2385,7 @@ OMPI_DECLSPEC  int MPI_Type_create_struct(int count, const int array_of_block_le
                                           const MPI_Datatype array_of_types[],
                                           MPI_Datatype *newtype);
 OMPI_DECLSPEC  int MPI_Type_create_struct_c(MPI_Count count, const MPI_Count array_of_block_lengths[],
-                                            const MPI_Aint array_of_displacements[],
+                                            const MPI_Count array_of_displacements[],
                                             const MPI_Datatype array_of_types[],
                                             MPI_Datatype *newtype);
 OMPI_DECLSPEC  int MPI_Type_create_subarray(int ndims, const int size_array[], const int subsize_array[],
@@ -3209,7 +3209,7 @@ OMPI_DECLSPEC  int PMPI_Pack_external(const char datarep[], const void *inbuf, i
                                       MPI_Aint outsize, MPI_Aint *position);
 OMPI_DECLSPEC  int PMPI_Pack_external_c(const char datarep[], const void *inbuf, MPI_Count incount,
                                         MPI_Datatype datatype, void *outbuf,
-                                        MPI_Aint outsize, MPI_Aint *position);
+                                        MPI_Count outsize, MPI_Count *position);
 OMPI_DECLSPEC  int PMPI_Pack_external_size(const char datarep[], int incount,
                                            MPI_Datatype datatype, MPI_Aint *size);
 OMPI_DECLSPEC  int PMPI_Pack_external_size_c(const char datarep[], MPI_Count incount,
@@ -3516,7 +3516,7 @@ OMPI_DECLSPEC  int PMPI_Type_create_struct(int count, const int array_of_block_l
                                            const MPI_Datatype array_of_types[],
                                            MPI_Datatype *newtype);
 OMPI_DECLSPEC  int PMPI_Type_create_struct_c(MPI_Count count, const MPI_Count array_of_block_lengths[],
-                                             const MPI_Aint array_of_displacements[],
+                                             const MPI_Count array_of_displacements[],
                                              const MPI_Datatype array_of_types[],
                                              MPI_Datatype *newtype);
 OMPI_DECLSPEC  int PMPI_Type_create_subarray(int ndims, const int size_array[], const int subsize_array[],

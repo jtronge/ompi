@@ -129,11 +129,11 @@ def abi_internal_name(extname):
 BIGCOUNT_TYPE_NAMES = [
     'COUNT',
     'COUNT_ARRAY',
-    'COUNT_AINT_ARRAY',
     'DISP',
     'DISP_ARRAY',
     'COUNT_OUT',
     'AINT_COUNT',
+    'AINT_COUNT_ARRAY',
     'AINT_COUNT_OUT',
     'INT_AINT_OUT',
     'USER_FUNCTION',

@@ -31,9 +31,7 @@
 #include "ompi/datatype/ompi_datatype.h"
 #include "ompi/memchecker.h"
 
-/* TODO: Does this need a bigcount variant? */
-
-PROTOTYPE ERROR_CLASS type_contiguous(INT count,
+PROTOTYPE ERROR_CLASS type_contiguous(COUNT count,
                                       DATATYPE oldtype,
                                       DATATYPE_OUT newtype)
 {

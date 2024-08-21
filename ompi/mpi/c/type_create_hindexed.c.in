@@ -33,7 +33,7 @@
 
 PROTOTYPE ERROR_CLASS type_create_hindexed(COUNT count,
                                            COUNT_ARRAY array_of_blocklengths,
-                                           COUNT_AINT_ARRAY array_of_displacements,
+                                           AINT_COUNT_ARRAY array_of_displacements,
                                            DATATYPE oldtype,
                                            DATATYPE_OUT newtype)
 {
