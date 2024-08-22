@@ -1227,21 +1227,6 @@ subroutine MPI_Exscan_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,reque
 end subroutine MPI_Exscan_init_f08
 end interface  MPI_Exscan_init
 
-interface  MPI_Gather
-subroutine MPI_Gather_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                          root,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount, root
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Gather_f08
-end interface  MPI_Gather
-
 interface  MPI_Igather
 subroutine MPI_Igather_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                           root,comm,request,ierror)
@@ -1274,22 +1259,6 @@ subroutine MPI_Gather_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recv
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Gather_init_f08
 end interface  MPI_Gather_init
-
-interface  MPI_Gatherv
-subroutine MPI_Gatherv_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &
-                           recvtype,root,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, root
-   INTEGER, INTENT(IN) :: recvcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Gatherv_f08
-end interface  MPI_Gatherv
 
 interface  MPI_Igatherv
 subroutine MPI_Igatherv_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &
@@ -2710,17 +2679,20 @@ subroutine MPI_Finalized_f08(flag,ierror)
 end subroutine MPI_Finalized_f08
 end interface  MPI_Finalized
 
+!
+! TODO: Does this the below comment affect TS/CFI support?
+!
 ! ASYNCHRONOUS had to removed from the base argument because
 ! the dummy argument is not an assumed-shape array.  This will
 ! be okay once the Interop TR is implemented.
-interface  MPI_Free_mem
-subroutine MPI_Free_mem_f08(base,ierror)
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ base
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: base
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Free_mem_f08
-end interface  MPI_Free_mem
+! interface  MPI_Free_mem
+! subroutine MPI_Free_mem_f08(base,ierror)
+!    implicit none
+!    @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ base
+!    @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: base
+!    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
+! end subroutine MPI_Free_mem_f08
+! end interface  MPI_Free_mem
 
 interface  MPI_Get_processor_name
 subroutine MPI_Get_processor_name_f08(name,resultlen,ierror)

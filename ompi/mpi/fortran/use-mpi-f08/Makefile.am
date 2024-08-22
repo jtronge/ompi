@@ -212,10 +212,7 @@ mpi_api_files = \
         file_sync_f08.F90 \
         finalized_f08.F90 \
         finalize_f08.F90 \
-        free_mem_f08.F90 \
-        gather_f08.F90 \
         gather_init_f08.F90 \
-        gatherv_f08.F90 \
         gatherv_init_f08.F90 \
         get_accumulate_f08.F90 \
         get_address_f08.F90 \

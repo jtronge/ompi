@@ -2,12 +2,10 @@
 # Shared list of prototype files to avoid listing dependencies multiple times.
 #
 
+# TODO: I don't think the below file should be a prototype
+# $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in
+
 incomplete_prototype_files = \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/compare_and_swap_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/free_mem_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gather_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_address_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_ts.c.in \
@@ -82,6 +80,7 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_attach_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/compare_and_swap_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/exscan_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/fetch_and_op_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_all_ts.c.in \
@@ -118,6 +117,9 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_ordered_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_shared_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/free_mem_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gather_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/irecv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/isend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
