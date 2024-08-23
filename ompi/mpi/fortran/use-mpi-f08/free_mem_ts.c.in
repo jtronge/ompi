@@ -23,7 +23,7 @@ PROTOTYPE VOID free_mem(BUFFER x)
 {
     int c_ierr;
     if (OMPI_CFI_IS_CONTIGUOUS(x)) {
-        c_ierr = PMPI_Free_mem(x->base_addr);
+        c_ierr = PMPI_Free_mem(OMPI_CFI_BASE_ADDR(x));
     } else {
         c_ierr = MPI_ERR_BUFFER;
         OMPI_ERRHANDLER_INVOKE(MPI_COMM_SELF, c_ierr, FUNC_NAME);
