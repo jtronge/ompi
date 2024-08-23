@@ -127,7 +127,8 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/testany.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/waitall.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_attach_ts.c.in
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_attach_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_shared_query.c.in
 
 # TODO: Is there any way to get EXTRA_DIST to work with absolute paths? Or,
 #       better yet, is there some way to make these dependencies a little
@@ -234,6 +235,7 @@ extra_dist_prototype_files = \
         file_iread_ts.c.in \
         file_read_at_all_ts.c.in \
         win_attach_ts.c.in \
+        win_shared_query.c.in \
         file_write_at_all_begin_ts.c.in \
         mrecv_ts.c.in \
         sendrecv_ts.c.in \

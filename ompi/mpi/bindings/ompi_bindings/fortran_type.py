@@ -176,6 +176,17 @@ class WBufferType(FortranType):
         return f'OMPI_CFI_BUFFER *{self.name}'
 
 
+@FortranType.add('C_PTR_OUT')
+class CptrType(FortranType):
+    def declare(self):
+        return f'TYPE(C_PTR), INTENT(OUT) :: {self.name}'
+
+    def use(self):
+        return [('ISO_C_BINDING', 'C_PTR')]
+
+    def c_parameter(self):
+        return f'char *{self.name}'
+
 @FortranType.add('COUNT')
 class CountType(FortranType):
     def declare(self):

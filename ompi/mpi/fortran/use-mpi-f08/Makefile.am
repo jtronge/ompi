@@ -441,7 +441,6 @@ mpi_api_files = \
         win_set_errhandler_f08.F90 \
         win_set_info_f08.F90 \
         win_set_name_f08.F90 \
-        win_shared_query_f08.F90 \
         win_start_f08.F90 \
         win_sync_f08.F90 \
         win_test_f08.F90 \
