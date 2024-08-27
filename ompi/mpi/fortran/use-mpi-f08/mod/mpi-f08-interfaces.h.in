@@ -924,22 +924,6 @@ subroutine MPI_Unpack_external_f08(datarep,inbuf,insize,position,outbuf,outcount
 end subroutine MPI_Unpack_external_f08
 end interface  MPI_Unpack_external
 
-interface  MPI_Iallgather
-subroutine MPI_Iallgather_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                             comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Iallgather_f08
-end interface  MPI_Iallgather
-
 interface  MPI_Allgather_init
 subroutine MPI_Allgather_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                              comm,info,request,ierror)
@@ -956,23 +940,6 @@ subroutine MPI_Allgather_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,r
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Allgather_init_f08
 end interface  MPI_Allgather_init
-
-interface  MPI_Iallgatherv
-subroutine MPI_Iallgatherv_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &
-                              recvtype,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: recvcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Iallgatherv_f08
-end interface  MPI_Iallgatherv
 
 interface  MPI_Allgatherv_init
 subroutine MPI_Allgatherv_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &

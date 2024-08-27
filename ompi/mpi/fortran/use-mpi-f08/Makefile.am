@@ -241,8 +241,6 @@ mpi_api_files = \
         group_size_f08.F90 \
         group_translate_ranks_f08.F90 \
         group_union_f08.F90 \
-        iallgather_f08.F90 \
-        iallgatherv_f08.F90 \
         iallreduce_f08.F90 \
         ialltoall_f08.F90 \
         ialltoallv_f08.F90 \
