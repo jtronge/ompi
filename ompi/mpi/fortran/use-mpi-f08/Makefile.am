@@ -214,11 +214,9 @@ mpi_api_files = \
         finalize_f08.F90 \
         gather_init_f08.F90 \
         gatherv_init_f08.F90 \
-        get_address_f08.F90 \
         get_count_f08.F90 \
         get_elements_f08.F90 \
         get_elements_x_f08.F90 \
-        get_f08.F90 \
         get_library_version_f08.F90 \
         get_processor_name_f08.F90 \
         get_version_f08.F90 \

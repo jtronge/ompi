@@ -19,14 +19,7 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Get_address";
-
-void ompi_get_address_ts(CFI_cdesc_t *x, MPI_Aint *address, MPI_Fint *ierr)
+PROTOTYPE VOID get_address(BUFFER_ASYNC x, AINT address)
 {
     int c_ierr;
     MPI_Aint c_address;
