@@ -6,7 +6,6 @@
 # $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in
 
 incomplete_prototype_files = \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_address_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/iallgather_ts.c.in \
@@ -120,6 +119,7 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/free_mem_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gather_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/irecv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/isend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
