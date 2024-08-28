@@ -131,6 +131,7 @@ BIGCOUNT_TYPE_NAMES = [
     'COUNT_ARRAY',
     'DISP',
     'DISP_ARRAY',
+    'DISP_OUT',
     'COUNT_OUT',
     'AINT_COUNT',
     'AINT_COUNT_ARRAY',
