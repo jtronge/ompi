@@ -296,10 +296,6 @@ mpi_api_files = \
         op_create_f08.F90 \
         open_port_f08.F90 \
         op_free_f08.F90 \
-        pack_external_f08.F90 \
-        pack_external_size_f08.F90 \
-        pack_f08.F90 \
-        pack_size_f08.F90 \
         parrived_f08.F90 \
         pcontrol_f08.F90 \
         pready_f08.F90 \
@@ -393,8 +389,6 @@ mpi_api_files = \
         type_size_f08.F90 \
         type_size_x_f08.F90 \
         type_vector_f08.F90 \
-        unpack_external_f08.F90 \
-        unpack_f08.F90 \
         unpublish_name_f08.F90 \
         waitany_f08.F90 \
         wait_f08.F90 \

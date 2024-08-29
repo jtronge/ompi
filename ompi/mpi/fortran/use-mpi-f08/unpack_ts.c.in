@@ -19,17 +19,10 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
 
-#include "ompi/communicator/communicator.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Unpack";
-
-void ompi_unpack_ts(CFI_cdesc_t* x1, MPI_Fint *insize, MPI_Fint *position,
-                    CFI_cdesc_t* x2, MPI_Fint *outcount, MPI_Fint *datatype,
-                    MPI_Fint *comm, MPI_Fint *ierr)
+PROTOTYPE VOID unpack(BUFFER x1, COUNT insize, COUNT_INOUT position,
+                      BUFFER_OUT x2, COUNT_OUT outcount, DATATYPE datatype,
+                      COMM comm)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
@@ -55,7 +48,7 @@ void ompi_unpack_ts(CFI_cdesc_t* x1, MPI_Fint *insize, MPI_Fint *position,
 
     OMPI_SINGLE_FINT_2_INT(position);
 
-    c_ierr = PMPI_Unpack(inbuf, OMPI_FINT_2_INT(*insize),
+    c_ierr = @INNER_CALL@(inbuf, OMPI_FINT_2_INT(*insize),
                          OMPI_SINGLE_NAME_CONVERT(position),
                          OMPI_F2C_BOTTOM(outbuf), c_outcount,
                          c_datatype, c_comm);

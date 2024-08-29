@@ -19,37 +19,15 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/constants.h"
-#include "ompi/mpi/fortran/base/constants.h"
-#include "ompi/mpi/fortran/base/fortran_base_strings.h"
-
-static const char FUNC_NAME[] = "MPI_Pack_external";
-
-void ompi_pack_external_ts(char *datarep, CFI_cdesc_t* x1, MPI_Fint *incount,
-                           MPI_Fint *datatype, CFI_cdesc_t* x2,
-                           MPI_Aint *outsize, MPI_Aint *position,
-                           MPI_Fint *ierr, int datarep_len)
+PROTOTYPE VOID pack_external(CHAR_ARRAY datarep, BUFFER x1, COUNT incount,
+                             DATATYPE datatype, BUFFER x2,
+                             COUNT outsize, AINT_COUNT_INOUT position)
 {
-    int ret, c_ierr;
-    char *c_datarep;
+    int c_ierr;
     MPI_Datatype c_datatype, c_type = PMPI_Type_f2c(*datatype);
     void *inbuf = OMPI_CFI_BASE_ADDR(x1);
     char *outbuf = OMPI_CFI_BASE_ADDR(x2);
     int c_incount = OMPI_FINT_2_INT(*incount);
-
-    /* Convert the fortran string */
-
-    if (OMPI_SUCCESS != (ret = ompi_fortran_string_f2c(datarep, datarep_len,
-                                                       &c_datarep))) {
-        c_ierr = OMPI_ERRHANDLER_INVOKE(MPI_COMM_SELF, ret, FUNC_NAME);
-        if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
-        return;
-    }
 
     OMPI_CFI_2_C(x1, c_incount, c_type, c_datatype, c_ierr);
     if (MPI_SUCCESS != c_ierr) {
@@ -68,7 +46,7 @@ void ompi_pack_external_ts(char *datarep, CFI_cdesc_t* x1, MPI_Fint *incount,
         return;
     }
 
-    c_ierr = PMPI_Pack_external(c_datarep, OMPI_F2C_BOTTOM(inbuf),
+    c_ierr = @INNER_CALL@(datarep, OMPI_F2C_BOTTOM(inbuf),
                                c_incount,
                                c_datatype, outbuf,
                                *outsize,
@@ -77,6 +55,4 @@ void ompi_pack_external_ts(char *datarep, CFI_cdesc_t* x1, MPI_Fint *incount,
         ompi_datatype_destroy(&c_datatype);
     }
     if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
-
-    free(c_datarep);
 }

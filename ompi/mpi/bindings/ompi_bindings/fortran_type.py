@@ -202,6 +202,38 @@ class CountType(FortranType):
         type_ = 'MPI_Count' if self.bigcount else 'MPI_Fint'
         return f'{type_} *{self.name}'
 
+@FortranType.add('COUNT_INOUT')
+class CountTypeInOut(FortranType):
+    """COUNT type with INOUT INTENT"""
+    def declare(self):
+        if self.bigcount:
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(INOUT) :: {self.name}'
+        else:
+            return f'INTEGER, INTENT(INOUT) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+
+    def c_parameter(self):
+        type_ = 'MPI_Count' if self.bigcount else 'MPI_Fint'
+        return f'{type_} *{self.name}'
+
+@FortranType.add('COUNT_OUT')
+class CountTypeInOut(FortranType):
+    """COUNT type with OUT INTENT"""
+    def declare(self):
+        if self.bigcount:
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(OUT) :: {self.name}'
+        else:
+            return f'INTEGER, INTENT(IN) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+
+    def c_parameter(self):
+        type_ = 'MPI_Count' if self.bigcount else 'MPI_Fint'
+        return f'{type_} *{self.name}'
+
 
 @FortranType.add('DATATYPE')
 class DatatypeType(FortranType):
@@ -420,6 +452,45 @@ class AintOut(FortranType):
     def c_parameter(self):
         return f'MPI_Aint *{self.name}'
 
+@FortranType.add('AINT_COUNT_INOUT')
+class AintCountTypeInOut(FortranType):
+    """AINT/COUNT type with INOUT INTENT"""
+    def declare(self):
+        if self.bigcount:
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(INOUT) :: {self.name}'
+        else:
+            return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(INOUT) :: {self.name}'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+        else:
+            return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+
+    def c_parameter(self):
+        type_ = 'MPI_Count' if self.bigcount else 'MPI_Aint'
+        return f'{type_} *{self.name}'
+
+@FortranType.add('AINT_COUNT_OUT')
+class AintCountTypeOut(FortranType):
+    """AINT/COUNT type with OUT INTENT"""
+    def declare(self):
+        if self.bigcount:
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(OUT) :: {self.name}'
+        else:
+            return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(OUT) :: {self.name}'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+        else:
+            return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+
+    def c_parameter(self):
+        type_ = 'MPI_Count' if self.bigcount else 'MPI_Aint'
+        return f'{type_} *{self.name}'
+
+
 @FortranType.add('DISP')
 class Disp(FortranType):
     """Displacecment type."""
@@ -558,3 +629,19 @@ class Offset(FortranType):
 
     def c_parameter(self):
         return f'MPI_Offset *{self.name}'
+
+@FortranType.add('CHAR_ARRAY')
+class CharArray(FortranType):
+    """Fortran CHAR type."""
+
+    def declare(self):
+        return f'CHARACTER(LEN=*), INTENT(IN) :: {self.name}'
+
+    def use(self):
+        return [('iso_c_binding', 'c_char')]
+
+    def declare_cbinding_fortran(self):
+        return f'CHARACTER(KIND=C_CHAR), INTENT(IN) :: {self.name}(*)'
+
+    def c_parameter(self):
+        return f'char *{self.name}'

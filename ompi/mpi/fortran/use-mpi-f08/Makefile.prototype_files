@@ -29,8 +29,6 @@ incomplete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/put_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/raccumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_init_ts.c.in \
@@ -49,9 +47,7 @@ incomplete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_replace_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_init_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/unpack_external_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/unpack_ts.c.in
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_ts.c.in
 
 complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/accumulate_ts.c.in \
@@ -130,7 +126,13 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_create_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_detach_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_allocate.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_allocate_shared.c.in
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/win_allocate_shared.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/unpack_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/unpack_external_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_size.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_size.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_ts.c.in
 
 # TODO: Is there any way to get EXTRA_DIST to work with absolute paths? Or,
 #       better yet, is there some way to make these dependencies a little
@@ -165,6 +167,7 @@ extra_dist_prototype_files = \
         ineighbor_alltoallv_ts.c.in \
         neighbor_alltoall_ts.c.in \
         reduce_ts.c.in \
+        pack_size.c.in \
         pack_ts.c.in \
         file_read_all_ts.c.in \
         raccumulate_ts.c.in \
@@ -211,6 +214,7 @@ extra_dist_prototype_files = \
         allreduce_ts.c.in \
         allgatherv_ts.c.in \
         pack_external_ts.c.in \
+        pack_external_size.c.in \
         file_write_ordered_begin_ts.c.in \
         ineighbor_allgatherv_ts.c.in \
         recv_ts.c.in \
@@ -246,6 +250,7 @@ extra_dist_prototype_files = \
         file_read_at_all_end_ts.c.in \
         get_ts.c.in \
         unpack_ts.c.in \
+        unpack_external_ts.c.in \
         ibcast_ts.c.in \
         bcast_ts.c.in \
         bsend_ts.c.in \
@@ -255,7 +260,6 @@ extra_dist_prototype_files = \
         gatherv_ts.c.in \
         file_read_ordered_end_ts.c.in \
         file_iread_at_ts.c.in \
-        unpack_external_ts.c.in \
         rget_ts.c.in \
         iscatterv_ts.c.in \
         ireduce_scatter_ts.c.in \
