@@ -242,10 +242,6 @@ mpi_api_files = \
         group_translate_ranks_f08.F90 \
         group_union_f08.F90 \
         ibarrier_f08.F90 \
-        ibcast_f08.F90 \
-        ibsend_f08.F90 \
-        iexscan_f08.F90 \
-        igather_f08.F90 \
         igatherv_f08.F90 \
         improbe_f08.F90 \
         imrecv_f08.F90 \
