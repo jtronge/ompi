@@ -959,22 +959,6 @@ subroutine MPI_Allgatherv_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts
 end subroutine MPI_Allgatherv_init_f08
 end interface  MPI_Allgatherv_init
 
-interface  MPI_Iallreduce
-subroutine MPI_Iallreduce_f08(sendbuf,recvbuf,count,datatype,op,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Op), INTENT(IN) :: op
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Iallreduce_f08
-end interface  MPI_Iallreduce
-
 interface  MPI_Allreduce_init
 subroutine MPI_Allreduce_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,request,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm, MPI_Info, MPI_Request
@@ -991,22 +975,6 @@ subroutine MPI_Allreduce_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,re
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Allreduce_init_f08
 end interface  MPI_Allreduce_init
-
-interface  MPI_Ialltoall
-subroutine MPI_Ialltoall_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                            comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ialltoall_f08
-end interface  MPI_Ialltoall
 
 interface  MPI_Alltoall_init
 subroutine MPI_Alltoall_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
@@ -1025,22 +993,6 @@ subroutine MPI_Alltoall_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,re
 end subroutine MPI_Alltoall_init_f08
 end interface  MPI_Alltoall_init
 
-interface  MPI_Ialltoallv
-subroutine MPI_Ialltoallv_f08(sendbuf,sendcounts,sdispls,sendtype,recvbuf,recvcounts, &
-                             rdispls,recvtype,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: sendcounts(*), sdispls(*), recvcounts(*), rdispls(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ialltoallv_f08
-end interface  MPI_Ialltoallv
-
 interface  MPI_Alltoallv_init
 subroutine MPI_Alltoallv_init_f08(sendbuf,sendcounts,sdispls,sendtype,recvbuf,recvcounts, &
                              rdispls,recvtype,comm,info,request,ierror)
@@ -1057,22 +1009,6 @@ subroutine MPI_Alltoallv_init_f08(sendbuf,sendcounts,sdispls,sendtype,recvbuf,re
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Alltoallv_init_f08
 end interface  MPI_Alltoallv_init
-
-interface  MPI_Ialltoallw
-subroutine MPI_Ialltoallw_f08(sendbuf,sendcounts,sdispls,sendtypes,recvbuf,recvcounts, &
-                             rdispls,recvtypes,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: sendcounts(*), sdispls(*), recvcounts(*), rdispls(*)
-   TYPE(MPI_Datatype), INTENT(IN) OMPI_ASYNCHRONOUS :: sendtypes(*), recvtypes(*)
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ialltoallw_f08
-end interface  MPI_Ialltoallw
 
 interface  MPI_Alltoallw_init
 subroutine MPI_Alltoallw_init_f08(sendbuf,sendcounts,sdispls,sendtypes,recvbuf,recvcounts, &
