@@ -242,9 +242,7 @@ mpi_api_files = \
         group_translate_ranks_f08.F90 \
         group_union_f08.F90 \
         ibarrier_f08.F90 \
-        igatherv_f08.F90 \
         improbe_f08.F90 \
-        imrecv_f08.F90 \
         ineighbor_allgather_f08.F90 \
         ineighbor_allgatherv_f08.F90 \
         ineighbor_alltoall_f08.F90 \

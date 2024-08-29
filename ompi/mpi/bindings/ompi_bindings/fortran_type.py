@@ -630,6 +630,7 @@ class Offset(FortranType):
     def c_parameter(self):
         return f'MPI_Offset *{self.name}'
 
+
 @FortranType.add('CHAR_ARRAY')
 class CharArray(FortranType):
     """Fortran CHAR type."""
@@ -645,3 +646,17 @@ class CharArray(FortranType):
 
     def c_parameter(self):
         return f'char *{self.name}'
+
+
+@FortranType.add('MESSAGE_INOUT')
+class MessageInOut(FortranType):
+    """MPI_Message INOUT type."""
+
+    def declare(self):
+        return f'TYPE(MPI_Message), INTENT(INOUT) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_Message')]
+
+    def c_parameter(self):
+        return f'MPI_Fint *{self.name}'

@@ -1909,6 +1909,8 @@ OMPI_DECLSPEC  int MPI_Improbe(int source, int tag, MPI_Comm comm,
                                MPI_Status *status);
 OMPI_DECLSPEC  int MPI_Imrecv(void *buf, int count, MPI_Datatype type,
                               MPI_Message *message, MPI_Request *request);
+OMPI_DECLSPEC  int MPI_Imrecv_c(void *buf, MPI_Count count, MPI_Datatype type,
+                                MPI_Message *message, MPI_Request *request);
 OMPI_DECLSPEC  MPI_Fint MPI_Info_c2f(MPI_Info info);
 OMPI_DECLSPEC  int MPI_Info_create(MPI_Info *info);
 OMPI_DECLSPEC  int MPI_Info_create_env(int argc, char *argv[], MPI_Info *info);
@@ -3040,6 +3042,8 @@ OMPI_DECLSPEC  int PMPI_Improbe(int source, int tag, MPI_Comm comm,
                                 MPI_Status *status);
 OMPI_DECLSPEC  int PMPI_Imrecv(void *buf, int count, MPI_Datatype type,
                                MPI_Message *message, MPI_Request *request);
+OMPI_DECLSPEC  int PMPI_Imrecv_c(void *buf, MPI_Count count, MPI_Datatype type,
+                                 MPI_Message *message, MPI_Request *request);
 OMPI_DECLSPEC  MPI_Fint PMPI_Info_c2f(MPI_Info info);
 OMPI_DECLSPEC  int PMPI_Info_create(MPI_Info *info);
 OMPI_DECLSPEC  int PMPI_Info_create_env(int argc, char *argv[], MPI_Info *info);

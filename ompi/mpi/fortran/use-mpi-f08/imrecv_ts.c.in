@@ -20,24 +20,15 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Imrecv";
-
-void ompi_imrecv_ts(CFI_cdesc_t* x, MPI_Fint *count, MPI_Fint *datatype,
-                    MPI_Fint *message, MPI_Fint *request, MPI_Fint *ierr)
+PROTOTYPE VOID imrecv(BUFFER_ASYNC_OUT x, COUNT count, DATATYPE datatype,
+                      MESSAGE_INOUT message, REQUEST_OUT request)
 {
     int c_ierr;
     MPI_Datatype c_datatype, c_type = PMPI_Type_f2c(*datatype);
     MPI_Request c_req;
     MPI_Message c_message;
     void *buf = OMPI_CFI_BASE_ADDR(x);
-    int c_count =  OMPI_FINT_2_INT(*count);
+    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
 
     c_message = PMPI_Message_f2c(*message);
 
@@ -48,8 +39,8 @@ void ompi_imrecv_ts(CFI_cdesc_t* x, MPI_Fint *count, MPI_Fint *datatype,
         return;
     }
 
-    c_ierr = PMPI_Imrecv(OMPI_F2C_BOTTOM(buf), c_count,
-                         c_datatype, &c_message, &c_req);
+    c_ierr = @INNER_CALL@(OMPI_F2C_BOTTOM(buf), c_count,
+                          c_datatype, &c_message, &c_req);
     if (c_datatype != c_type) {
         ompi_datatype_destroy(&c_datatype);
     }
