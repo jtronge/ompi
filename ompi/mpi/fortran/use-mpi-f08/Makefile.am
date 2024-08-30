@@ -243,8 +243,6 @@ mpi_api_files = \
         group_union_f08.F90 \
         ibarrier_f08.F90 \
         improbe_f08.F90 \
-        ineighbor_allgather_f08.F90 \
-        ineighbor_allgatherv_f08.F90 \
         ineighbor_alltoall_f08.F90 \
         ineighbor_alltoallv_f08.F90 \
         ineighbor_alltoallw_f08.F90 \
