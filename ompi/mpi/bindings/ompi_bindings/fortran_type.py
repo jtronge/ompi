@@ -439,6 +439,7 @@ class Aint(FortranType):
     def c_parameter(self):
         return f'MPI_Aint *{self.name}'
 
+
 @FortranType.add('AINT_OUT')
 class AintOut(FortranType):
     """MPI_Aint out type."""
@@ -451,6 +452,7 @@ class AintOut(FortranType):
 
     def c_parameter(self):
         return f'MPI_Aint *{self.name}'
+
 
 @FortranType.add('AINT_COUNT_INOUT')
 class AintCountTypeInOut(FortranType):
@@ -471,6 +473,7 @@ class AintCountTypeInOut(FortranType):
         type_ = 'MPI_Count' if self.bigcount else 'MPI_Aint'
         return f'{type_} *{self.name}'
 
+
 @FortranType.add('AINT_COUNT_OUT')
 class AintCountTypeOut(FortranType):
     """AINT/COUNT type with OUT INTENT"""
@@ -489,6 +492,21 @@ class AintCountTypeOut(FortranType):
     def c_parameter(self):
         type_ = 'MPI_Count' if self.bigcount else 'MPI_Aint'
         return f'{type_} *{self.name}'
+
+
+@FortranType.add('AINT_ARRAY')
+class AintArrayType(FortranType):
+    """Array of MPI_Aint."""
+
+    def declare(self):
+        # TODO: Should there be a separate ASYNC version here, when the OMPI_ASYNCHRONOUS attr is required?
+        return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+
+    def c_parameter(self):
+        return f'MPI_Aint *{self.name}'
 
 
 @FortranType.add('DISP')

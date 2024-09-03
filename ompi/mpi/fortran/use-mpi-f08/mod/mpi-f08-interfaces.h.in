@@ -3515,22 +3515,6 @@ subroutine MPI_Neighbor_alltoall_f08(sendbuf,sendcount,sendtype,recvbuf,recvcoun
 end subroutine MPI_Neighbor_alltoall_f08
 end interface  MPI_Neighbor_alltoall
 
-interface  MPI_Ineighbor_alltoall
-subroutine MPI_Ineighbor_alltoall_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                            comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ineighbor_alltoall_f08
-end interface  MPI_Ineighbor_alltoall
-
 interface  MPI_Neighbor_alltoall_init
 subroutine MPI_Neighbor_alltoall_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                             comm,info,request,ierror)
@@ -3562,22 +3546,6 @@ subroutine MPI_Neighbor_alltoallv_f08(sendbuf,sendcounts,sdispls,sendtype,recvbu
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Neighbor_alltoallv_f08
 end interface  MPI_Neighbor_alltoallv
-
-interface  MPI_Ineighbor_alltoallv
-subroutine MPI_Ineighbor_alltoallv_f08(sendbuf,sendcounts,sdispls,sendtype,recvbuf,recvcounts, &
-                             rdispls,recvtype,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: sendcounts(*), sdispls(*), recvcounts(*), rdispls(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ineighbor_alltoallv_f08
-end interface  MPI_Ineighbor_alltoallv
 
 interface  MPI_Neighbor_alltoallv_init
 subroutine MPI_Neighbor_alltoallv_init_f08(sendbuf,sendcounts,sdispls,sendtype,recvbuf,recvcounts, &
@@ -3611,23 +3579,6 @@ subroutine MPI_Neighbor_alltoallw_f08(sendbuf,sendcounts,sdispls,sendtypes,recvb
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Neighbor_alltoallw_f08
 end interface  MPI_Neighbor_alltoallw
-
-interface  MPI_Ineighbor_alltoallw
-subroutine MPI_Ineighbor_alltoallw_f08(sendbuf,sendcounts,sdispls,sendtypes,recvbuf,recvcounts, &
-                             rdispls,recvtypes,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request, MPI_ADDRESS_KIND
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: sendcounts(*), recvcounts(*)
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) OMPI_ASYNCHRONOUS :: sdispls(*), rdispls(*)
-   TYPE(MPI_Datatype), INTENT(IN) OMPI_ASYNCHRONOUS :: sendtypes(*), recvtypes(*)
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Ineighbor_alltoallw_f08
-end interface  MPI_Ineighbor_alltoallw
 
 interface  MPI_Neighbor_alltoallw_init
 subroutine MPI_Neighbor_alltoallw_init_f08(sendbuf,sendcounts,sdispls,sendtypes,recvbuf,recvcounts, &
