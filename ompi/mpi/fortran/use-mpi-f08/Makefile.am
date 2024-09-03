@@ -350,8 +350,6 @@ mpi_api_files = \
         testsome_f08.F90 \
         topo_test_f08.F90 \
         type_commit_f08.F90 \
-        type_contiguous_f08.F90 \
-        type_create_darray_f08.F90 \
         type_create_f90_complex_f08.F90 \
         type_create_f90_integer_f08.F90 \
         type_create_f90_real_f08.F90 \
@@ -361,27 +359,20 @@ mpi_api_files = \
         type_create_hindexed_block_f08.F90 \
         type_create_keyval_f08.F90 \
         type_create_resized_f08.F90 \
-        type_create_struct_f08.F90 \
-        type_create_subarray_f08.F90 \
         type_delete_attr_f08.F90 \
         type_dup_f08.F90 \
         type_free_f08.F90 \
         type_free_keyval_f08.F90 \
         type_get_attr_f08.F90 \
         type_get_contents_f08.F90 \
-        type_get_envelope_f08.F90 \
         type_get_extent_f08.F90 \
         type_get_extent_x_f08.F90 \
         type_get_name_f08.F90 \
-        type_get_true_extent_f08.F90 \
         type_get_true_extent_x_f08.F90 \
-        type_indexed_f08.F90 \
         type_match_size_f08.F90 \
         type_set_attr_f08.F90 \
         type_set_name_f08.F90 \
-        type_size_f08.F90 \
         type_size_x_f08.F90 \
-        type_vector_f08.F90 \
         unpublish_name_f08.F90 \
         waitany_f08.F90 \
         wait_f08.F90 \

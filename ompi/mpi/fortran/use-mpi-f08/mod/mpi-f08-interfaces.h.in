@@ -573,32 +573,6 @@ subroutine MPI_Type_commit_f08(datatype,ierror)
 end subroutine MPI_Type_commit_f08
 end interface  MPI_Type_commit
 
-interface  MPI_Type_contiguous
-subroutine MPI_Type_contiguous_f08(count,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_contiguous_f08
-end interface  MPI_Type_contiguous
-
-interface  MPI_Type_create_darray
-subroutine MPI_Type_create_darray_f08(size,rank,ndims,array_of_gsizes, &
-                    array_of_distribs,array_of_dargs,array_of_psizes,order, &
-                    oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: size, rank, ndims, order
-   INTEGER, INTENT(IN) :: array_of_gsizes(ndims), array_of_distribs(ndims)
-   INTEGER, INTENT(IN) :: array_of_dargs(ndims), array_of_psizes(ndims)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_darray_f08
-end interface  MPI_Type_create_darray
-
 interface  MPI_Type_create_hindexed
 subroutine MPI_Type_create_hindexed_f08(count,array_of_blocklengths, &
                                         array_of_displacements,oldtype,newtype,ierror)
@@ -662,34 +636,6 @@ subroutine MPI_Type_create_resized_f08(oldtype,lb,extent,newtype,ierror)
 end subroutine MPI_Type_create_resized_f08
 end interface  MPI_Type_create_resized
 
-interface  MPI_Type_create_struct
-subroutine MPI_Type_create_struct_f08(count,array_of_blocklengths, &
-                           array_of_displacements,array_of_types,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND
-   implicit none
-   INTEGER, INTENT(IN) :: count
-   INTEGER, INTENT(IN) :: array_of_blocklengths(count)
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: array_of_displacements(count)
-   TYPE(MPI_Datatype), INTENT(IN) :: array_of_types(count)
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_struct_f08
-end interface  MPI_Type_create_struct
-
-interface  MPI_Type_create_subarray
-subroutine MPI_Type_create_subarray_f08(ndims,array_of_sizes,array_of_subsizes, &
-                    array_of_starts,order,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: ndims, order
-   INTEGER, INTENT(IN) :: array_of_sizes(ndims), array_of_subsizes(ndims)
-   INTEGER, INTENT(IN) :: array_of_starts(ndims)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_subarray_f08
-end interface  MPI_Type_create_subarray
-
 interface  MPI_Type_dup
 subroutine MPI_Type_dup_f08(oldtype,newtype,ierror)
    use :: mpi_f08_types, only : MPI_Datatype
@@ -733,6 +679,14 @@ subroutine MPI_Type_get_envelope_f08(datatype,num_integers,num_addresses,num_dat
    INTEGER, INTENT(OUT) :: num_integers, num_addresses, num_datatypes, combiner
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Type_get_envelope_f08
+subroutine MPI_Type_get_envelope_f08_c(datatype,num_integers,num_addresses,num_datatypes, &
+                                     combiner,ierror)
+   use :: mpi_f08_types, only : MPI_Datatype, MPI_COUNT_KIND
+   implicit none
+   TYPE(MPI_Datatype), INTENT(IN) :: datatype
+   INTEGER(MPI_COUNT_KIND), INTENT(OUT) :: num_integers, num_addresses, num_datatypes, combiner
+   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
+end subroutine MPI_Type_get_envelope_f08_c
 end interface  MPI_Type_get_envelope
 
 interface  MPI_Type_get_extent
@@ -755,16 +709,6 @@ subroutine MPI_Type_get_extent_x_f08(datatype,lb,extent,ierror)
 end subroutine MPI_Type_get_extent_x_f08
 end interface  MPI_Type_get_extent_x
 
-interface  MPI_Type_get_true_extent
-subroutine MPI_Type_get_true_extent_f08(datatype,true_lb,true_extent,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND
-   implicit none
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   INTEGER(MPI_ADDRESS_KIND), INTENT(OUT) :: true_lb, true_extent
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_get_true_extent_f08
-end interface  MPI_Type_get_true_extent
-
 interface  MPI_Type_get_true_extent_x
 subroutine MPI_Type_get_true_extent_x_f08(datatype,true_lb,true_extent,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND, MPI_COUNT_KIND
@@ -775,29 +719,6 @@ subroutine MPI_Type_get_true_extent_x_f08(datatype,true_lb,true_extent,ierror)
 end subroutine MPI_Type_get_true_extent_x_f08
 end interface  MPI_Type_get_true_extent_x
 
-interface  MPI_Type_indexed
-subroutine MPI_Type_indexed_f08(count,array_of_blocklengths, &
-                                array_of_displacements,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: count
-   INTEGER, INTENT(IN) :: array_of_blocklengths(count), array_of_displacements(count)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_indexed_f08
-end interface  MPI_Type_indexed
-
-interface  MPI_Type_size
-subroutine MPI_Type_size_f08(datatype,size,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   INTEGER, INTENT(OUT) :: size
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_size_f08
-end interface  MPI_Type_size
-
 interface  MPI_Type_size_x
 subroutine MPI_Type_size_x_f08(datatype,size,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_COUNT_KIND
@@ -807,17 +728,6 @@ subroutine MPI_Type_size_x_f08(datatype,size,ierror)
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Type_size_x_f08
 end interface  MPI_Type_size_x
-
-interface  MPI_Type_vector
-subroutine MPI_Type_vector_f08(count,blocklength,stride,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: count, blocklength, stride
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_vector_f08
-end interface  MPI_Type_vector
 
 interface  MPI_Allgather_init
 subroutine MPI_Allgather_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &

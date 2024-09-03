@@ -132,7 +132,15 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_size.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_size.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_ts.c.in
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_vector.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_size.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_indexed.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_contiguous.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_darray.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_get_true_extent.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_subarray.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_struct.c.in
 
 # TODO: Is there any way to get EXTRA_DIST to work with absolute paths? Or,
 #       better yet, is there some way to make these dependencies a little
@@ -263,4 +271,12 @@ extra_dist_prototype_files = \
         rget_ts.c.in \
         iscatterv_ts.c.in \
         ireduce_scatter_ts.c.in \
-        file_write_all_ts.c.in
+        file_write_all_ts.c.in \
+        type_vector.c.in \
+        type_size.c.in \
+        type_indexed.c.in \
+        type_contiguous.c.in \
+        type_create_darray.c.in \
+        type_get_true_extent.c.in \
+	type_create_subarray.c.in \
+        type_create_struct.c.in

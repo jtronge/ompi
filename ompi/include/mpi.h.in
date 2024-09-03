@@ -2346,6 +2346,11 @@ OMPI_DECLSPEC  int MPI_Type_create_darray(int size, int rank, int ndims,
                                           const int darg_array[], const int psize_array[],
                                           int order, MPI_Datatype oldtype,
                                           MPI_Datatype *newtype);
+OMPI_DECLSPEC  int MPI_Type_create_darray_c(int size, int rank, int ndims,
+                                            const MPI_Count gsize_array[], const int distrib_array[],
+                                            const int darg_array[], const int psize_array[],
+                                            int order, MPI_Datatype oldtype,
+                                            MPI_Datatype *newtype);
 OMPI_DECLSPEC  int MPI_Type_create_f90_complex(int p, int r, MPI_Datatype *newtype);
 OMPI_DECLSPEC  int MPI_Type_create_f90_integer(int r, MPI_Datatype *newtype);
 OMPI_DECLSPEC  int MPI_Type_create_f90_real(int p, int r, MPI_Datatype *newtype);
@@ -2427,6 +2432,8 @@ OMPI_DECLSPEC  int MPI_Type_get_name(MPI_Datatype type, char *type_name,
                                      int *resultlen);
 OMPI_DECLSPEC  int MPI_Type_get_true_extent(MPI_Datatype datatype, MPI_Aint *true_lb,
                                             MPI_Aint *true_extent);
+OMPI_DECLSPEC  int MPI_Type_get_true_extent_c(MPI_Datatype datatype, MPI_Count *true_lb,
+                                             MPI_Count *true_extent);
 OMPI_DECLSPEC  int MPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Count *true_lb,
                                               MPI_Count *true_extent);
 OMPI_DECLSPEC  int MPI_Type_indexed(int count, const int array_of_blocklengths[],
@@ -3479,6 +3486,11 @@ OMPI_DECLSPEC  int PMPI_Type_create_darray(int size, int rank, int ndims,
                                            const int darg_array[], const int psize_array[],
                                            int order, MPI_Datatype oldtype,
                                            MPI_Datatype *newtype);
+OMPI_DECLSPEC  int PMPI_Type_create_darray_c(int size, int rank, int ndims,
+                                             const MPI_Count gsize_array[], const int distrib_array[],
+                                             const int darg_array[], const int psize_array[],
+                                             int order, MPI_Datatype oldtype,
+                                             MPI_Datatype *newtype);
 OMPI_DECLSPEC  int PMPI_Type_create_f90_complex(int p, int r, MPI_Datatype *newtype);
 OMPI_DECLSPEC  int PMPI_Type_create_f90_integer(int r, MPI_Datatype *newtype);
 OMPI_DECLSPEC  int PMPI_Type_create_f90_real(int p, int r, MPI_Datatype *newtype);
@@ -3560,6 +3572,8 @@ OMPI_DECLSPEC  int PMPI_Type_get_name(MPI_Datatype type, char *type_name,
                                       int *resultlen);
 OMPI_DECLSPEC  int PMPI_Type_get_true_extent(MPI_Datatype datatype, MPI_Aint *true_lb,
                                              MPI_Aint *true_extent);
+OMPI_DECLSPEC  int PMPI_Type_get_true_extent_c(MPI_Datatype datatype, MPI_Count *true_lb,
+                                              MPI_Count *true_extent);
 OMPI_DECLSPEC  int PMPI_Type_get_true_extent_x(MPI_Datatype datatype, MPI_Count *true_lb,
                                                MPI_Count *true_extent);
 OMPI_DECLSPEC  int PMPI_Type_indexed(int count, const int array_of_blocklengths[],

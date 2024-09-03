@@ -252,6 +252,24 @@ class DatatypeType(FortranType):
     def c_parameter(self):
         return f'MPI_Fint *{self.name}'
 
+@FortranType.add('DATATYPE_OUT')
+class DatatypeTypeOut(FortranType):
+    def declare(self):
+        return f'TYPE(MPI_Datatype), INTENT(OUT) :: {self.name}'
+
+    def declare_cbinding_fortran(self):
+        return f'INTEGER, INTENT(OUT) :: {self.name}'
+
+    def argument(self):
+        return f'{self.name}%MPI_VAL'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_Datatype')]
+
+    def c_parameter(self):
+        return f'MPI_Fint *{self.name}'
+
+
 
 @FortranType.add('DATATYPE_ARRAY')
 class DatatypeArrayType(FortranType):
@@ -424,6 +442,25 @@ class CountArray(IntArray):
     def c_parameter(self):
         count_type = 'MPI_Count' if self.bigcount else 'MPI_Fint'
         return f'{count_type} *{self.name}'
+
+@FortranType.add('AINT_COUNT_ARRAY')
+class CountArray(IntArray):
+    """Array of MPI_Count or int."""
+
+    def declare(self):
+        kind = '(KIND=MPI_COUNT_KIND)' if self.bigcount else '(KIND=MPI_ADDRESS_KIND)'
+        return f'INTEGER{kind}, INTENT(IN) :: {self.name}(*)'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+        else:
+            return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+
+    def c_parameter(self):
+        count_type = 'MPI_Count' if self.bigcount else 'MPI_Fint'
+        return f'{count_type} *{self.name}'
+
 
 
 @FortranType.add('AINT')
