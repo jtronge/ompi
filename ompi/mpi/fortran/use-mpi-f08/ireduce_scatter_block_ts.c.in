@@ -19,19 +19,10 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Ireduce_scatter_block";
-
-void ompi_ireduce_scatter_block_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2,
-                                   MPI_Fint *recvcount, MPI_Fint *datatype,
-                                   MPI_Fint *op, MPI_Fint *comm,
-                                   MPI_Fint *request, MPI_Fint *ierr)
+PROTOTYPE VOID ireduce_scatter_block(BUFFER_ASYNC x1, BUFFER_ASYNC_OUT x2,
+                                     COUNT recvcount, DATATYPE datatype,
+                                     OP op, COMM comm,
+                                     REQUEST_OUT request)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
@@ -63,9 +54,8 @@ void ompi_ireduce_scatter_block_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2,
     sendbuf = (char *) OMPI_F2C_BOTTOM(sendbuf);
     recvbuf = (char *) OMPI_F2C_BOTTOM(recvbuf);
 
-    c_ierr = PMPI_Ireduce_scatter_block(sendbuf, recvbuf,
-                                       OMPI_FINT_2_INT(*recvcount),
-                                       c_type, c_op, c_comm, &c_request);
+    c_ierr = @INNER_CALL@(sendbuf, recvbuf, (@COUNT_TYPE@) *recvcount,
+                          c_type, c_op, c_comm, &c_request);
     if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
     if (MPI_SUCCESS == c_ierr) *request = PMPI_Request_c2f(c_request);
 }

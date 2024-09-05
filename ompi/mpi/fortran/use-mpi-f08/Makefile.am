@@ -261,9 +261,6 @@ mpi_api_files = \
         intercomm_create_from_groups_f08.F90 \
         intercomm_merge_f08.F90 \
         iprobe_f08.F90 \
-        ireduce_f08.F90 \
-        ireduce_scatter_f08.F90 \
-        ireduce_scatter_block_f08.F90 \
         irsend_f08.F90 \
         iscan_f08.F90 \
         iscatter_f08.F90 \
