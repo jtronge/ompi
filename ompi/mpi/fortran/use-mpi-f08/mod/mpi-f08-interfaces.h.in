@@ -1092,22 +1092,6 @@ subroutine MPI_Scatter_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype
 end subroutine MPI_Scatter_f08
 end interface  MPI_Scatter
 
-interface  MPI_Iscatter
-subroutine MPI_Iscatter_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                           root,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount, root
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Iscatter_f08
-end interface  MPI_Iscatter
-
 interface  MPI_Scatter_init
 subroutine MPI_Scatter_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                            root,comm,info,request,ierror)
@@ -1140,23 +1124,6 @@ subroutine MPI_Scatterv_f08(sendbuf,sendcounts,displs,sendtype,recvbuf,recvcount
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Scatterv_f08
 end interface  MPI_Scatterv
-
-interface  MPI_Iscatterv
-subroutine MPI_Iscatterv_f08(sendbuf,sendcounts,displs,sendtype,recvbuf,recvcount, &
-                            recvtype,root,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: recvcount, root
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: sendcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Iscatterv_f08
-end interface  MPI_Iscatterv
 
 interface  MPI_Scatterv_init
 subroutine MPI_Scatterv_init_f08(sendbuf,sendcounts,displs,sendtype,recvbuf,recvcount, &
