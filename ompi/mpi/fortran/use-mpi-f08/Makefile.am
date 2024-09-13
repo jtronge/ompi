@@ -261,11 +261,9 @@ mpi_api_files = \
         intercomm_create_from_groups_f08.F90 \
         intercomm_merge_f08.F90 \
         iprobe_f08.F90 \
-        issend_f08.F90 \
         is_thread_main_f08.F90 \
         lookup_name_f08.F90 \
         mprobe_f08.F90 \
-        mrecv_f08.F90 \
         neighbor_allgather_f08.F90 \
         neighbor_allgather_init_f08.F90 \
         neighbor_allgatherv_f08.F90 \

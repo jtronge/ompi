@@ -354,8 +354,20 @@ class CommType(FortranType):
         return f'MPI_Fint *{self.name}'
 
 
-@FortranType.add('STATUS_OUT')
+@FortranType.add('STATUS')
 class StatusType(FortranType):
+    def declare(self):
+        return f'TYPE(MPI_Status) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_Status')]
+
+    def c_parameter(self):
+        return f'MPI_Fint *{self.name}'
+
+
+@FortranType.add('STATUS_OUT')
+class StatusOutType(FortranType):
     def declare(self):
         return f'TYPE(MPI_Status), INTENT(OUT) :: {self.name}'
 
