@@ -264,9 +264,7 @@ mpi_api_files = \
         is_thread_main_f08.F90 \
         lookup_name_f08.F90 \
         mprobe_f08.F90 \
-        neighbor_allgather_f08.F90 \
         neighbor_allgather_init_f08.F90 \
-        neighbor_allgatherv_f08.F90 \
         neighbor_allgatherv_init_f08.F90 \
         neighbor_alltoall_f08.F90 \
         neighbor_alltoall_init_f08.F90 \

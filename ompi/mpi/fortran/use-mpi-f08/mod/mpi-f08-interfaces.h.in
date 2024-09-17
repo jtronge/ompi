@@ -3172,21 +3172,6 @@ subroutine MPI_Improbe_f08(source,tag,comm,flag,message,status,ierror)
 end subroutine MPI_Improbe_f08
 end interface  MPI_Improbe
 
-interface  MPI_Neighbor_allgather
-subroutine MPI_Neighbor_allgather_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                             comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Neighbor_allgather_f08
-end interface  MPI_Neighbor_allgather
-
 interface  MPI_Neighbor_allgather_init
 subroutine MPI_Neighbor_allgather_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                              comm,info,request,ierror)
@@ -3203,22 +3188,6 @@ subroutine MPI_Neighbor_allgather_init_f08(sendbuf,sendcount,sendtype,recvbuf,re
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Neighbor_allgather_init_f08
 end interface  MPI_Neighbor_allgather_init
-
-interface  MPI_Neighbor_allgatherv
-subroutine MPI_Neighbor_allgatherv_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &
-                              recvtype,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount
-   INTEGER, INTENT(IN) :: recvcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Neighbor_allgatherv_f08
-end interface  MPI_Neighbor_allgatherv
 
 interface  MPI_Neighbor_allgatherv_init
 subroutine MPI_Neighbor_allgatherv_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &

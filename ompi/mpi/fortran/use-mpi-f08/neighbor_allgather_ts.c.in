@@ -22,27 +22,18 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Neighbor_allgather";
-
-void ompi_neighbor_allgather_ts(CFI_cdesc_t *x1, MPI_Fint *sendcount, MPI_Fint *sendtype,
-                                CFI_cdesc_t *x2, MPI_Fint *recvcount, MPI_Fint *recvtype,
-                                MPI_Fint *comm, MPI_Fint *ierr)
+PROTOTYPE VOID neighbor_allgather(BUFFER x1, COUNT sendcount, DATATYPE sendtype,
+                                  BUFFER_OUT x2, COUNT recvcount, DATATYPE recvtype,
+                                  COMM comm)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
     MPI_Datatype c_senddatatype, c_sendtype = PMPI_Type_f2c(*sendtype);
     void *sendbuf = OMPI_CFI_BASE_ADDR(x1);
-    int c_sendcount =  OMPI_FINT_2_INT(*sendcount);
+    @COUNT_TYPE@ c_sendcount = (@COUNT_TYPE@) *sendcount;
     MPI_Datatype c_recvtype = PMPI_Type_f2c(*recvtype);
     void *recvbuf = OMPI_CFI_BASE_ADDR(x2);
-    int c_recvcount =  OMPI_FINT_2_INT(*recvcount);
+    @COUNT_TYPE@ c_recvcount = (@COUNT_TYPE@) *recvcount;
 
     OMPI_CFI_CHECK_CONTIGUOUS(x2, c_ierr);
     if (MPI_SUCCESS != c_ierr) {
@@ -64,12 +55,14 @@ void ompi_neighbor_allgather_ts(CFI_cdesc_t *x1, MPI_Fint *sendcount, MPI_Fint *
     sendbuf = (char *) OMPI_F2C_BOTTOM(sendbuf);
     recvbuf = (char *) OMPI_F2C_BOTTOM(recvbuf);
 
-    c_ierr = PMPI_Neighbor_allgather(sendbuf,
-                                     c_sendcount,
-                                     c_sendtype,
-                                     recvbuf,
-                                     c_recvcount,
-                                     c_recvtype, c_comm);
+    c_ierr = @INNER_CALL@(sendbuf,
+                          c_sendcount,
+                          c_sendtype,
+                          recvbuf,
+                          c_recvcount,
+                          c_recvtype, c_comm);
+
+    /* TODO: Created type c_senddatatype is not being used above */
 
     if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
 }

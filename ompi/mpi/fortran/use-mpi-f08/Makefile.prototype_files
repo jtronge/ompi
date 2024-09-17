@@ -6,8 +6,6 @@
 # $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in
 
 incomplete_prototype_files = \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgather_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
@@ -116,6 +114,8 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/isend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/issend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/mrecv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgather_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_ts.c.in \
