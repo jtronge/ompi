@@ -266,11 +266,8 @@ mpi_api_files = \
         mprobe_f08.F90 \
         neighbor_allgather_init_f08.F90 \
         neighbor_allgatherv_init_f08.F90 \
-        neighbor_alltoall_f08.F90 \
         neighbor_alltoall_init_f08.F90 \
-        neighbor_alltoallv_f08.F90 \
         neighbor_alltoallv_init_f08.F90 \
-        neighbor_alltoallw_f08.F90 \
         neighbor_alltoallw_init_f08.F90 \
         op_commutative_f08.F90 \
         op_create_f08.F90 \

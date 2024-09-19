@@ -22,18 +22,9 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Neighbor_alltoall";
-
-void ompi_neighbor_alltoall_ts(CFI_cdesc_t *x1, MPI_Fint *sendcount, MPI_Fint *sendtype,
-                               CFI_cdesc_t *x2, MPI_Fint *recvcount, MPI_Fint *recvtype,
-                               MPI_Fint *comm, MPI_Fint *ierr)
+PROTOTYPE VOID neighbor_alltoall(BUFFER x1, COUNT sendcount, DATATYPE sendtype,
+                                 BUFFER_OUT x2, COUNT recvcount, DATATYPE recvtype,
+                                 COMM comm)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
@@ -60,11 +51,11 @@ void ompi_neighbor_alltoall_ts(CFI_cdesc_t *x1, MPI_Fint *sendcount, MPI_Fint *s
     sendbuf = (char *) OMPI_F2C_BOTTOM(sendbuf);
     recvbuf = (char *) OMPI_F2C_BOTTOM(recvbuf);
 
-    c_ierr = PMPI_Neighbor_alltoall(sendbuf,
-                                   OMPI_FINT_2_INT(*sendcount),
-                                   c_sendtype,
-                                   recvbuf,
-                                   OMPI_FINT_2_INT(*recvcount),
-                                   c_recvtype, c_comm);
+    c_ierr = @INNER_CALL@(sendbuf,
+                          (@COUNT_TYPE@) *sendcount,
+                          c_sendtype,
+                          recvbuf,
+                          (@COUNT_TYPE@) *recvcount,
+                          c_recvtype, c_comm);
     if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
 }
