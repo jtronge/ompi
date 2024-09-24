@@ -6,8 +6,6 @@
 # $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in
 
 incomplete_prototype_files = \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/put_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/raccumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_local_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_scatter_block_ts.c.in \
@@ -133,6 +131,8 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_size.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_size.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/pack_external_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/put_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/raccumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_vector.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_size.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_indexed.c.in \

@@ -282,9 +282,7 @@ mpi_api_files = \
         probe_f08.F90 \
         psend_init_f08.F90 \
         publish_name_f08.F90 \
-        put_f08.F90 \
         query_thread_f08.F90 \
-        raccumulate_f08.F90 \
         recv_init_f08.F90 \
         reduce_init_f08.F90 \
         reduce_local_f08.F90 \

@@ -2464,25 +2464,6 @@ subroutine MPI_Unpublish_name_f08(service_name,info,port_name,ierror)
 end subroutine MPI_Unpublish_name_f08
 end interface  MPI_Unpublish_name
 
-interface  MPI_Raccumulate
-subroutine MPI_Raccumulate_f08(origin_addr,origin_count,origin_datatype,target_rank, &
-                               target_disp,target_count,target_datatype,op,win,request, &
-                               ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Win, MPI_Request, MPI_ADDRESS_KIND
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ origin_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: origin_addr
-   INTEGER, INTENT(IN) :: origin_count, target_rank, target_count
-   TYPE(MPI_Datatype), INTENT(IN) :: origin_datatype
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: target_disp
-   TYPE(MPI_Datatype), INTENT(IN) :: target_datatype
-   TYPE(MPI_Op), INTENT(IN) :: op
-   TYPE(MPI_Win), INTENT(IN) :: win
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Raccumulate_f08
-end interface  MPI_Raccumulate
-
 interface  MPI_Rget
 subroutine MPI_Rget_f08(origin_addr,origin_count,origin_datatype,target_rank, &
                         target_disp,target_count,target_datatype,win,request,ierror)
@@ -2520,22 +2501,6 @@ subroutine MPI_Rget_accumulate_f08(origin_addr,origin_count,origin_datatype,resu
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Rget_accumulate_f08
 end interface  MPI_Rget_accumulate
-
-interface  MPI_Put
-subroutine MPI_Put_f08(origin_addr,origin_count,origin_datatype,target_rank, &
-                               target_disp,target_count,target_datatype,win,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Win, MPI_ADDRESS_KIND
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ origin_addr
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: origin_addr
-   INTEGER, INTENT(IN) :: origin_count, target_rank, target_count
-   TYPE(MPI_Datatype), INTENT(IN) :: origin_datatype
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: target_disp
-   TYPE(MPI_Datatype), INTENT(IN) :: target_datatype
-   TYPE(MPI_Win), INTENT(IN) :: win
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Put_f08
-end interface  MPI_Put
 
 interface  MPI_Rput
 subroutine MPI_Rput_f08(origin_addr,origin_count,origin_datatype,target_rank, &
