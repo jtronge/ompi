@@ -19,18 +19,9 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Reduce_scatter";
-
-void ompi_reduce_scatter_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2,
-                            MPI_Fint *recvcounts, MPI_Fint *datatype,
-                            MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr)
+PROTOTYPE VOID reduce_scatter(BUFFER x1, BUFFER_OUT x2,
+                              COUNT_ARRAY recvcounts, DATATYPE datatype,
+                              OP op, COMM comm)
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
@@ -38,7 +29,7 @@ void ompi_reduce_scatter_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2,
     MPI_Op c_op;
     int size;
     char *sendbuf = OMPI_CFI_BASE_ADDR(x1), *recvbuf = OMPI_CFI_BASE_ADDR(x2);
-    OMPI_ARRAY_NAME_DECL(recvcounts);
+    @COUNT_TYPE@ *tmp_recvcounts = NULL;
 
     OMPI_CFI_CHECK_CONTIGUOUS(x1, c_ierr);
     if (MPI_SUCCESS != c_ierr) {
@@ -57,14 +48,15 @@ void ompi_reduce_scatter_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2,
     c_op = PMPI_Op_f2c(*op);
 
     PMPI_Comm_size(c_comm, &size);
-    OMPI_ARRAY_FINT_2_INT(recvcounts, size);
+    OMPI_FORTRAN_BIGCOUNT_ARRAY_SET(recvcounts, tmp_recvcounts, size);
 
     sendbuf = (char *) OMPI_F2C_IN_PLACE(sendbuf);
     sendbuf = (char *) OMPI_F2C_BOTTOM(sendbuf);
     recvbuf = (char *) OMPI_F2C_BOTTOM(recvbuf);
 
-    c_ierr = PMPI_Reduce_scatter(sendbuf, recvbuf,
-                                OMPI_ARRAY_NAME_CONVERT(recvcounts),
-                                c_type, c_op, c_comm);
-   if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
+    c_ierr = @INNER_CALL@(sendbuf, recvbuf,
+                          tmp_recvcounts,
+                          c_type, c_op, c_comm);
+    OMPI_FORTRAN_BIGCOUNT_ARRAY_CLEANUP(recvcounts, tmp_recvcounts);
+    if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
 }

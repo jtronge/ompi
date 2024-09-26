@@ -19,17 +19,8 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Reduce_local";
-
-void ompi_reduce_local_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2, MPI_Fint *count,
-                          MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *ierr)
+PROTOTYPE VOID reduce_local(BUFFER x1, BUFFER_OUT x2, COUNT count,
+                            DATATYPE datatype, OP op)
 {
     int c_ierr;
     MPI_Datatype c_type;
@@ -55,8 +46,8 @@ void ompi_reduce_local_ts(CFI_cdesc_t *x1, CFI_cdesc_t *x2, MPI_Fint *count,
     inbuf = (char *) OMPI_F2C_BOTTOM(inbuf);
     inoutbuf = (char *) OMPI_F2C_BOTTOM(inoutbuf);
 
-    c_ierr = PMPI_Reduce_local(inbuf, inoutbuf,
-                              OMPI_FINT_2_INT(*count),
-                              c_type, c_op);
+    c_ierr = @INNER_CALL@(inbuf, inoutbuf,
+                          (@COUNT_TYPE@) *count,
+                          c_type, c_op);
    if (NULL != ierr) *ierr = OMPI_INT_2_FINT(c_ierr);
 }
