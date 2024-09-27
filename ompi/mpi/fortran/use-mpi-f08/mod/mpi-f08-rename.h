@@ -158,8 +158,10 @@
 #define MPI_Type_free_f08 PMPI_Type_free_f08
 #define MPI_Type_get_contents PMPI_Type_get_contents
 #define MPI_Type_get_contents_f08 PMPI_Type_get_contents_f08
+#define MPI_Type_get_contents_f08_c PMPI_Type_get_contents_f08_c
 #define MPI_Type_get_envelope PMPI_Type_get_envelope
 #define MPI_Type_get_envelope_f08 PMPI_Type_get_envelope_f08
+#define MPI_Type_get_envelope_f08_c PMPI_Type_get_envelope_f08_c
 #define MPI_Type_get_extent PMPI_Type_get_extent
 #define MPI_Type_get_extent_f08 PMPI_Type_get_extent_f08
 #define MPI_Type_get_extent_x PMPI_Type_get_extent_x

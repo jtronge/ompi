@@ -343,10 +343,13 @@ mpi_api_files = \
         type_free_keyval_f08.F90 \
         type_get_attr_f08.F90 \
         type_get_contents_f08.F90 \
+        type_get_contents_f08_c.F90 \
         type_get_extent_f08.F90 \
         type_get_extent_x_f08.F90 \
         type_get_name_f08.F90 \
         type_get_true_extent_x_f08.F90 \
+        type_get_envelope_f08.F90 \
+        type_get_envelope_f08_c.F90 \
         type_match_size_f08.F90 \
         type_set_attr_f08.F90 \
         type_set_name_f08.F90 \

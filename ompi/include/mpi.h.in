@@ -2415,7 +2415,13 @@ OMPI_DECLSPEC  int MPI_Type_get_contents(MPI_Datatype mtype, int max_integers,
                                          int array_of_integers[],
                                          MPI_Aint array_of_addresses[],
                                          MPI_Datatype array_of_datatypes[]);
-/* TODO: MPI_Type_get_contents_c */
+OMPI_DECLSPEC  int MPI_Type_get_contents_c(MPI_Datatype mtype, MPI_Count max_integers,
+                                           MPI_Count max_addresses, MPI_Count max_large_counts, 
+					   MPI_Count max_datatypes,
+                                           int array_of_integers[],
+                                           MPI_Aint array_of_addresses[],
+					   MPI_Count array_of_large_counts[],
+                                           MPI_Datatype array_of_datatypes[]);
 OMPI_DECLSPEC  int MPI_Type_get_envelope(MPI_Datatype type, int *num_integers,
                                          int *num_addresses, int *num_datatypes,
                                          int *combiner);
@@ -3555,7 +3561,13 @@ OMPI_DECLSPEC  int PMPI_Type_get_contents(MPI_Datatype mtype, int max_integers,
                                           int array_of_integers[],
                                           MPI_Aint array_of_addresses[],
                                           MPI_Datatype array_of_datatypes[]);
- /* TODO: MPI_Type_get_contents_c */
+OMPI_DECLSPEC  int PMPI_Type_get_contents_c(MPI_Datatype mtype, MPI_Count max_integers,
+                                            MPI_Count max_addresses, MPI_Count max_large_counts,
+                                            MPI_Count max_datatypes,
+                                            int array_of_integers[],
+                                            MPI_Aint array_of_addresses[],
+                                            MPI_Count array_of_large_counts[],
+                                            MPI_Datatype array_of_datatypes[]);
 OMPI_DECLSPEC  int PMPI_Type_get_envelope(MPI_Datatype type, int *num_integers,
                                           int *num_addresses, int *num_datatypes,
                                           int *combiner);
