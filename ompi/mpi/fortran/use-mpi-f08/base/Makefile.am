@@ -37,7 +37,10 @@ libusempif08_ccode_la_SOURCES += \
         ts.h \
         ts.c \
         bigcount.h \
-        api_f08_generated.c
+        api_f08_generated.c \
+	ompi_type_get_extent_f_c.c \
+	ompi_type_get_envelope_f_c.c \
+        ompi_type_get_contents_f_c.c
 
 #
 # api_f08_generated.c should work with all compilers, supporting CFI or TS 29113 support
