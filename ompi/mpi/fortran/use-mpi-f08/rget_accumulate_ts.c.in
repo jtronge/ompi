@@ -23,22 +23,12 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/win/win.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Rget_accumulate";
-
-void ompi_rget_accumulate_ts(CFI_cdesc_t *x1, MPI_Fint *origin_count,
-                             MPI_Fint *origin_datatype, CFI_cdesc_t *x2,
-                             MPI_Fint *result_count, MPI_Fint *result_datatype,
-                             MPI_Fint *target_rank, MPI_Aint *target_disp,
-                             MPI_Fint *target_count, MPI_Fint *target_datatype,
-                             MPI_Fint *op, MPI_Fint *win, MPI_Fint *request,
-                             MPI_Fint *ierr)
+PROTOTYPE VOID rget_accumulate(BUFFER_ASYNC x1, COUNT origin_count,
+                               DATATYPE origin_datatype, BUFFER_ASYNC_OUT x2,
+                               COUNT result_count, DATATYPE result_datatype,
+                               RANK target_rank, AINT target_disp,
+                               COUNT target_count, DATATYPE target_datatype,
+                               OP op, WIN win, REQUEST_OUT request)
 {
     int c_ierr;
     MPI_Datatype c_origin_datatype, c_origin_type = PMPI_Type_f2c(*origin_datatype);
@@ -47,9 +37,9 @@ void ompi_rget_accumulate_ts(CFI_cdesc_t *x1, MPI_Fint *origin_count,
     MPI_Win c_win = PMPI_Win_f2c(*win);
     MPI_Op c_op = PMPI_Op_f2c(*op);
     char *origin_addr = OMPI_CFI_BASE_ADDR(x1);
-    int c_origin_count = OMPI_INT_2_FINT(*origin_count);
+    @COUNT_TYPE@ c_origin_count = (@COUNT_TYPE@) *origin_count;
     char *result_addr = OMPI_CFI_BASE_ADDR(x2);
-    int c_result_count = OMPI_INT_2_FINT(*result_count);
+    @COUNT_TYPE@ c_result_count = (@COUNT_TYPE@) *result_count;
     MPI_Request c_req;
 
     OMPI_CFI_2_C(x1, c_origin_count, c_origin_type, c_origin_datatype, c_ierr);
@@ -67,16 +57,16 @@ void ompi_rget_accumulate_ts(CFI_cdesc_t *x1, MPI_Fint *origin_count,
         OMPI_ERRHANDLER_INVOKE(c_win, c_ierr, FUNC_NAME);
         return;
     }
-    c_ierr = PMPI_Rget_accumulate(OMPI_F2C_BOTTOM(origin_addr),
-                                  c_origin_count,
-                                  c_origin_datatype,
-                                  OMPI_F2C_BOTTOM(result_addr),
-                                  c_result_count,
-                                  c_result_datatype,
-                                  OMPI_FINT_2_INT(*target_rank),
-                                  *target_disp,
-                                  OMPI_FINT_2_INT(*target_count),
-                                  c_target_datatype, c_op, c_win, &c_req);
+    c_ierr = @INNER_CALL@(OMPI_F2C_BOTTOM(origin_addr),
+                          c_origin_count,
+                          c_origin_datatype,
+                          OMPI_F2C_BOTTOM(result_addr),
+                          c_result_count,
+                          c_result_datatype,
+                          OMPI_FINT_2_INT(*target_rank),
+                          *target_disp,
+                          (@COUNT_TYPE@) *target_count,
+                          c_target_datatype, c_op, c_win, &c_req);
     if (c_origin_datatype != c_origin_type) {
         ompi_datatype_destroy(&c_origin_datatype);
     }
