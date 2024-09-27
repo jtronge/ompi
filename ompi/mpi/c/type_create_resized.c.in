@@ -28,7 +28,7 @@
 #include "ompi/memchecker.h"
 
 PROTOTYPE ERROR_CLASS type_create_resized(DATATYPE oldtype,
-                                          AINT lb,
+                                          AINT_COUNT lb,
                                           AINT_COUNT extent,
                                           DATATYPE_OUT newtype)
 {
