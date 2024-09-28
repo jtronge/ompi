@@ -473,58 +473,6 @@ subroutine MPI_Type_commit_f08(datatype,ierror)
 end subroutine MPI_Type_commit_f08
 end interface  MPI_Type_commit
 
-interface  MPI_Type_create_hindexed
-subroutine MPI_Type_create_hindexed_f08(count,array_of_blocklengths, &
-                                        array_of_displacements,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND
-   implicit none
-   INTEGER, INTENT(IN) :: count
-   INTEGER, INTENT(IN) :: array_of_blocklengths(count)
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: array_of_displacements(count)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_hindexed_f08
-end interface  MPI_Type_create_hindexed
-
-interface  MPI_Type_create_hvector
-subroutine MPI_Type_create_hvector_f08(count,blocklength,stride,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND
-   implicit none
-   INTEGER, INTENT(IN) :: count, blocklength
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: stride
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_hvector_f08
-end interface  MPI_Type_create_hvector
-
-interface  MPI_Type_create_indexed_block
-subroutine MPI_Type_create_indexed_block_f08(count,blocklength, &
-                           array_of_displacements,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype
-   implicit none
-   INTEGER, INTENT(IN) :: count, blocklength
-   INTEGER, INTENT(IN) :: array_of_displacements(count)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_indexed_block_f08
-end interface  MPI_Type_create_indexed_block
-
-interface  MPI_Type_create_hindexed_block
-subroutine MPI_Type_create_hindexed_block_f08(count,blocklength, &
-                           array_of_displacements,oldtype,newtype,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND
-   implicit none
-   INTEGER, INTENT(IN) :: count, blocklength
-   INTEGER(MPI_ADDRESS_KIND), INTENT(IN) :: array_of_displacements(count)
-   TYPE(MPI_Datatype), INTENT(IN) :: oldtype
-   TYPE(MPI_Datatype), INTENT(OUT) :: newtype
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Type_create_hindexed_block_f08
-end interface  MPI_Type_create_hindexed_block
-
 interface  MPI_Type_create_resized
 subroutine MPI_Type_create_resized_f08(oldtype,lb,extent,newtype,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_ADDRESS_KIND

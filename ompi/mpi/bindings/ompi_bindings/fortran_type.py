@@ -470,7 +470,7 @@ class CountArray(IntArray):
             return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
 
     def c_parameter(self):
-        count_type = 'MPI_Count' if self.bigcount else 'MPI_Fint'
+        count_type = 'MPI_Count' if self.bigcount else 'MPI_Aint'
         return f'{count_type} *{self.name}'
 
 
@@ -501,6 +501,26 @@ class AintOut(FortranType):
 
     def c_parameter(self):
         return f'MPI_Aint *{self.name}'
+
+
+@FortranType.add('AINT_COUNT')
+class AintCountTypeIn(FortranType):
+    """AINT/COUNT type with ININTENT"""
+    def declare(self):
+        if self.bigcount:
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(IN) :: {self.name}'
+        else:
+            return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(IN) :: {self.name}'
+
+    def use(self):
+        if self.bigcount:
+            return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+        else:
+            return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]
+
+    def c_parameter(self):
+        type_ = 'MPI_Count' if self.bigcount else 'MPI_Aint'
+        return f'{type_} *{self.name}'
 
 
 @FortranType.add('AINT_COUNT_INOUT')

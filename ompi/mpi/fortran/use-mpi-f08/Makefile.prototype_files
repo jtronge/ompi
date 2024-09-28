@@ -140,7 +140,11 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_darray.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_get_true_extent.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_subarray.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_struct.c.in
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_struct.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_hindexed.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_hindexed_block.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_indexed_block.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_create_hvector.c.in
 
 # TODO: Is there any way to get EXTRA_DIST to work with absolute paths? Or,
 #       better yet, is there some way to make these dependencies a little

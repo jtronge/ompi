@@ -326,10 +326,6 @@ mpi_api_files = \
         type_create_f90_complex_f08.F90 \
         type_create_f90_integer_f08.F90 \
         type_create_f90_real_f08.F90 \
-        type_create_hindexed_f08.F90 \
-        type_create_hvector_f08.F90 \
-        type_create_indexed_block_f08.F90 \
-        type_create_hindexed_block_f08.F90 \
         type_create_keyval_f08.F90 \
         type_create_resized_f08.F90 \
         type_delete_attr_f08.F90 \
