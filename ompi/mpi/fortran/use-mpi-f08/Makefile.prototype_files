@@ -283,4 +283,8 @@ extra_dist_prototype_files = \
         type_create_darray.c.in \
         type_get_true_extent.c.in \
 	type_create_subarray.c.in \
-        type_create_struct.c.in
+        type_create_struct.c.in \
+        type_create_hindexed.c.in \
+        type_create_hindexed_block.c.in \
+        type_create_indexed_block.c.in \
+        type_create_hvector.c.in
