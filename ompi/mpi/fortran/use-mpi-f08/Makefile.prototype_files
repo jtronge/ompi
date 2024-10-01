@@ -5,13 +5,7 @@
 # TODO: I don't think the below file should be a prototype
 # $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/f_sync_reg_ts.c.in
 
-incomplete_prototype_files = \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_replace_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_init_ts.c.in \
-        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_ts.c.in
-
-complete_prototype_files = \
+prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgather_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgatherv_ts.c.in \
@@ -136,6 +130,10 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scatter_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scatterv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_init_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_replace_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_init_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/ssend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_vector.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_size.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/type_indexed.c.in \

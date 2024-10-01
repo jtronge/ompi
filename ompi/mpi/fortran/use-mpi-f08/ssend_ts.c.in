@@ -19,25 +19,16 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-static const char FUNC_NAME[] = "MPI_Ssend";
-
-void ompi_ssend_ts(CFI_cdesc_t* x, MPI_Fint *count, MPI_Fint *datatype,
-                   MPI_Fint *dest, MPI_Fint *tag,
-                   MPI_Fint *comm, MPI_Fint *ierr)
+PROTOTYPE VOID ssend(BUFFER x, COUNT count, DATATYPE datatype,
+                     RANK dest, TAG tag,
+                     COMM comm)
 {
     int c_ierr;
     MPI_Datatype c_datatype, c_type = PMPI_Type_f2c(*datatype);
     MPI_Comm c_comm = PMPI_Comm_f2c (*comm);
 
     void *buf = OMPI_CFI_BASE_ADDR(x);
-    int c_count =  OMPI_FINT_2_INT(*count);
+    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
 
     OMPI_CFI_2_C(x, c_count, c_type, c_datatype, c_ierr);
     if (MPI_SUCCESS != c_ierr) {
@@ -46,9 +37,9 @@ void ompi_ssend_ts(CFI_cdesc_t* x, MPI_Fint *count, MPI_Fint *datatype,
         return;
     }
 
-    c_ierr = PMPI_Ssend(OMPI_F2C_BOTTOM(buf), c_count,
-                        c_datatype, OMPI_FINT_2_INT(*dest),
-                        OMPI_FINT_2_INT(*tag), c_comm);
+    c_ierr = @INNER_CALL@(OMPI_F2C_BOTTOM(buf), c_count,
+                          c_datatype, OMPI_FINT_2_INT(*dest),
+                          OMPI_FINT_2_INT(*tag), c_comm);
     if (c_datatype != c_type) {
         ompi_datatype_destroy(&c_datatype);
     }

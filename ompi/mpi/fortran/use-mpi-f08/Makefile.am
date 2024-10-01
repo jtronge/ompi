@@ -289,8 +289,6 @@ mpi_api_files = \
         scan_init_f08.F90 \
         scatter_init_f08.F90 \
         scatterv_init_f08.F90 \
-        sendrecv_f08.F90 \
-        sendrecv_replace_f08.F90 \
         session_call_errhandler_f08.F90\
         session_create_errhandler_f08.F90\
         session_get_errhandler_f08.F90\
@@ -301,8 +299,6 @@ mpi_api_files = \
 	session_init_f08.F90 \
 	session_finalize_f08.F90 \
         session_set_errhandler_f08.F90\
-        ssend_f08.F90 \
-        ssend_init_f08.F90 \
         startall_f08.F90 \
         start_f08.F90 \
         status_f082f_f08.F90 \
@@ -448,7 +444,7 @@ if OMPI_GENERATE_BINDINGS
 
 include Makefile.prototype_files
 
-api_f08_generated.F90: $(incomplete_prototype_files) $(complete_prototype_files)
+api_f08_generated.F90: $(prototype_files)
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
@@ -456,7 +452,7 @@ api_f08_generated.F90: $(incomplete_prototype_files) $(complete_prototype_files)
 	    fortran \
 	    code \
 	    --lang fortran \
-	    --prototype-files $(complete_prototype_files)
+	    --prototype-files $(prototype_files)
 
 EXTRA_DIST = $(extra_dist_prototype_files)
 

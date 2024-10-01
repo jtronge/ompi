@@ -47,7 +47,7 @@ if OMPI_GENERATE_BINDINGS
 
 include ../Makefile.prototype_files
 
-api_f08_generated.c: $(incomplete_prototype_files) $(complete_prototype_files)
+api_f08_generated.c: $(prototype_files)
 	$(OMPI_V_GEN) $(PYTHON) $(top_srcdir)/ompi/mpi/bindings/bindings.py \
 	    --builddir $(abs_top_builddir) \
 	    --srcdir $(abs_top_srcdir) \
@@ -55,7 +55,7 @@ api_f08_generated.c: $(incomplete_prototype_files) $(complete_prototype_files)
 	    fortran \
 	    code \
 	    --lang c \
-	    --prototype-files $(complete_prototype_files)
+	    --prototype-files $(prototype_files)
 
 # Delete generated files on maintainer-clean
 MAINTAINERCLEANFILES = api_f08_generated.c
