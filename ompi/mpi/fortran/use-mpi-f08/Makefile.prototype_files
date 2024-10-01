@@ -23,6 +23,7 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_attach_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_detach.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/compare_and_swap_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/exscan_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/fetch_and_op_ts.c.in \
@@ -267,6 +268,7 @@ extra_dist_prototype_files = \
         bcast_ts.c.in \
         bsend_ts.c.in \
         buffer_attach_ts.c.in \
+        buffer_detach.c.in \
         irecv_ts.c.in \
         neighbor_allgather_ts.c.in \
         gatherv_ts.c.in \

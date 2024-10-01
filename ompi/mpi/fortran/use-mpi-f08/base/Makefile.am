@@ -31,9 +31,6 @@ if OMPI_BUILD_FORTRAN_USEMPIF08_BINDINGS
 noinst_LTLIBRARIES = libusempif08_ccode.la
 
 libusempif08_ccode_la_SOURCES = \
-        buffer_detach.c
-
-libusempif08_ccode_la_SOURCES += \
         ts.h \
         ts.c \
         bigcount.h \

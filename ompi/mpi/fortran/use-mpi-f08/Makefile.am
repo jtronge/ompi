@@ -127,7 +127,6 @@ mpi_api_files = \
         barrier_f08.F90 \
         barrier_init_f08.F90 \
         bcast_init_f08.F90 \
-        buffer_detach_f08.F90 \
         cancel_f08.F90 \
         cart_coords_f08.F90 \
         cart_create_f08.F90 \

@@ -19,16 +19,6 @@
 ! and the name for tools ("MPI_Init_f08") and the back-end implementation
 ! name (e.g., "MPI_Init_f08").
 
-interface  MPI_Buffer_detach
-subroutine MPI_Buffer_detach_f08(buffer_addr,size,ierror)
-   USE, INTRINSIC ::  ISO_C_BINDING, ONLY : C_PTR
-   implicit none
-   TYPE(C_PTR), INTENT(OUT) ::  buffer_addr
-   INTEGER, INTENT(OUT) :: size
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Buffer_detach_f08
-end interface  MPI_Buffer_detach
-
 interface  MPI_Cancel
 subroutine MPI_Cancel_f08(request,ierror)
    use :: mpi_f08_types, only : MPI_Request
