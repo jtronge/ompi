@@ -195,20 +195,6 @@ subroutine MPI_Sendrecv_replace_f08(buf,count,datatype,dest,sendtag,source,recvt
 end subroutine MPI_Sendrecv_replace_f08
 end interface  MPI_Sendrecv_replace
 
-interface  MPI_Send_init
-subroutine MPI_Send_init_f08(buf,count,datatype,dest,tag,comm,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ buf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: buf
-   INTEGER, INTENT(IN) :: count, dest, tag
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Send_init_f08
-end interface  MPI_Send_init
-
 interface MPI_Session_call_errhandler
 subroutine MPI_Session_call_errhandler_f08(session,errorcode,ierror)
    use :: mpi_f08_types, only : MPI_Session
@@ -876,21 +862,6 @@ subroutine MPI_Reduce_scatter_block_init_f08(sendbuf,recvbuf,recvcount,datatype,
 end subroutine MPI_Reduce_scatter_block_init_f08
 end interface  MPI_Reduce_scatter_block_init
 
-interface  MPI_Scan
-subroutine MPI_Scan_f08(sendbuf,recvbuf,count,datatype,op,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: count
-   TYPE(MPI_Datatype), INTENT(IN) :: datatype
-   TYPE(MPI_Op), INTENT(IN) :: op
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Scan_f08
-end interface  MPI_Scan
-
 interface  MPI_Scan_init
 subroutine MPI_Scan_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,request,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm, MPI_Info, MPI_Request
@@ -908,21 +879,6 @@ subroutine MPI_Scan_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,request
 end subroutine MPI_Scan_init_f08
 end interface  MPI_Scan_init
 
-interface  MPI_Scatter
-subroutine MPI_Scatter_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
-                           root,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount, recvcount, root
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Scatter_f08
-end interface  MPI_Scatter
-
 interface  MPI_Scatter_init
 subroutine MPI_Scatter_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,recvtype, &
                            root,comm,info,request,ierror)
@@ -939,22 +895,6 @@ subroutine MPI_Scatter_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcount,rec
    INTEGER, OPTIONAL, INTENT(OUT) :: ierror
 end subroutine MPI_Scatter_init_f08
 end interface  MPI_Scatter_init
-
-interface  MPI_Scatterv
-subroutine MPI_Scatterv_f08(sendbuf,sendcounts,displs,sendtype,recvbuf,recvcount, &
-                            recvtype,root,comm,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ :: recvbuf
-   INTEGER, INTENT(IN) :: recvcount, root
-   INTEGER, INTENT(IN) :: sendcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Scatterv_f08
-end interface  MPI_Scatterv
 
 interface  MPI_Scatterv_init
 subroutine MPI_Scatterv_init_f08(sendbuf,sendcounts,displs,sendtype,recvbuf,recvcount, &

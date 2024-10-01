@@ -289,13 +289,9 @@ mpi_api_files = \
         register_datarep_f08.F90 \
         request_free_f08.F90 \
         request_get_status_f08.F90 \
-        scan_f08.F90 \
         scan_init_f08.F90 \
-        scatter_f08.F90 \
         scatter_init_f08.F90 \
-        scatterv_f08.F90 \
         scatterv_init_f08.F90 \
-        send_init_f08.F90 \
         sendrecv_f08.F90 \
         sendrecv_replace_f08.F90 \
         session_call_errhandler_f08.F90\
