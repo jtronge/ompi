@@ -2098,7 +2098,7 @@ OMPI_DECLSPEC  int MPI_Pcontrol(const int level, ...);
 OMPI_DECLSPEC  int MPI_Pready(int partitions, MPI_Request request);
 OMPI_DECLSPEC  int MPI_Pready_range(int partition_low, int partition_high,
                                     MPI_Request request);
-OMPI_DECLSPEC  int MPI_Pready_list(int length, int partition_list[], MPI_Request request);
+OMPI_DECLSPEC  int MPI_Pready_list(int length, const int partition_list[], MPI_Request request);
 OMPI_DECLSPEC  int MPI_Precv_init(void* buf, int partitions, MPI_Count count,
                                   MPI_Datatype datatype, int source, int tag, MPI_Comm comm,
                                   MPI_Info info, MPI_Request *request);
@@ -3246,7 +3246,7 @@ OMPI_DECLSPEC  int PMPI_Pcontrol(const int level, ...);
 OMPI_DECLSPEC  int PMPI_Pready(int partitions, MPI_Request request);
 OMPI_DECLSPEC  int PMPI_Pready_range(int partition_low, int partition_high,
                                      MPI_Request request);
-OMPI_DECLSPEC  int PMPI_Pready_list(int length, int partition_list[], MPI_Request request);
+OMPI_DECLSPEC  int PMPI_Pready_list(int length, const int partition_list[], MPI_Request request);
 OMPI_DECLSPEC  int PMPI_Precv_init(void* buf, int partitions, MPI_Count count,
                                    MPI_Datatype datatype, int source, int tag, MPI_Comm comm,
                                    MPI_Info info, MPI_Request *request);
