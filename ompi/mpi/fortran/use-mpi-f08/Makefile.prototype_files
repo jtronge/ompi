@@ -66,6 +66,8 @@ complete_prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_address_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_accumulate_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_count.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_elements.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/iallgather_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/iallgatherv_ts.c.in \
@@ -289,4 +291,6 @@ extra_dist_prototype_files = \
         type_create_hindexed.c.in \
         type_create_hindexed_block.c.in \
         type_create_indexed_block.c.in \
-        type_create_hvector.c.in
+        type_create_hvector.c.in \
+	get_count.c.in \
+	get_elements.c.in
