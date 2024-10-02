@@ -288,7 +288,6 @@ mpi_api_files = \
         request_get_status_f08.F90 \
         scan_init_f08.F90 \
         scatter_init_f08.F90 \
-        scatterv_init_f08.F90 \
         session_call_errhandler_f08.F90\
         session_create_errhandler_f08.F90\
         session_get_errhandler_f08.F90\

@@ -129,6 +129,7 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scan_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scatter_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scatterv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/scatterv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_replace_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/sendrecv_ts.c.in \
@@ -185,6 +186,7 @@ extra_dist_prototype_files = \
         file_read_all_ts.c.in \
         raccumulate_ts.c.in \
         scatterv_ts.c.in \
+        scatterv_init_ts.c.in \
         scatter_ts.c.in \
         neighbor_alltoallv_ts.c.in \
         compare_and_swap_ts.c.in \
