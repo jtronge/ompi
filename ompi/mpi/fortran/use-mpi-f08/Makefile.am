@@ -117,7 +117,6 @@ mpi_api_files = \
         add_error_string_f08.F90 \
         aint_add_f08.F90 \
         aint_diff_f08.F90 \
-        allgather_init_f08.F90 \
         allgatherv_init_f08.F90 \
         alloc_mem_f08.F90 \
         allreduce_init_f08.F90 \
