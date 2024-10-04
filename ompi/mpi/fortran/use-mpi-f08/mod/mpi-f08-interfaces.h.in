@@ -488,24 +488,6 @@ subroutine MPI_Type_size_x_f08(datatype,size,ierror)
 end subroutine MPI_Type_size_x_f08
 end interface  MPI_Type_size_x
 
-interface  MPI_Allgatherv_init
-subroutine MPI_Allgatherv_init_f08(sendbuf,sendcount,sendtype,recvbuf,recvcounts,displs, &
-                              recvtype,comm,info,request,ierror)
-   use :: mpi_f08_types, only : MPI_Datatype, MPI_Comm, MPI_Info, MPI_Request
-   implicit none
-   @OMPI_FORTRAN_IGNORE_TKR_PREDECL@ sendbuf, recvbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@, INTENT(IN) OMPI_ASYNCHRONOUS :: sendbuf
-   @OMPI_FORTRAN_IGNORE_TKR_TYPE@ OMPI_ASYNCHRONOUS :: recvbuf
-   INTEGER, INTENT(IN) :: sendcount
-   INTEGER, INTENT(IN) OMPI_ASYNCHRONOUS :: recvcounts(*), displs(*)
-   TYPE(MPI_Datatype), INTENT(IN) :: sendtype, recvtype
-   TYPE(MPI_Comm), INTENT(IN) :: comm
-   TYPE(MPI_Info), INTENT(IN) :: info
-   TYPE(MPI_Request), INTENT(OUT) :: request
-   INTEGER, OPTIONAL, INTENT(OUT) :: ierror
-end subroutine MPI_Allgatherv_init_f08
-end interface  MPI_Allgatherv_init
-
 interface  MPI_Allreduce_init
 subroutine MPI_Allreduce_init_f08(sendbuf,recvbuf,count,datatype,op,comm,info,request,ierror)
    use :: mpi_f08_types, only : MPI_Datatype, MPI_Op, MPI_Comm, MPI_Info, MPI_Request

@@ -10,6 +10,7 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgather_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgather_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgatherv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allgatherv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allreduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoall_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallv_ts.c.in \
@@ -240,6 +241,7 @@ extra_dist_prototype_files = \
         ialltoallv_ts.c.in \
         allreduce_ts.c.in \
         allgatherv_ts.c.in \
+        allgatherv_init_ts.c.in \
         pack_external_ts.c.in \
         pack_external_size.c.in \
         file_write_ordered_begin_ts.c.in \
