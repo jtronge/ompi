@@ -279,9 +279,6 @@ mpi_api_files = \
         psend_init_f08.F90 \
         publish_name_f08.F90 \
         query_thread_f08.F90 \
-        reduce_init_f08.F90 \
-        reduce_scatter_init_f08.F90 \
-        reduce_scatter_block_init_f08.F90 \
         register_datarep_f08.F90 \
         request_free_f08.F90 \
         request_get_status_f08.F90 \

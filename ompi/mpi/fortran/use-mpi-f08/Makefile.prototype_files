@@ -101,6 +101,7 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/send_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/testany.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/waitall.c.in \
@@ -121,7 +122,9 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_local_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_scatter_block_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_scatter_block_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_scatter_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_scatter_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/rget_accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/rget_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/rput_ts.c.in \
@@ -171,6 +174,7 @@ extra_dist_prototype_files = \
         file_write_ordered_ts.c.in \
         iscan_ts.c.in \
         reduce_scatter_block_ts.c.in \
+        reduce_scatter_block_init_ts.c.in \
         send_ts.c.in \
         ineighbor_allgather_ts.c.in \
         send_init_ts.c.in \
@@ -185,6 +189,7 @@ extra_dist_prototype_files = \
         ineighbor_alltoallv_ts.c.in \
         neighbor_alltoall_ts.c.in \
         reduce_ts.c.in \
+        reduce_init_ts.c.in \
         pack_size.c.in \
         pack_ts.c.in \
         file_read_all_ts.c.in \
@@ -197,6 +202,7 @@ extra_dist_prototype_files = \
         compare_and_swap_ts.c.in \
         rput_ts.c.in \
         reduce_scatter_ts.c.in \
+        reduce_scatter_init_ts.c.in \
         win_create_ts.c.in \
         file_read_at_ts.c.in \
         ineighbor_alltoall_ts.c.in \
