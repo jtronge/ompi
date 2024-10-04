@@ -24,7 +24,7 @@ PROTOTYPE VOID allgather_init(BUFFER_ASYNC x1, COUNT sendcount, DATATYPE sendtyp
                               COMM comm, INFO info, REQUEST_OUT request)
 {
     int c_ierr;
-    MPI_Comm c_comm;
+    MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
     MPI_Request c_req;
     MPI_Datatype c_sendtype = NULL, c_recvtype = NULL, c_senddatatype = NULL;
     MPI_Info c_info;
