@@ -235,6 +235,18 @@ class CountTypeInOut(FortranType):
         return f'{type_} *{self.name}'
 
 
+@FortranType.add('PARTITIONED_COUNT')
+class PartitionedCountType(FortranType):
+    def declare(self):
+            return f'INTEGER(KIND=MPI_COUNT_KIND), INTENT(IN) :: {self.name}'
+
+    def use(self):
+        return [('mpi_f08_types', 'MPI_COUNT_KIND')]
+
+    def c_parameter(self):
+        return f'MPI_Count *{self.name}'
+
+
 @FortranType.add('DATATYPE')
 class DatatypeType(FortranType):
     def declare(self):
