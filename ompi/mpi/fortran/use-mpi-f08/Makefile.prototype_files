@@ -14,8 +14,11 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allreduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/allreduce_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoall_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoall_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallw_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallw_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bcast_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_ts.c.in \
@@ -172,6 +175,11 @@ extra_dist_prototype_files = \
         ssend_ts.c.in \
         bsend_init_ts.c.in \
         alltoall_ts.c.in \
+        alltoall_init_ts.c.in \
+        alltoallv_ts.c.in \
+        alltoallv_init_ts.c.in \
+        alltoallw_ts.c.in \
+        alltoallw_init_ts.c.in \
         file_iwrite_at_ts.c.in \
         igather_ts.c.in \
         sendrecv_replace_ts.c.in \
