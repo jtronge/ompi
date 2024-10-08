@@ -261,7 +261,6 @@ mpi_api_files = \
         neighbor_allgather_init_f08.F90 \
         neighbor_allgatherv_init_f08.F90 \
         neighbor_alltoall_init_f08.F90 \
-        neighbor_alltoallv_init_f08.F90 \
         op_commutative_f08.F90 \
         op_create_f08.F90 \
         open_port_f08.F90 \

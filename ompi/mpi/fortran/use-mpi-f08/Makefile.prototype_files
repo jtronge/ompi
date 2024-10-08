@@ -100,6 +100,7 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgatherv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
@@ -204,6 +205,7 @@ extra_dist_prototype_files = \
         scatter_ts.c.in \
         scatter_init_ts.c.in \
         neighbor_alltoallv_ts.c.in \
+        neighbor_alltoallv_init_ts.c.in \
         compare_and_swap_ts.c.in \
         rput_ts.c.in \
         reduce_scatter_ts.c.in \
