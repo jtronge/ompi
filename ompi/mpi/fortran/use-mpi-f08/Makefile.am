@@ -118,7 +118,6 @@ mpi_api_files = \
         aint_add_f08.F90 \
         aint_diff_f08.F90 \
         alloc_mem_f08.F90 \
-        allreduce_init_f08.F90 \
         alltoall_init_f08.F90 \
         alltoallv_init_f08.F90 \
         alltoallw_init_f08.F90 \
