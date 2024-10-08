@@ -581,7 +581,7 @@ class AintArrayType(FortranType):
 
     def declare(self):
         # TODO: Should there be a separate ASYNC version here, when the OMPI_ASYNCHRONOUS attr is required?
-        return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}'
+        return f'INTEGER(KIND=MPI_ADDRESS_KIND), INTENT(IN) OMPI_ASYNCHRONOUS :: {self.name}(*)'
 
     def use(self):
         return [('mpi_f08_types', 'MPI_ADDRESS_KIND')]

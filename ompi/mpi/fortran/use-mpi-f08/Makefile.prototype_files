@@ -101,6 +101,7 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/recv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/reduce_init_ts.c.in \
@@ -253,6 +254,7 @@ extra_dist_prototype_files = \
         recv_ts.c.in \
         iallgather_ts.c.in \
         neighbor_alltoallw_ts.c.in \
+        neighbor_alltoallw_init_ts.c.in \
         neighbor_allgatherv_ts.c.in \
         irsend_ts.c.in \
         put_ts.c.in \
@@ -312,4 +314,5 @@ extra_dist_prototype_files = \
         type_create_hvector.c.in \
 	get_count.c.in \
 	get_elements.c.in \
-	psend_init_ts.c.in
+	psend_init_ts.c.in \
+        precv_init_ts.c.in
