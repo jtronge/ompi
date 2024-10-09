@@ -100,8 +100,11 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/issend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/mrecv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgather_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgather_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgatherv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_allgatherv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoall_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/neighbor_alltoallw_ts.c.in \
@@ -202,6 +205,7 @@ extra_dist_prototype_files = \
         isendrecv_ts.c.in \
         ineighbor_alltoallv_ts.c.in \
         neighbor_alltoall_ts.c.in \
+        neighbor_alltoall_init_ts.c.in \
         reduce_ts.c.in \
         reduce_init_ts.c.in \
         pack_size.c.in \
@@ -266,6 +270,7 @@ extra_dist_prototype_files = \
         neighbor_alltoallw_ts.c.in \
         neighbor_alltoallw_init_ts.c.in \
         neighbor_allgatherv_ts.c.in \
+        neighbor_allgatherv_init_ts.c.in \
         irsend_ts.c.in \
         put_ts.c.in \
         free_mem_ts.c.in \
@@ -303,6 +308,7 @@ extra_dist_prototype_files = \
         buffer_detach.c.in \
         irecv_ts.c.in \
         neighbor_allgather_ts.c.in \
+        neighbor_allgather_init_ts.c.in \
         gatherv_ts.c.in \
         file_read_ordered_end_ts.c.in \
         file_iread_at_ts.c.in \
