@@ -30,7 +30,7 @@ PROTOTYPE VOID isendrecv_replace(BUFFER_ASYNC_OUT x, COUNT count, DATATYPE datat
     MPI_Comm c_comm = PMPI_Comm_f2c (*comm);
 
     void *buf = OMPI_CFI_BASE_ADDR(x);
-    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
+    @COUNT_TYPE@  __opal_attribute_unused__ c_count = (@COUNT_TYPE@) *count;
 
     OMPI_CFI_2_C(x, c_count, c_type, c_datatype, c_ierr);
     if (MPI_SUCCESS != c_ierr) {

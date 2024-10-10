@@ -28,7 +28,8 @@ PROTOTYPE VOID neighbor_allgather(BUFFER x1, COUNT sendcount, DATATYPE sendtype,
 {
     int c_ierr;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
-    MPI_Datatype c_senddatatype, c_sendtype = PMPI_Type_f2c(*sendtype);
+    MPI_Datatype __opal_attribute_unused__ c_senddatatype;
+    MPI_Datatype c_sendtype = PMPI_Type_f2c(*sendtype);
     void *sendbuf = OMPI_CFI_BASE_ADDR(x1);
     @COUNT_TYPE@ c_sendcount = (@COUNT_TYPE@) *sendcount;
     MPI_Datatype c_recvtype = PMPI_Type_f2c(*recvtype);
