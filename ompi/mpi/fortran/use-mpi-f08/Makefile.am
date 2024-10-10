@@ -120,7 +120,6 @@ mpi_api_files = \
         alloc_mem_f08.F90 \
         barrier_f08.F90 \
         barrier_init_f08.F90 \
-        bcast_init_f08.F90 \
         cancel_f08.F90 \
         cart_coords_f08.F90 \
         cart_create_f08.F90 \
@@ -176,7 +175,6 @@ mpi_api_files = \
         errhandler_free_f08.F90 \
         error_class_f08.F90 \
         error_string_f08.F90 \
-        exscan_init_f08.F90 \
         f_sync_reg_f08.F90 \
         file_call_errhandler_f08.F90 \
         file_close_f08.F90 \
@@ -205,8 +203,6 @@ mpi_api_files = \
         file_sync_f08.F90 \
         finalized_f08.F90 \
         finalize_f08.F90 \
-        gather_init_f08.F90 \
-        gatherv_init_f08.F90 \
         get_elements_x_f08.F90 \
         get_library_version_f08.F90 \
         get_processor_name_f08.F90 \

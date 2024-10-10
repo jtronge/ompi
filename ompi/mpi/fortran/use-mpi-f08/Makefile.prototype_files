@@ -20,12 +20,14 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallw_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/alltoallw_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bcast_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bcast_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/bsend_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_attach_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/buffer_detach.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/compare_and_swap_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/exscan_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/exscan_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/fetch_and_op_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_all_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_iread_at_all_ts.c.in \
@@ -63,7 +65,9 @@ prototype_files = \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/file_write_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/free_mem_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gather_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gather_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_ts.c.in \
+        $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/gatherv_init_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_address_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_accumulate_ts.c.in \
         $(abs_top_srcdir)/ompi/mpi/fortran/use-mpi-f08/get_count.c.in \
@@ -254,6 +258,7 @@ extra_dist_prototype_files = \
         file_read_all_end_ts.c.in \
         isend_ts.c.in \
         gather_ts.c.in \
+        gather_init_ts.c.in \
         igatherv_ts.c.in \
         ialltoallw_ts.c.in \
         ialltoallv_ts.c.in \
@@ -289,6 +294,7 @@ extra_dist_prototype_files = \
         iallreduce_ts.c.in \
         imrecv_ts.c.in \
         exscan_ts.c.in \
+        exscan_init_ts.c.in \
         rsend_init_ts.c.in \
         file_iread_ts.c.in \
         file_read_at_all_ts.c.in \
@@ -303,6 +309,7 @@ extra_dist_prototype_files = \
         unpack_external_ts.c.in \
         ibcast_ts.c.in \
         bcast_ts.c.in \
+        bcast_init_ts.c.in \
         bsend_ts.c.in \
         buffer_attach_ts.c.in \
         buffer_detach.c.in \
@@ -310,6 +317,7 @@ extra_dist_prototype_files = \
         neighbor_allgather_ts.c.in \
         neighbor_allgather_init_ts.c.in \
         gatherv_ts.c.in \
+        gatherv_init_ts.c.in \
         file_read_ordered_end_ts.c.in \
         file_iread_at_ts.c.in \
         rget_ts.c.in \
