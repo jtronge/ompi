@@ -32,7 +32,7 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS cart_sub(COMM comm, COUNT_ARRAY remain_dims, COMM_OUT new_comm)
+PROTOTYPE ERROR_CLASS cart_sub(COMM comm, INT_ARRAY remain_dims, COMM_OUT new_comm)
 {
     int err;
 

@@ -32,7 +32,7 @@
 #include "ompi/mca/topo/topo.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS cart_rank(COMM comm, COUNT_ARRAY coords, INT_OUT rank)
+PROTOTYPE ERROR_CLASS cart_rank(COMM comm, INT_ARRAY coords, INT_OUT rank)
 {
     int i, err;
 

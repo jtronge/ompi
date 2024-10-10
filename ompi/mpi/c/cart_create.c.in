@@ -32,8 +32,8 @@
 #include "ompi/mca/topo/base/base.h"
 #include "ompi/memchecker.h"
 
-PROTOTYPE ERROR_CLASS cart_create(COMM old_comm, INT  ndims, COUNT_ARRAY dims,
-                                  COUNT_ARRAY periods, INT reorder, COMM_OUT comm_cart)
+PROTOTYPE ERROR_CLASS cart_create(COMM old_comm, INT  ndims, INT_ARRAY dims,
+                                  INT_ARRAY periods, INT reorder, COMM_OUT comm_cart)
 {
     mca_topo_base_module_t* topo;
     int err;
