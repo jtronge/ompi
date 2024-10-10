@@ -19,15 +19,6 @@
  * $HEADER$
  */
 
-#include "ompi_config.h"
-
-#include "ompi/communicator/communicator.h"
-#include "ompi/errhandler/errhandler.h"
-#include "ompi/mpi/fortran/use-mpi-f08/ts/bindings.h"
-#include "ompi/mpi/fortran/base/constants.h"
-
-/* void ompi_send_ts(CFI_cdesc_t* x, MPI_Fint *count, MPI_Fint *datatype,
-                     MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr) */
 PROTOTYPE VOID send(BUFFER x, COUNT count, DATATYPE datatype, RANK dest,
                     TAG tag, COMM comm)
 {
@@ -36,7 +27,7 @@ PROTOTYPE VOID send(BUFFER x, COUNT count, DATATYPE datatype, RANK dest,
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
     MPI_Datatype c_datatype, c_type = PMPI_Type_f2c(*datatype);
     void *buf = OMPI_CFI_BASE_ADDR(x);
-    int c_count =  OMPI_FINT_2_INT(*count);
+    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
 
     OMPI_CFI_2_C(x, c_count, c_type, c_datatype, c_ierr);
     if (MPI_SUCCESS != c_ierr) {

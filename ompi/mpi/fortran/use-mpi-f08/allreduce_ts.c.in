@@ -23,7 +23,7 @@ PROTOTYPE VOID allreduce(BUFFER x1, BUFFER_OUT x2, COUNT count,
                          DATATYPE datatype, OP op, COMM comm)
 {
     int c_ierr;
-    int c_count = OMPI_FINT_2_INT(*count);
+    @COUNT_TYPE@ c_count = (@COUNT_TYPE@) *count;
     MPI_Comm c_comm = PMPI_Comm_f2c(*comm);
     MPI_Datatype c_type;
     MPI_Op c_op;
