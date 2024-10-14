@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "opal_config.h"
 
 /*
  * NOTE: This code chooses between 64-bit and 32-bit pointers by using the
@@ -27,7 +28,7 @@ static inline void ompi_count_array_init(ompi_count_array_t *array, const int *d
 }
 
 /* Initialize a bigcount variant of the count array */
-static inline void ompi_count_array_init_c(ompi_count_array_t *array, const size_t *data)
+static inline void ompi_count_array_init_c(ompi_count_array_t *array, const OMPI_MPI_COUNT_TYPE *data)
 {
     *array = (intptr_t)data;
 }
@@ -38,7 +39,7 @@ static inline void ompi_count_array_init_c(ompi_count_array_t *array, const size
                                                     const int *: ompi_count_array_init, \
                                                     size_t *: ompi_count_array_init_c, \
                                                     const size_t *: ompi_count_array_init_c, \
-                                                    const MPI_Count *: ompi_count_array_init_c)(array, data)
+                                                    const  OMPI_MPI_COUNT_TYPE *: ompi_count_array_init_c)(array, data)
 #else
 #define OMPI_COUNT_ARRAY_INIT(array, data) \
     do { \
